@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel Pastoral - Videira Jataí</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+      .container { max-width: 900px; margin: 0 auto; padding: 15px 15px; }
+
+      /* HEADER */
+      .header { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; border-left: 5px solid var(--primary); }
+      .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.1rem; }
+      .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
+      .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
+
+      /* DASHBOARD / VERSÍCULO DO DIA (NOVO) */
+      .stat-card { 
+          background: linear-gradient(135deg, var(--primary), #5c0016); 
+          color: white; 
+          padding: 25px 20px; 
+          border-radius: var(--radius); 
+          text-align: center; 
+          box-shadow: 0 4px 15px rgba(128, 0, 32, 0.2); 
+          margin-bottom: 15px; 
+          position: relative; 
+          overflow: hidden; 
+      }
+      
+      .stat-card::before { 
+          content: "\f10d"; 
+          font-family: "Font Awesome 5 Free"; 
+          font-weight: 900; 
+          position: absolute; 
+          top: -10px; 
+          left: 10px; 
+          font-size: 4rem; 
+          opacity: 0.1; 
+      }
+      
+      .titulo-versiculo { 
+          text-transform: uppercase; 
+          letter-spacing: 2px; 
+          font-size: 0.75rem; 
+          color: #facc15; 
+          font-weight: 700; 
+          margin-bottom: 10px; 
+          display: block; 
+      }
+      
+      .texto-versiculo { 
+          font-size: 1.05rem; 
+          font-weight: 500; 
+          font-style: italic; 
+          line-height: 1.5; 
+          margin: 0; 
+      }
+      
+      .ref-versiculo { 
+          display: block; 
+          margin-top: 15px; 
+          font-size: 0.85rem; 
+          font-weight: 700; 
+          opacity: 0.9; 
+          text-align: right; 
+      }
+
+      /* BOTÃO BÍBLIA DESTAQUE (NOVO) */
+      .btn-biblia-destaque { 
+          width: 100%; 
+          background: linear-gradient(135deg, var(--ouro-videira), var(--ouro-escuro)); 
+          color: white; 
+          border: none; 
+          padding: 16px; 
+          border-radius: var(--radius); 
+          font-size: 1rem; 
+          font-weight: 700; 
+          cursor: pointer; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          gap: 10px; 
+          box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); 
+          margin-bottom: 20px; 
+          transition: 0.3s; 
+      }
+      
+      .btn-biblia-destaque:hover { 
+          transform: translateY(-2px); 
+          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); 
+      }
+
+      /* MENU NAVEGAÇÃO */
+      .nav-menu { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+      .nav-btn { flex: 1 1 30%; min-width: 100px; padding: 12px; border: none; border-radius: 10px; background: white; color: var(--text-light); font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); font-size: 0.8rem; }
+      .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128, 0, 32, 0.3); }
+
+      /* GRID & CARDS */
+      .member-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+      @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+      .member-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px; }
+      .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+      .card-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0; }
+      .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; border: 1px solid transparent; }
+      .cat-badge.Líder { background: rgba(212, 175, 55, 0.15); color: #b58900; border-color: #D4AF37; } 
+      .cat-badge.Pastor { background: rgba(128, 0, 32, 0.1); color: #800020; border-color: #800020; } 
+      .cat-badge.Discipulador { background: rgba(0, 86, 179, 0.1); color: #0056b3; border-color: #0056b3; }
+      .card-info { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+      .status-row { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+      .status-pill { flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px; border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600; white-space: nowrap; }
+      .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
+      .card-actions { display: flex; gap: 8px; margin-top: 5px; padding-top: 10px; border-top: 1px solid #eee; }
+      .btn-card { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; background: white; color: #555; transition: 0.2s; }
+      .btn-zap { background: #f0fdf4; color: #166534; border-color: #bbf7d0; text-decoration: none; }
+      .btn-card:hover { background: #f5f5f5; }
+
+      /* TABELAS */
+      .table-clean { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid #ddd; margin-top: 10px; }
+      .table-clean th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
+      .table-clean td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-size: 0.9rem; }
+      
+      /* FINANCEIRO BÁSICO */
+      .fin-dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+      .fin-card { padding: 20px; border-radius: var(--radius); color: white; text-align: center; box-shadow: var(--shadow); }
+      .fin-card.blue { background: linear-gradient(135deg, #0056b3, #003d80); }
+      .fin-card.green { background: linear-gradient(135deg, #1e8e3e, #135c27); }
+      .fin-card.red { background: linear-gradient(135deg, #c5221f, #8a1513); }
+      .fin-val { font-size: 1.4rem; font-weight: 800; margin-top: 5px; }
+
+      /* FORMS E MODAIS */
+      .form-box { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); }
+      label { display: block; margin-bottom: 5px; color: var(--text-light); font-weight: 600; font-size: 0.85rem; }
+      input, select, textarea { width: 100%; padding: 12px; background: var(--input-bg); margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; box-sizing: border-box; }
+      .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+      .btn-add-member { background: var(--success-text); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+      
+      .switch-container { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; margin-bottom: 8px; }
+      .switch-label { font-weight: 600; color: #444; margin: 0; }
+      .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+      .switch input { opacity: 0; width: 0; height: 0; }
+      .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+      .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+      input:checked + .slider { background-color: var(--success-text); }
+      input:checked + .slider:before { transform: translateX(22px); }
+
+      .report-list-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; }
+      .paper-report { background: #fff; border: 1px solid #e0e0e0; border-top: 4px solid var(--accent); padding: 20px; border-radius: 8px; }
+      .paper-header { text-align: center; padding-bottom: 15px; border-bottom: 1px dashed #ddd; margin-bottom: 15px; }
+      .paper-title { font-weight: 800; font-size: 1.1rem; color: var(--primary); display:block; }
+      .paper-date { font-size: 0.85rem; color: #777; }
+      .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+      .role-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
+      .role-label { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px; }
+      .role-val { font-size: 0.9rem; font-weight: 600; color: #333; }
+      .attend-box { background: var(--success-bg); color: var(--success-text); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px solid #c3e6cb; }
+      .attend-num { font-size: 1.5rem; font-weight: 800; display: block; }
+      .attend-label { font-size: 0.8rem; font-weight: 600; opacity: 0.9; }
+      .list-present { font-size: 0.85rem; color: #555; line-height: 1.6; background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; }
+      .obs-box { margin-top: 15px; background: #fffbf0; padding: 15px; border-radius: 8px; color: #665c3b; font-size: 0.9rem; border: 1px solid #faeace; }
+
+      .word-list-item { background: white; border-radius: var(--radius); padding: 15px; margin-bottom: 10px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-left: 4px solid var(--accent); transition: 0.2s; }
+      .word-date { font-weight: 800; color: var(--text-main); font-size: 1rem; }
+      .word-theme { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
+      .word-text { line-height: 1.6; color: #444; font-size: 0.95rem; white-space: pre-wrap; margin-top: 15px; }
+
+      .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+      .modal-content { background: white; width: 100%; max-width: 800px; height: 85vh; border-radius: 20px 20px 0 0; padding: 20px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .btn-close-modal { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; z-index: 10; display: flex; align-items: center; justify-content: center;}
+      .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; transition: background 0.2s; box-sizing: border-box; }
+      
+      @media (max-width: 600px) { .fin-dashboard { grid-template-columns: 1fr; } }
+
+      /* ========================================== */
+      /* ESTILOS DA BÍBLIA (Dourado #D4AF37)         */
+      /* ========================================== */
+
+      :root {
+          --ouro-videira: #D4AF37; 
+          --ouro-escuro: #b5952f;
+      }
+
+      .biblia-offcanvas {
+          position: fixed;
+          top: 0;
+          right: -100%;
+          width: 100%;
+          max-width: 450px;
+          height: 100vh;
+          background-color: #ffffff;
+          box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+          z-index: 2000;
+          transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
+          flex-direction: column;
+      }
+
+      .biblia-offcanvas.aberto {
+          right: 0;
+      }
+
+      #biblia-overlay {
+          position: fixed; 
+          top: 0; 
+          left: 0; 
+          width: 100%; 
+          height: 100%;
+          background: rgba(0,0,0,0.4); 
+          z-index: 1999;
+          display: none; 
+          opacity: 0; 
+          transition: opacity 0.3s ease;
+      }
+
+      .biblia-header {
+          background-color: var(--ouro-videira);
+          color: white;
+          padding: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+
+      .biblia-titulo-area {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+      }
+
+      .biblia-header h2 {
+          color: white;
+          margin: 0;
+          font-size: 1.2rem;
+          font-weight: 700;
+      }
+
+      .btn-fechar-biblia {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          margin: 0;
+      }
+
+      .biblia-controles {
+          padding: 15px;
+          background-color: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          gap: 10px;
+      }
+
+      .biblia-controles select {
+          flex: 1;
+          padding: 10px;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          outline: none;
+          font-family: 'Inter', sans-serif;
+          margin-bottom: 0;
+      }
+
+      .btn-ler-ouro {
+          background-color: var(--ouro-videira);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+      }
+
+      .btn-ler-ouro:hover {
+          background-color: var(--ouro-escuro);
+      }
+
+      .biblia-texto-area {
+          padding: 25px 20px;
+          overflow-y: auto;
+          flex: 1;
+          line-height: 1.8;
+          font-size: 1rem;
+          color: #334155;
+      }
+
+      .biblia-placeholder {
+          text-align: center;
+          color: #94a3b8;
+          font-style: italic;
+          margin-top: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const paginasPermitidas = JSON.parse(sessionStorage.getItem('paginasPermitidas') || "[]");
+      if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("pastor")) {
+          window.location.href = "index.html";
+      }
+  </script>
+
+    <div class="container">
+      
+      <div class="header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 110px;">
+          <h3>Painel Pastoral</h3>
+        </div>
+        <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+      </div>
+
+      <!--<div class="stat-card" id="card-versiculo">
+        <span class="titulo-versiculo"><i class="fas fa-star"></i> Versículo do Dia</span>
+        <p class="texto-versiculo" id="texto-versiculo-dia">Carregando...</p>
+        <span class="ref-versiculo" id="ref-versiculo-dia"></span>
+      </div>-->
+
+      <!--<button onclick="abrirBiblia()" class="btn-biblia-destaque">
+        <i class="fas fa-bible"></i>Bíblia A Mensagem
+      </button>-->
+
+      <div class="nav-menu">
+        <button onclick="mudarSecao('lista')" class="nav-btn active" id="btn-lista"><i class="fas fa-users"></i> Membros</button>
+        <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
+        <button onclick="mudarSecao('financeiro')" class="nav-btn" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button>
+        <button onclick="carregarArquivados()" class="nav-btn" id="btn-arquivo"><i class="fas fa-archive"></i> Arquivo</button>
+        <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos </button>
+        <button onclick="carregarRelatorios()" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>
+        
+        <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda" style="flex: 1 1 30%; margin-top: 5px;">
+           <i class="far fa-calendar-alt"></i> Agenda
+        </button>
+
+        <button onclick="carregarPalavras()" class="nav-btn" id="btn-palavras" style="flex: 1 1 30%; margin-top: 5px;">
+           <i class="fas fa-book-open"></i> Palavras
+        </button>
+
+        <button onclick="abrirBiblia()" class="nav-btn" id="btn-biblia" style="flex: 1 1 30%; margin-top: 5px;">
+           <i class="fas fa-bible"></i> Bíblia A Mensagem
+        </button>
+      </div>
+
+      <div id="secao-lista">
+        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
+          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h4 style="margin:0; color: var(--text-light);"><span id="totalMembros">0</span> Membros</h4>
+            <button onclick="novoCadastro()" class="btn-add-member"><i class="fas fa-plus"></i> Novo</button>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()" style="margin:0; flex:2;">
+            <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex:1;"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div id="gridMembros" class="member-grid"></div>
+      </div>
+
+      <div id="secao-celulas" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h4 style="margin:0; color:var(--primary);">Gestão de Células</h4>
+          <button onclick="novaCelula()" class="btn-add-member" style="background:var(--accent); color:#333;">+ Nova Célula</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="table-clean" id="tabelaCelulas">
+            <thead><tr><th>Nome</th><th>Líder</th><th>Dia</th><th style="text-align:center;">Ações</th></tr></thead>
+            <tbody id="corpoCelulas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="secao-financeiro" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h4 style="margin:0; color:var(--primary);">Dashboard Financeiro</h4>
+          <input type="month" id="filtroMesFin" onchange="recalcularFinanceiro()" style="width:auto; margin:0; background:white;">
+        </div>
+        <div class="fin-dashboard">
+          <div class="fin-card blue"><small>SALDO</small><div class="fin-val" id="finSaldo">R$ 0,00</div></div>
+          <div class="fin-card green"><small>ENTRADAS</small><div class="fin-val" id="finEntrada">R$ 0,00</div></div>
+          <div class="fin-card red"><small>SAÍDAS</small><div class="fin-val" id="finSaida">R$ 0,00</div></div>
+        </div>
+        <div class="nav-menu" style="justify-content:center; margin-bottom:15px;">
+          <button class="nav-btn active" onclick="mudarTabFin('lancamento', this)" style="flex:0 0 140px;">Lançar</button>
+          <button class="nav-btn" onclick="mudarTabFin('extrato', this)" style="flex:0 0 140px;">Extrato</button>
+        </div>
+        <div id="tab-lancamento" class="form-box" style="max-width:600px; margin:0 auto;">
+          <form id="formFinanceiro">
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label>Tipo</label><select name="tipo" id="finTipo" onchange="atualizarCategorias()" required><option value="Entrada">Entrada</option><option value="Saída">Saída</option></select></div>
+              <div style="flex:1;"><label>Categoria</label><select name="categoria" id="finCategoria" onchange="atualizarCampos()" required><option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option></select></div>
+            </div>
+            <label id="lblDescricao">Descrição / Membro</label>
+            <select name="membro" id="finMembroSelect"></select>
+            <input type="text" name="descricao" id="finDescricaoInput" class="hidden" placeholder="Descreva a movimentação...">
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label>Valor (R$)</label><input type="number" step="0.01" name="valor" required placeholder="0,00"></div>
+              <div style="flex:1;"><label>Data</label><input type="date" name="data" id="finData" required></div>
+            </div>
+            <label>Método de Pagamento</label>
+            <select name="metodo"><option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option><option value="Boleto">Boleto</option></select>
+            <button type="submit" id="btnSalvarFin" class="btn-save">Registrar Movimentação</button>
+          </form>
+        </div>
+        <div id="tab-extrato" class="hidden"><table class="table-clean"><thead><tr><th>Dia</th><th>Descrição</th><th>Valor</th></tr></thead><tbody id="corpoFin"></tbody></table></div>
+      </div>
+
+      <div id="secao-arquivo" class="hidden">
+        <h4 style="color:var(--text-light);">Arquivo Morto</h4>
+        <input type="text" id="inputBuscaArquivo" placeholder="🔍 Buscar..." onkeyup="filtrarTabela('tabelaArquivo')">
+        <table class="table-clean" id="tabelaArquivo"><thead><tr><th>Data</th><th>Nome</th><th>Ação</th></tr></thead><tbody id="corpoArquivo"></tbody></table>
+      </div>
+
+      <div id="secao-sugestoes" class="hidden">
+        <h4 style="color:#b58900;">Pedidos de Orações Recebidos</h4>
+        <button onclick="carregarSugestoes()" class="btn-add-member" style="background:#eee; color:#333; margin-bottom:10px; width:auto;"><i class="fas fa-sync-alt"></i> Atualizar</button>
+        <div class="form-box">
+          <table class="table-clean" id="tabelaSugestoes">
+            <thead><tr><th>Data</th><th>Mensagem</th></tr></thead>
+            <tbody id="corpoSugestoes"><tr><td colspan="2">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="secao-relatorios" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+           <h4 style="color:var(--text-light); margin:0;">Relatórios de Célula</h4>
+           <button onclick="carregarRelatorios()" class="btn-add-member" style="width:auto; background:white; color:#333; border:1px solid #ddd;"><i class="fas fa-sync-alt"></i></button>
+        </div>
+        <div style="margin-bottom:15px;">
+           <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; background:white; font-size:1rem; color:#444;">
+              <option value="">Todas as Células</option>
+           </select>
+        </div>
+        <div id="listaRelatorios"></div>
+      </div>
+
+      <div id="secao-agenda" class="hidden">
+        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
+          <div style="display:flex; justify-content: space-between; align-items: center;">
+              <h4 style="margin:0; color: var(--text-light);">Agenda de Eventos</h4>
+              <!--<button onclick="novaAgenda()" class="btn-add-member" style="background:var(--primary);"><i class="fas fa-plus"></i> Novo Evento</button>-->
+          </div>
+        </div>
+        <div id="listaAgenda" class="member-grid">
+          <p style="text-align:center; color:#999; grid-column: 1 / -1;">Carregando...</p>
+        </div>
+      </div>
+
+      <div id="secao-cadastro-agenda" class="form-box hidden">
+        <h3 id="tituloFormAgenda" style="color:var(--primary); margin-top:0;">Cadastrar Evento na Agenda</h3>
+        <form id="formAgenda">
+           <input type="hidden" name="indexOriginal" id="indexAgenda">
+           <label>Data do Evento</label><input type="date" name="dataEvento" id="agendaData" required>
+           <label>Descrição</label><input type="text" name="descricao" id="agendaDesc" required placeholder="Nome/Descrição do evento">
+           <label>Observações</label><textarea name="observacao" id="agendaObs" rows="3" placeholder="Detalhes adicionais..."></textarea>
+           <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                 <label>Tipo</label>
+                 <select name="tipo" id="agendaTipo" required>
+                    <option value="Gratuito">Gratuito</option>
+                    <option value="Pago">Pago</option>
+                 </select>
+              </div>
+              <div style="flex:1;">
+                 <label>Categoria</label>
+                 <select name="categoria" id="agendaCat" required>
+                    <option value="RL">RL</option>
+                    <option value="GOOGLE AGENDA">GOOGLE AGENDA</option>
+                    <option value="KIDS">KIDS</option>
+                 </select>
+              </div>
+           </div>
+           <div style="display:flex; gap:10px; margin-top: 15px;">
+               <button type="button" onclick="mudarSecao('agenda')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
+               <button type="submit" id="btnSalvarAgenda" class="btn-save" style="flex:2;">Salvar Evento</button>
+           </div>
+        </form>
+      </div>
+      <div id="secao-palavras" class="hidden">
+         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h4 style="margin:0; color:var(--accent);">Palavras e Estudos</h4>
+            <button onclick="novaPalavra()" class="btn-add-member" style="background:var(--accent); color:#333;"><i class="fas fa-plus"></i> Nova</button>
+         </div>
+         <div id="listaPalavras"></div>
+      </div>
+
+      <div id="secao-nova-palavra" class="form-box hidden">
+          <h3 style="color:var(--primary); margin-top:0;">Adicionar Palavra</h3>
+          <form id="formPalavra">
+             <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Data</label><input type="date" name="data" id="palavraData" required></div>
+                <div style="flex:2;"><label>Tema / Título</label><input type="text" name="tema" required></div>
+             </div>
+             <label>Link do YouTube (Opcional)</label><input type="text" name="link" placeholder="Cole o link aqui...">
+             <label>Texto / Esboço</label><textarea name="texto" rows="10" required placeholder="Escreva o esboço aqui..."></textarea>
+             <div style="display:flex; gap:10px;">
+                <button type="button" onclick="mudarSecao('palavras')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
+                <button type="submit" id="btnSalvarPalavra" class="btn-save" style="flex:2;">Publicar</button>
+             </div>
+          </form>
+      </div>
+
+      <div id="modal-ver-relatorio" class="form-box hidden">
+         <div class="paper-report">
+            <div class="paper-header"><span class="paper-title" id="relCelula">Nome</span><span class="paper-date" id="relData">00/00/0000</span></div>
+            <div class="attend-box"><span class="attend-num" id="relTotal">0</span><span class="attend-label">PESSOAS PRESENTES</span></div>
+            <div class="role-grid">
+               <div class="role-box"><span class="role-label">Palavra</span><span class="role-val" id="relPalavra">-</span></div>
+               <div class="role-box"><span class="role-label">Louvor</span><span class="role-val" id="relLouvor">-</span></div>
+               <div class="role-box"><span class="role-label">Lanche</span><span class="role-val" id="relLanche">-</span></div>
+               <div class="role-box"><span class="role-label">Quebra-Gelo</span><span class="role-val" id="relGelo">-</span></div>
+            </div>
+            <div style="margin-top:15px;"><span class="paper-label" style="font-weight:bold; color:#555; font-size:0.85rem;">Frequência / Nomes</span><div class="list-present" id="relLista"></div></div>
+            <div class="obs-box" id="relObs">...</div>
+         </div>
+         <button onclick="mudarSecao('relatorios')" class="btn-save" style="margin-top:20px; background:#333;">Voltar</button>
+      </div>
+
+      <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModal(null)">&times;</button>
+            <h3 id="modalTitulo" style="color:var(--primary); margin-top:10px;"></h3>
+            <small id="modalDataPalavra" style="color:#777; display:block; margin-bottom:15px;"></small>
+            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
+            <div id="modalTexto" class="word-text"></div>
+        </div>
+      </div>
+
+      <div id="secao-cadastro" class="form-box hidden">
+        <h3 id="tituloForm" style="color:var(--primary); margin-top:0;">Cadastro de Membro</h3>
+        <form id="formMembro">
+          <input type="hidden" name="idMembro" id="idMembro">
+          <label>Nome Completo</label><input type="text" name="nome" id="campoNome" required>
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label>Nascimento</label><input type="date" name="nascimento" id="campoNasc"></div>
+            <div style="flex:1;"><label>WhatsApp</label><input type="tel" name="telefone" id="campoTel"></div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label>Célula</label><select name="celula" id="selectCelulas"></select></div>
+            <div style="flex:1;"><label>Categoria</label>
+               <select name="categoria" id="campoCategoria">
+                  <option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option>
+               </select>
+            </div>
+          </div>
+          <label style="margin-top:15px; margin-bottom:10px;">Caminho Espiritual</label>
+          <div class="switch-container"><span class="switch-label">Batismo</span><label class="switch"><input type="checkbox" name="batizado" id="checkBat"><span class="slider"></span></label></div>
+          <div class="switch-container"><span class="switch-label">Cursão</span><label class="switch"><input type="checkbox" name="cursao" id="checkCur"><span class="slider"></span></label></div>
+          <div class="switch-container"><span class="switch-label">CTL</span><label class="switch"><input type="checkbox" name="ctl" id="checkCtl"><span class="slider"></span></label></div>
+          <div class="switch-container"><span class="switch-label">Encontro</span><label class="switch"><input type="checkbox" name="encontro" id="checkDiz"><span class="slider"></span></label></div>
+          <div style="display:flex; gap:10px; margin-top:15px;">
+             <button type="button" onclick="mudarSecao('lista')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Voltar</button>
+             <button type="submit" id="btnSalvar" class="btn-save" style="flex:2;">Salvar</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="secao-form-celula" class="form-box hidden">
+        <h3 id="tituloFormCelula" style="color:var(--primary); margin-top:0;">Nova Célula</h3>
+        <form id="formCelula">
+          <input type="hidden" name="nomeOriginal" id="nomeOriginalCelula">
+          <label>Nome</label><input type="text" name="nome" id="celNome" required>
+          <label>Líder</label><select name="lider" id="celLider" required></select>
+          <label>Dia</label><select name="dia" id="celDia"><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option></select>
+          <label>Endereço</label><input type="text" name="endereco" id="celEndereco">
+          <div style="display:flex; gap:10px;">
+             <button type="button" onclick="mudarSecao('celulas')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px;">Voltar</button>
+             <button type="submit" id="btnSalvarCelula" class="btn-save" style="flex:2;">Salvar</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <div id="painel-biblia" class="biblia-offcanvas">
+        <div class="biblia-header">
+            <div class="biblia-titulo-area">
+                <i class="fas fa-bible" style="font-size: 1.5rem;"></i>
+                <h2>A Mensagem</h2>
+            </div>
+            <button class="btn-fechar-biblia" onclick="fecharBiblia()">✕</button>
+        </div>
+
+        <div class="biblia-controles">
+            <select id="biblia-livro" onchange="atualizarCapitulos()">
+                <option value="">Selecione o Livro</option>
+            </select>
+            <select id="biblia-capitulo" disabled>
+                <option value="">Capítulo</option>
+            </select>
+            <button class="btn-ler-ouro" onclick="carregarCapitulo()">Ler</button>
+        </div>
+
+        <div id="biblia-conteudo" class="biblia-texto-area">
+            <p class="biblia-placeholder">Selecione um livro e capítulo para começar a leitura.</p>
+        </div>
+    </div>
+
+    <div id="biblia-overlay" onclick="fecharBiblia()"></div>
+
+    <script>
+      const API_URL = sessionStorage.getItem('urlApi');
+      let dadosMembros = [], dadosCelulas = [], dadosFinanceiros = [], lideres = [], dadosRelatorios = [], listaPalavras = [], listaAgenda = [];
+      
+      window.onload = function() {
+          const hoje = new Date();
+          const campoData = document.getElementById('finData'); if(campoData) campoData.valueAsDate = hoje;
+          const filtroMes = document.getElementById('filtroMesFin'); if(filtroMes) filtroMes.value = hoje.toISOString().slice(0, 7);
+          carregarTudo();
+      }
+
+      async function fetchGoogle(action, payload = {}) {
+        payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
+          try {
+              let res = await fetch(API_URL, {
+                  method: 'POST',
+                  body: JSON.stringify({ action: action, payload: payload })
+              });
+              let json = await res.json();
+              if (json.status === "sucesso") return json.dados || json.mensagem;
+              else throw new Error(json.mensagem);
+          } catch(e) {
+              console.error(e); alert("Erro na API: " + e.message); throw e;
+          }
+      }
+
+      async function carregarTudo() {
+        const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
+        try {
+            const res = await fetchGoogle('buscarDadosIniciais');
+            dadosMembros = res.membros; dadosCelulas = res.celulas; lideres = res.lideres;
+            document.getElementById('totalMembros').innerText = res.total;
+            renderizarCards(res.membros); renderizarCelulas(res.celulas);
+            preencherSelects(res.celulas); preencherSelectMembrosFin(res.membros);
+            carregarFinanceiro();
+
+            try {
+                listaAgenda = await fetchGoogle('buscarAgenda') || [];
+                renderizarAgenda(listaAgenda);
+            } catch(e) {
+                renderizarAgenda([]);
+            }
+
+            // Busca Versículo do Dia
+            carregarVersiculoDoDia();
+
+        } catch(e) { console.error(e); } finally { if(icon) icon.classList.remove('fa-spin'); }
+      }
+
+      function renderizarCards(lista) {
+        const grid = document.getElementById('gridMembros'); grid.innerHTML = '';
+        const check = (val) => (val === 'Sim' || val === true) ? 'active' : '';
+        const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+
+        lista.forEach(m => {
+          let nome=m[1], categoria=m[2], celula=m[3]||'-', tel=String(m[4]||'');
+          let telClean = tel.replace(/\D/g, '');
+          let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
+          let nasc = m[10] ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m[10])}</span>` : '';
+
+          grid.innerHTML += `
+            <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+               <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge ${categoria}">${categoria}</span></div>
+               <div class="card-info"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${nasc}</div>
+               <div class="status-row">
+                  <div class="status-pill ${check(m[6])}">Batismo</div>
+                  <div class="status-pill ${check(m[7])}">Cursão</div>
+                  <div class="status-pill ${check(m[8])}">CTL</div>
+                  <div class="status-pill ${check(m[9])}">Encontro</div>
+               </div>
+               <div class="card-actions">
+                  ${btnZap}
+                  <button onclick="editarMembro('${m[0]}')" class="btn-card" title="Editar"><i class="fas fa-pencil-alt"></i></button>
+                  <button onclick="arquivar('${m[0]}', '${m[1]}')" class="btn-card" title="Arquivar" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>
+               </div>
+            </div>`;
+        });
+      }
+
+      function mudarSecao(s) {
+        ['lista','celulas','financeiro','arquivo','cadastro','form-celula','sugestoes', 'relatorios', 'modal-ver-relatorio', 'palavras', 'nova-palavra', 'agenda', 'cadastro-agenda'].forEach(id => {
+            const el = document.getElementById('secao-'+id) || document.getElementById(id);
+            if(el) el.classList.add('hidden');
+        });
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if(s === 'modal-ver-relatorio') { document.getElementById(s).classList.remove('hidden'); }
+        else { document.getElementById('secao-'+s).classList.remove('hidden'); const btn = document.getElementById('btn-'+s); if(btn) btn.classList.add('active'); }
+      }
+
+      // --- PALAVRAS ---
+      async function carregarPalavras() {
+         mudarSecao('palavras');
+         const div = document.getElementById('listaPalavras'); div.innerHTML = '<p style="text-align:center;">Carregando...</p>';
+         try { const p = await fetchGoogle('buscarPalavras'); listaPalavras = p.reverse(); renderizarPalavras(listaPalavras); } catch(e){}
+      }
+      function renderizarPalavras(lista) {
+          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+          if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center; color:#999;">Vazio.</p>'; return; }
+          lista.forEach((p, index) => {
+              let dataF = p[0]; try { if(p[0].includes('-')) { const dp=p[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+              div.innerHTML += `<div class="word-list-item" onclick="abrirPalavra(${index})"><div><div class="word-date"><i class="far fa-calendar-alt"></i> ${dataF}</div><div class="word-theme">${p[1]}</div></div><i class="fas fa-chevron-right" style="color:var(--text-light);"></i></div>`;
+          });
+      }
+      function abrirPalavra(index) {
+          const p = listaPalavras[index]; document.getElementById('modalTitulo').innerText = p[1];
+          let dataF = p[0]; try { if(p[0].includes('-')) { const dp=p[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+          document.getElementById('modalDataPalavra').innerText = dataF; document.getElementById('modalTexto').innerText = p[2];
+          const btn = document.getElementById('btnLinkYoutube');
+          if (p[3] && p[3].trim() !== "") { btn.href = p[3]; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); }
+          document.getElementById('modalPalavra').classList.remove('hidden');
+      }
+      function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraData').valueAsDate = new Date(); mudarSecao('nova-palavra'); }
+      function fecharModal(e) { if(e === null || e.target.id === 'modalPalavra') document.getElementById('modalPalavra').classList.add('hidden'); }
+      document.getElementById('formPalavra').onsubmit = async function(e) {
+          e.preventDefault(); const btn = document.getElementById('btnSalvarPalavra'); btn.disabled = true; btn.innerText = "Salvando...";
+          try {
+              const res = await fetchGoogle('salvarPalavra', { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link: this.link.value });
+              alert(res); carregarPalavras();
+          } finally { btn.disabled = false; btn.innerText = "Publicar"; }
+      };
+
+      // --- AGENDA COM EDITAR E EXCLUIR ---
+      function renderizarAgenda(lista) {
+         const div = document.getElementById('listaAgenda');
+         div.innerHTML = '';
+         
+         if(!lista || lista.length === 0) {
+             div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1; margin-top:20px;">Nenhum evento na agenda.</p>';
+             return;
+         }
+
+         let listaComIndex = lista.map((item, index) => {
+             return { originalIndex: index, data: item };
+         });
+
+         listaComIndex.sort((a, b) => {
+             const parseDate = (d) => {
+                 if(!d) return 0;
+                 if(d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                 if(d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                 return new Date(d).getTime();
+             };
+             return parseDate(a.data[0]) - parseDate(b.data[0]); 
+         });
+
+         listaComIndex.forEach((obj) => {
+             let a = obj.data;
+             let originalIndex = obj.originalIndex;
+             let dataF = a[0];
+             try { if(a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+             let corCategoria = '#555';
+             if(a[4] === 'RL') corCategoria = '#0056b3';
+             else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)';
+             else if(a[4] === 'KIDS') corCategoria = '#b58900';
+
+             let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+
+             div.innerHTML += `
+             <div class="member-card">
+                 <div class="card-header">
+                     <h4 class="card-name" style="color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                     <span class="cat-badge" style="background:${corCategoria}; color:white; border:none;">${a[4]||'Sem Categoria'}</span>
+                 </div>
+                 <div style="font-size: 1rem; font-weight: 700; color: #333; margin-top: 5px;">${a[1]||''}</div>
+                 <div style="font-size: 0.85rem; color: #666; margin-top: 5px; min-height: 20px;">${a[2]||''}</div>
+                 
+                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; display:flex; justify-content:space-between; align-items:center;">
+                     <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: #f9f9f9; color: ${corTipo}; font-weight: bold; border: 1px solid #ddd;">
+                         <i class="fas fa-info-circle"></i> -> ${a[3]||''}
+                     </span>
+                     <div>
+                         
+                     </div>
+                 </div>
+             </div>`;
+         });
+      }
+
+// <button onclick="editarAgenda(${originalIndex})" style="background:none; border:none; color:orange; cursor:pointer; margin-right:8px;" title="Editar"><i class="fas fa-edit"></i></button>
+// <button onclick="excluirAgenda(${originalIndex})" style="background:none; border:none; color:var(--danger-text); cursor:pointer;" title="Excluir"><i class="fas fa-trash"></i></button>
+      
+      
+      function novaAgenda() {
+          document.getElementById('formAgenda').reset();
+          document.getElementById('indexAgenda').value = "";
+          document.getElementById('tituloFormAgenda').innerText = "Cadastrar Evento na Agenda";
+          mudarSecao('cadastro-agenda');
+      }
+
+      function editarAgenda(index) {
+          const a = listaAgenda[index];
+          if(!a) return;
+          
+          document.getElementById('indexAgenda').value = index;
+          
+          let dataA = a[0];
+          if (dataA.includes('/')) {
+             const p = dataA.split('/');
+             dataA = `${p[2]}-${p[1]}-${p[0]}`; 
+          }
+          
+          document.getElementById('agendaData').value = dataA;
+          document.getElementById('agendaDesc').value = a[1];
+          document.getElementById('agendaObs').value = a[2];
+          document.getElementById('agendaTipo').value = a[3];
+          document.getElementById('agendaCat').value = a[4];
+          
+          document.getElementById('tituloFormAgenda').innerText = "Editar Evento";
+          mudarSecao('cadastro-agenda');
+      }
+
+      async function excluirAgenda(index) {
+          if(!confirm("Tem certeza que deseja excluir este evento permanentemente?")) return;
+          try {
+              const res = await fetchGoogle('excluirAgenda', { index: index });
+              alert(res);
+              carregarTudo(); 
+          } catch(e) {
+              console.error(e);
+          }
+      }
+
+      document.getElementById('formAgenda').onsubmit = async function(e) {
+         e.preventDefault(); 
+         const btn = document.getElementById('btnSalvarAgenda'); btn.disabled = true; btn.innerText="Salvando...";
+         
+         const indexOriginal = document.getElementById('indexAgenda').value;
+         const d = { 
+            dataEvento: this.dataEvento.value, 
+            descricao: this.descricao.value, 
+            observacao: this.observacao.value, 
+            tipo: this.tipo.value, 
+            categoria: this.categoria.value 
+         };
+         
+         try {
+             if (indexOriginal !== "") {
+                 const resposta = await fetchGoogle('editarAgenda', { index: indexOriginal, dados: d });
+                 alert(resposta);
+             } else {
+                 const resposta = await fetchGoogle('salvarAgenda', d);
+                 alert(resposta);
+             }
+             this.reset();
+             mudarSecao('agenda');
+             carregarTudo();
+         } catch(err) {
+             console.error(err);
+         } finally {
+             btn.disabled = false; btn.innerText="Salvar Evento";
+         }
+      };
+
+      // --- SUGESTOES ---
+      async function carregarSugestoes() {
+        mudarSecao('sugestoes'); const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="2" align="center">Carregando...</td></tr>';
+        try {
+            const dados = await fetchGoogle('buscarSugestoes'); corpo.innerHTML = '';
+            if(!dados || dados.length === 0) { corpo.innerHTML = '<tr><td colspan="2" align="center">Vazio.</td></tr>'; return; }
+            dados.reverse().forEach(row => { let d = String(row[0]); if(d.length > 16) d = d.substring(0, 16); corpo.innerHTML += `<tr><td style="width:130px; font-size:0.8rem; color:#666;">${d}</td><td style="font-weight:500;">${row[1]}</td></tr>`; });
+        } catch(e){} 
+      }
+
+      // --- RELATÓRIOS ---
+      async function carregarRelatorios() {
+        mudarSecao('relatorios'); const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '<p align="center">Carregando...</p>';
+        const sel = document.getElementById('filtroRelCelula'); sel.innerHTML = '<option value="">Todas as Células</option>';
+        dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c[0]}">${c[0]}</option>`);
+        try { dadosRelatorios = await fetchGoogle('buscarRelatorios'); filtrarRelatorios(); } catch(e){}
+      }
+      function filtrarRelatorios() {
+         const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '';
+         const celulaFiltro = document.getElementById('filtroRelCelula').value.toLowerCase();
+         if(!dadosRelatorios || dadosRelatorios.length === 0) { divLista.innerHTML = '<p align="center">Vazio.</p>'; return; }
+         const listaFiltrada = dadosRelatorios.filter(r => { return celulaFiltro === "" || String(r[1]).toLowerCase().includes(celulaFiltro); });
+         if(listaFiltrada.length === 0) { divLista.innerHTML = '<p align="center">Vazio.</p>'; return; }
+         listaFiltrada.reverse().forEach((r) => {
+             const index = dadosRelatorios.indexOf(r); let dataExibicao = String(r[0]); if(dataExibicao.length > 10) dataExibicao = dataExibicao.substring(0,10);
+             divLista.innerHTML += `<div class="report-list-item" onclick="verRelatorio(${index})"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-weight:bold; color:var(--text-main); font-size:0.95rem;">${r[1]}</span><span style="font-size:0.8rem; color:var(--text-light);"><i class="far fa-calendar-alt"></i> ${dataExibicao}</span></div><div style="color:var(--accent);"><i class="fas fa-chevron-right"></i></div></div>`;
+         });
+      }
+      function verRelatorio(index) {
+         const item = dadosRelatorios[index]; let dataF = String(item[0]); if(dataF.length>10) dataF = dataF.substring(0,10);
+         document.getElementById('relData').innerText = dataF; document.getElementById('relCelula').innerText = item[1];
+         let lista = String(item[2] || ""); let contagem = lista.split(',').filter(x => x.trim().length > 0).length; if(contagem === 0 && lista.length > 2) contagem = 1;
+         document.getElementById('relTotal').innerText = contagem; document.getElementById('relLista').innerText = lista || "-";
+         document.getElementById('relGelo').innerText = item[3] || "-"; document.getElementById('relPalavra').innerText = item[4] || "-";
+         document.getElementById('relLanche').innerText = item[6] || "-"; document.getElementById('relLouvor').innerText = item[7] || "-";
+         document.getElementById('relObs').innerText = item[8] || "Sem observações."; mudarSecao('modal-ver-relatorio');
+      }
+
+      // --- ARQUIVO ---
+      async function carregarArquivados() { 
+        mudarSecao('arquivo'); const corpo = document.getElementById('corpoArquivo'); corpo.innerHTML = '<tr><td colspan="3" align="center">Carregando...</td></tr>';
+        try {
+            const d = await fetchGoogle('buscarArquivados'); corpo.innerHTML=''; 
+            if (!d || d.length === 0) { corpo.innerHTML = '<tr><td colspan="3" align="center">Vazio.</td></tr>'; return; }
+            d.forEach(r => { let dataF = String(r[0]); if(dataF.length > 10) dataF = dataF.substring(0,10); corpo.innerHTML += `<tr><td>${dataF}</td><td>${r[2]}</td><td><button onclick="restaurar('${r[1]}')" style="color:var(--success-text);border:none;background:none; cursor:pointer;"><i class="fas fa-undo"></i></button></td></tr>`; }); 
+        } catch(e){}
+      }
+
+      // --- FINANCEIRO BÁSICO ---
+      async function carregarFinanceiro() { try { dadosFinanceiros = await fetchGoogle('buscarFinanceiro'); recalcularFinanceiro(); } catch(e){} }
+      function recalcularFinanceiro() { const mes = document.getElementById('filtroMesFin').value; let ent = 0, sai = 0, fil = []; dadosFinanceiros.forEach(r => { if(r[0].startsWith(mes)){ let v=parseFloat(r[4]); if(r[1]==='Entrada')ent+=v; else sai+=v; fil.push(r); }}); const fmt = (v) => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); document.getElementById('finSaldo').innerText = fmt(ent - sai); document.getElementById('finEntrada').innerText = fmt(ent); document.getElementById('finSaida').innerText = fmt(sai); renderizarExtrato(fil); }
+      function renderizarExtrato(lista) { const corpo = document.getElementById('corpoFin'); corpo.innerHTML = ''; const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); lista.reverse().forEach(l => { let c = l[1] === 'Entrada' ? 'var(--success-text)' : 'var(--danger-text)'; corpo.innerHTML += `<tr><td>${l[0].split('-')[2]}/${l[0].split('-')[1]}</td><td>${l[3]}</td><td style="font-weight:bold; color:${c};">${fmt(l[4])}</td></tr>`; }); }
+      function mudarTabFin(tab, btn) { document.getElementById('tab-lancamento').classList.add('hidden'); document.getElementById('tab-extrato').classList.add('hidden'); document.getElementById('tab-'+tab).classList.remove('hidden'); btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+      function atualizarCategorias() { const t = document.getElementById('finTipo').value; const c = document.getElementById('finCategoria'); c.innerHTML = t === 'Saída' ? '<option value="Despesa Fixa">Despesa Fixa</option><option value="Eventual">Eventual</option><option value="Manutenção">Manutenção</option>' : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>'; atualizarCampos(); }
+      function atualizarCampos() { const t = document.getElementById('finTipo').value, c = document.getElementById('finCategoria').value, m = document.getElementById('finMembroSelect'), d = document.getElementById('finDescricaoInput'); if(t==='Entrada' && c==='Dízimo'){ m.classList.remove('hidden'); d.classList.add('hidden'); } else { m.classList.add('hidden'); d.classList.remove('hidden'); } }
+      function preencherSelectMembrosFin(m) { const s = document.getElementById('finMembroSelect'); s.innerHTML = '<option value="">Membro...</option>'; [...m].sort((a,b)=>a[1].localeCompare(b[1])).forEach(i => s.innerHTML += `<option value="${i[1]}">${i[1]}</option>`); }
+
+      document.getElementById('formFinanceiro').onsubmit = async function(e) { 
+          e.preventDefault(); const btn = document.getElementById('btnSalvarFin'); btn.disabled=true; btn.innerText="Salvando..."; 
+          let desc = (this.tipo.value==='Entrada' && this.categoria.value==='Dízimo') ? this.membro.value : this.descricao.value; 
+          const d = { tipo: this.tipo.value, categoria: this.categoria.value, descricao: desc, valor: this.valor.value, data: this.data.value, metodo: this.metodo.value }; 
+          try {
+              await fetchGoogle('salvarTransacao', d);
+              alert("Registrado!"); this.reset(); document.getElementById('finData').valueAsDate = new Date(); 
+              carregarFinanceiro(); atualizarCategorias(); 
+          } finally { btn.disabled=false; btn.innerText="Registrar Movimentação"; }
+      }
+
+      // --- UTILITÁRIOS E SUBMITS ---
+      function filtrarMembros() { const b = document.getElementById('inputBusca').value.toLowerCase(), c = document.getElementById('filtroCelula').value.toLowerCase(); document.querySelectorAll('.member-card').forEach(card => { const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c)); card.style.display = match ? 'flex' : 'none'; }); }
+      function preencherSelects(celulas) { const s1 = document.getElementById('selectCelulas'), s2 = document.getElementById('filtroCelula'), s3 = document.getElementById('celLider'); s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Todas</option>'; s3.innerHTML='<option value="">Selecione...</option>'; celulas.forEach(c => { s1.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; s2.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; }); lideres.forEach(l => s3.innerHTML += `<option value="${l}">${l}</option>`); }
+      function editarMembro(id) { const m = dadosMembros.find(i => i[0] == id); if(!m) return; document.getElementById('idMembro').value = m[0]; document.getElementById('campoNome').value = m[1]; document.getElementById('campoNasc').value = m[10]; document.getElementById('campoTel').value = m[4]; document.getElementById('selectCelulas').value = m[3]; document.getElementById('campoCategoria').value = m[2]; document.getElementById('checkBat').checked = (m[6]==='Sim'); document.getElementById('checkCur').checked = (m[7]==='Sim'); document.getElementById('checkCtl').checked = (m[8]==='Sim'); document.getElementById('checkDiz').checked = (m[9]==='Sim'); mudarSecao('cadastro'); }
+      function novoCadastro() { document.getElementById('formMembro').reset(); document.getElementById('idMembro').value=''; mudarSecao('cadastro'); }
+      
+      document.getElementById('formMembro').onsubmit = async function(e) { 
+          e.preventDefault(); const id = document.getElementById('idMembro').value; const btn = document.getElementById('btnSalvar'); btn.disabled=true; btn.innerText="Salvando...";
+          const d = { nome: this.nome.value, nascimento: this.nascimento.value, categoria: this.categoria.value, celula: this.celula.value, telefone: this.telefone.value, batizado: this.batizado.checked?"Sim":"Não", cursao: this.cursao.checked?"Sim":"Não", ctl: this.ctl.checked?"Sim":"Não", encontro: this.encontro.checked?"Sim":"Não" }; 
+          try { if(id) await fetchGoogle('editarMembro', {id: id, dados: d}); else await fetchGoogle('salvarMembro', d); mudarSecao('lista'); carregarTudo(); } finally { btn.disabled=false; btn.innerText="Salvar"; }
+      };
+      
+      function renderizarCelulas(l) { const c = document.getElementById('corpoCelulas'); c.innerHTML=''; l.forEach((i, x) => c.innerHTML += `<tr><td>${i[0]}</td><td>${i[1]}</td><td>${i[2]}</td><td align="center"><button onclick="editarCelula(${x})" style="background:none;border:none;color:orange;cursor:pointer;"><i class="fas fa-edit"></i></button></td></tr>`); }
+      function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('nomeOriginalCelula').value = ""; document.getElementById('tituloFormCelula').innerText = "Nova Célula"; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => s.innerHTML += `<option value="${l}">${l}</option>`); mudarSecao('form-celula'); }
+      function editarCelula(index) { const c = dadosCelulas[index]; if(!c) return; document.getElementById('nomeOriginalCelula').value = c[0]; document.getElementById('celNome').value = c[0]; document.getElementById('celDia').value = c[2]; document.getElementById('celEndereco').value = c[3]; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => { let opt = document.createElement('option'); opt.value = l; opt.text = l; if(l === c[1]) opt.selected = true; s.appendChild(opt); }); document.getElementById('tituloFormCelula').innerText = "Editar Célula"; mudarSecao('form-celula'); }
+      
+      document.getElementById('formCelula').onsubmit = async function(e) { 
+          e.preventDefault(); const btn = document.getElementById('btnSalvarCelula'); btn.disabled=true; btn.innerText="Salvando...";
+          const dados = { nomeOriginal: this.nomeOriginal.value, nome: this.nome.value, lider: this.lider.value, dia: this.dia.value, endereco: this.endereco.value }; 
+          try { const res = await fetchGoogle('salvarCelula', dados); alert(res); mudarSecao('celulas'); carregarTudo(); } finally { btn.disabled=false; btn.innerText="Salvar"; }
+      };
+      
+      async function arquivar(id, n) { if(confirm(`Arquivar ${n}?`)) { try{ await fetchGoogle('arquivarMembro', {id:id}); carregarTudo(); } catch(e){} } }
+      async function restaurar(id) { if(confirm("Restaurar?")) { try{ await fetchGoogle('restaurarMembro', {id:id}); mudarSecao('lista'); carregarTudo(); } catch(e){} } }
+      function filtrarTabela(id) { const b = document.getElementById('inputBuscaArquivo').value.toLowerCase(); const rows = document.getElementById('corpoArquivo').getElementsByTagName('tr'); for(let r of rows) r.style.display = r.innerText.toLowerCase().includes(b)?'':'none'; }
+
+      // ==========================================
+      // FUNÇÕES DA BÍBLIA & VERSÍCULO
+      // ==========================================
+      const dadosBiblia = [
+          { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
+          { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
+          { id: "deuteronomio", nome: "Deuteronômio", caps: 34 }, { id: "josue", nome: "Josué", caps: 24 }, 
+          { id: "juizes", nome: "Juízes", caps: 21 }, { id: "rute", nome: "Rute", caps: 4 }, 
+          { id: "1samuel", nome: "1 Samuel", caps: 31 }, { id: "2samuel", nome: "2 Samuel", caps: 24 }, 
+          { id: "1reis", nome: "1 Reis", caps: 22 }, { id: "2reis", nome: "2 Reis", caps: 25 }, 
+          { id: "1cronicas", nome: "1 Crônicas", caps: 29 }, { id: "2cronicas", nome: "2 Crônicas", caps: 36 }, 
+          { id: "esdras", nome: "Esdras", caps: 10 }, { id: "neemias", nome: "Neemias", caps: 13 }, 
+          { id: "ester", nome: "Ester", caps: 10 }, { id: "jo", nome: "Jó", caps: 42 }, 
+          { id: "salmos", nome: "Salmos", caps: 150 }, { id: "proverbios", nome: "Provérbios", caps: 31 }, 
+          { id: "eclesiastes", nome: "Eclesiastes", caps: 12 }, { id: "cantares", nome: "Cantares", caps: 8 }, 
+          { id: "isaias", nome: "Isaías", caps: 66 }, { id: "jeremias", nome: "Jeremias", caps: 52 }, 
+          { id: "lamentacoes", nome: "Lamentações", caps: 5 }, { id: "ezequiel", nome: "Ezequiel", caps: 48 }, 
+          { id: "daniel", nome: "Daniel", caps: 12 }, { id: "oseias", nome: "Oseias", caps: 14 }, 
+          { id: "joel", nome: "Joel", caps: 3 }, { id: "amos", nome: "Amós", caps: 9 }, 
+          { id: "obadias", nome: "Obadias", caps: 1 }, { id: "jonas", nome: "Jonas", caps: 4 }, 
+          { id: "miqueias", nome: "Miqueias", caps: 7 }, { id: "naum", nome: "Naum", caps: 3 }, 
+          { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
+          { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, 
+          { id: "malaquias", nome: "Malaquias", caps: 4 },
+          // NOVO TESTAMENTO
+          { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, 
+          { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
+          { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, 
+          { id: "1corintios", nome: "1 Coríntios", caps: 16 }, { id: "2corintios", nome: "2 Coríntios", caps: 13 }, 
+          { id: "galatas", nome: "Gálatas", caps: 6 }, { id: "efesios", nome: "Efésios", caps: 6 }, 
+          { id: "filipenses", nome: "Filipenses", caps: 4 }, { id: "colossenses", nome: "Colossenses", caps: 4 }, 
+          { id: "1tessalonicenses", nome: "1 Tessalonicenses", caps: 5 }, { id: "2tessalonicenses", nome: "2 Tessalonicenses", caps: 3 }, 
+          { id: "1timoteo", nome: "1 Timóteo", caps: 6 }, { id: "2timoteo", nome: "2 Timóteo", caps: 4 }, 
+          { id: "tito", nome: "Tito", caps: 3 }, { id: "filemon", nome: "Filemom", caps: 1 }, 
+          { id: "hebreus", nome: "Hebreus", caps: 13 }, { id: "tiago", nome: "Tiago", caps: 5 }, 
+          { id: "1pedro", nome: "1 Pedro", caps: 5 }, { id: "2pedro", nome: "2 Pedro", caps: 3 }, 
+          { id: "1joao", nome: "1 João", caps: 5 }, { id: "2joao", nome: "2 João", caps: 1 }, 
+          { id: "3joao", nome: "3 João", caps: 1 }, { id: "judas", nome: "Judas", caps: 1 }, 
+          { id: "apocalipse", nome: "Apocalipse", caps: 22 }
+      ];
+
+      async function carregarVersiculoDoDia() {
+          const versiculosNT = [
+              "rm/8/28", "jo/3/16", "fp/4/13", "mt/11/28", "rm/12/2",
+              "gl/2/20", "ef/2/8", "fp/4/6", "cl/3/14", "2tm/1/7",
+              "hb/11/1", "tg/1/5", "1pe/5/7", "1jo/4/8", "ap/3/20",
+              "mt/6/33", "mc/11/24", "lc/1/37", "jo/14/6", "at/1/8",
+              "rm/5/8", "1co/13/4", "2co/5/17", "gl/5/22", "ef/6/11",
+              "fp/1/6", "cl/1/15", "1ts/5/16", "hb/12/2", "tg/4/8", "1pe/2/9"
+          ];
+
+          const diaHoje = new Date().getDate(); 
+          const referenciaEscolhida = versiculosNT[diaHoje - 1]; 
+
+          try {
+              const resposta = await fetch(`https://www.abibliadigital.com.br/api/verses/ara/${referenciaEscolhida}`);
+              const dados = await resposta.json();
+
+              document.getElementById('texto-versiculo-dia').innerText = `"${dados.text}"`;
+              document.getElementById('ref-versiculo-dia').innerText = `- ${dados.book.name} ${dados.chapter}:${dados.number}`;
+          } catch (erro) {
+              document.getElementById('texto-versiculo-dia').innerText = '"Tudo posso naquele que me fortalece."';
+              document.getElementById('ref-versiculo-dia').innerText = "- Filipenses 4:13";
+          }
+      }
+
+      function abrirBiblia() {
+          document.getElementById('painel-biblia').classList.add('aberto');
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.display = 'block';
+          setTimeout(() => overlay.style.opacity = '1', 10);
+          
+          iniciarBiblia(); 
+      }
+
+      function fecharBiblia() {
+          document.getElementById('painel-biblia').classList.remove('aberto');
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.opacity = '0';
+          setTimeout(() => overlay.style.display = 'none', 300);
+      }
+      
+      function iniciarBiblia() {
+          const selectLivro = document.getElementById('biblia-livro');
+          selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
+
+          dadosBiblia.forEach((livro, index) => {
+              let option = document.createElement('option');
+              option.value = livro.id;
+              option.text = livro.nome;
+              
+              if (index >= 39) {
+                  option.style.fontWeight = "bold"; 
+              }
+              
+              selectLivro.appendChild(option);
+          });
+      }
+
+      function atualizarCapitulos() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const selectCapitulo = document.getElementById('biblia-capitulo');
+          
+          selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
+          
+          if (selectLivro.value === "") {
+              selectCapitulo.disabled = true;
+              return;
+          }
+
+          const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
+          
+          for (let i = 1; i <= livroEscolhido.caps; i++) {
+              let option = document.createElement('option');
+              option.value = i;
+              option.text = i;
+              selectCapitulo.appendChild(option);
+          }
+          
+          selectCapitulo.disabled = false;
+      }
+
+      async function carregarCapitulo() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const inputCapitulo = document.getElementById('biblia-capitulo');
+          const conteudo = document.getElementById('biblia-conteudo');
+          
+          const livro = selectLivro.value;
+          const capitulo = inputCapitulo.value;
+
+          if (!livro || !capitulo) {
+              alert("Por favor, selecione um livro e o capítulo.");
+              return;
+          }
+
+          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando...</p>";
+          
+          try {
+              const versiculos = await fetchGoogle('buscarCapituloBiblia', { livro: livro, capitulo: capitulo });
+              
+              conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
+              
+              versiculos.forEach(v => {
+                  let blocoHTML = `<div style="margin-bottom: 15px;">`;
+                  
+                  if (v.title && v.title.trim() !== "") {
+                      blocoHTML += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">${v.title}</h4>`;
+                  }
+                  
+                  blocoHTML += `<p style="margin: 0; text-align: justify;">
+                                  <sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>
+                                  ${v.content}
+                                </p></div>`;
+                  conteudo.innerHTML += blocoHTML;
+              });
+
+          } catch (e) {
+              conteudo.innerHTML = `<p style="color: var(--danger-text); text-align: center;">Erro ao carregar o capítulo. Verifique se o livro e o capítulo existem.</p>`;
+          }
+      }
+    </script>
+  </body>
+</html>

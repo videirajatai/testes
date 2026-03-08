@@ -1,1 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Liderança - Videira Jataí</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body, html { height: 100%; overflow: hidden; background: linear-gradient(135deg, #f4f7f6 0%, #e2e8f0 100%); }
+        
+        #tela-login {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; transition: opacity 0.5s ease;
+        }
+
+        .card-login {
+            background: #ffffff; padding: 40px 35px; border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); width: 90%; max-width: 380px; text-align: center;
+        }
+
+        .logo { width: 100px; height: auto; margin-bottom: 15px; }
+        h2 { color: var(--primary); font-size: 22px; margin-bottom: 6px; font-weight: 700; }
+        p.subtitulo { color: var(--text-light); font-size: 14px; margin-bottom: 35px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: var(--text-light); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px;
+            font-size: 15px; color: var(--text-main); outline: none; transition: 0.3s; background-color: var(--input-bg);
+        }
+        input[type="text"]:focus, input[type="password"]:focus { border-color: var(--primary); background-color: #ffffff; }
+
+        button {
+            width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #ffffff;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        button:hover { background-color: #600018; transform: translateY(-1px); }
+        button:disabled { background-color: #a0aec0; cursor: not-allowed; }
+        
+        .btn-secondary { background-color: #ffffff; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-secondary:hover { background-color: #fdf5f6; transform: translateY(0); }
+
+        #mensagem-erro { color: var(--danger-text); font-size: 14px; margin-top: 20px; display: none; font-weight: 500; background: #fff5f5; padding: 10px; border-radius: 8px; border: 1px solid #fed7d7; }
+
+        #splash-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #f4f7f6 0%, #e2e8f0 100%);
+            z-index: 5; opacity: 0; transition: opacity 0.4s ease;
+        }
+        .splash-logo { width: 120px; animation: pulse 1.5s infinite ease-in-out; }
+        #splash-screen p { margin-top: 25px; color: var(--text-main); font-size: 15px; font-weight: 600; }
+
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
+    </style>
+</head>
+<body>
+
+    <div id="tela-login">
+        <div class="card-login">
+            <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" alt="Logo Videira" class="logo">
+            <h2 id="titulo-login">Bem-vindo(a)</h2>
+            <p class="subtitulo" id="subtitulo-login">Acesse o seu painel</p>
+            
+            <div id="area-form">
+                <div class="input-group">
+                    <label>Usuário</label>
+                    <input type="text" id="usuario-input" placeholder="Usuário" onkeypress="verificarEnter(event)" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" id="senha-input" placeholder="••••••••" onkeypress="verificarEnter(event)">
+                </div>
+                
+                <button id="btn-entrar" onclick="verificarLogin()">Entrar no Sistema</button>
+                <p id="mensagem-erro">⚠️ Usuário ou senha incorretos.</p>
+            </div>
+
+            <div id="area-escolha" style="display: none;">
+                <div id="botoes-painel"></div>
+                <button class="btn-secondary" onclick="sair()" style="margin-top: 15px; padding: 10px; font-size: 14px;">Sair / Trocar Usuário</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="splash-screen">
+        <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" alt="Carregando" class="splash-logo">
+        <p id="splash-texto">Autenticando e carregando painel...</p>
+    </div>
+
+    <script>
+        const urlBackend = "https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec"; 
+        
+        async function verificarLogin() {
+            const user = document.getElementById('usuario-input').value.trim().toLowerCase();
+            const pass = document.getElementById('senha-input').value;
+            const erro = document.getElementById('mensagem-erro');
+            const btn = document.getElementById('btn-entrar');
+            
+            if(!user || !pass) { erro.innerText = "⚠️ Preencha usuário e senha."; erro.style.display = 'block'; return; }
+
+            btn.innerText = "Autenticando..."; btn.disabled = true; erro.style.display = 'none';
+
+            try {
+                let resposta = await fetch(urlBackend, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "login", payload: { usuario: user, senha: pass } })
+                });
+                
+                let resultado = await resposta.json();
+
+                if (resultado.status === "sucesso") {
+                    
+                    // Salva os dados de sessão, incluindo a lista de URLs permitidas!
+                    sessionStorage.setItem('usuarioLogado', resultado.nome);
+                    sessionStorage.setItem('tokenAcesso', resultado.token);
+                    sessionStorage.setItem('urlApi', urlBackend);
+                    
+                    const urlsPermitidas = resultado.paginas.map(p => p.url);
+                    sessionStorage.setItem('paginasPermitidas', JSON.stringify(urlsPermitidas));
+
+                    if (resultado.paginas.length === 1) {
+                        // Se tem só 1 permissão, pula o menu de escolha e vai direto
+                        entrarNoPainel(resultado.nome, resultado.paginas[0].url);
+                    } else {
+                        // Se tem mais de 1, exibe os botões para ele escolher
+                        document.getElementById('area-form').style.display = 'none';
+                        document.getElementById('area-escolha').style.display = 'block';
+                        document.getElementById('titulo-login').innerText = `Olá, ${resultado.nome}`;
+                        document.getElementById('subtitulo-login').innerText = "Qual painel você deseja acessar?";
+
+                        const divBotoes = document.getElementById('botoes-painel');
+                        divBotoes.innerHTML = '';
+                        resultado.paginas.forEach(pag => {
+                            let b = document.createElement('button');
+                            b.innerText = pag.nome;
+                            b.onclick = () => entrarNoPainel(resultado.nome, pag.url);
+                            divBotoes.appendChild(b);
+                        });
+                    }
+                    
+                } else {
+                    erro.innerText = "⚠️ Usuário ou senha incorretos.";
+                    erro.style.display = 'block';
+                    document.getElementById('senha-input').value = "";
+                    document.getElementById('senha-input').focus();
+                    btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+                }
+            } catch (e) {
+                erro.innerText = "⚠️ Erro de conexão com o servidor.";
+                erro.style.display = 'block';
+                btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+            }
+        }
+
+        function entrarNoPainel(nome, urlDestino) {
+            const telaLogin = document.getElementById('tela-login');
+            const splashScreen = document.getElementById('splash-screen');
+            document.getElementById('splash-texto').innerText = `Carregando...`;
+
+            telaLogin.style.opacity = '0'; 
+            setTimeout(() => {
+                telaLogin.style.display = 'none';
+                splashScreen.style.display = 'flex';
+                setTimeout(() => splashScreen.style.opacity = '1', 10);
+
+                setTimeout(() => {
+                    window.location.href = urlDestino + ".html";
+                }, 1000); 
+
+            }, 400); 
+        }
+
+        function sair() {
+            sessionStorage.clear();
+            document.getElementById('area-escolha').style.display = 'none';
+            document.getElementById('area-form').style.display = 'block';
+            document.getElementById('titulo-login').innerText = "Bem-vindo(a)";
+            document.getElementById('subtitulo-login').innerText = "Acesse o seu painel";
+            document.getElementById('usuario-input').value = "";
+            document.getElementById('senha-input').value = "";
+            document.getElementById('btn-entrar').innerText = "Entrar no Sistema";
+            document.getElementById('btn-entrar').disabled = false;
+        }
+
+        function verificarEnter(event) { if (event.key === "Enter") verificarLogin(); }
+    </script>
+</body>
+</html>
+
+
+
+
+
 
