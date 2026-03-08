@@ -630,24 +630,27 @@ async function carregarTudo() {
          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
 
          lista.forEach(m => {
-            // Lendo direto do objeto do Supabase
-            let nome = m.nome || 'Sem Nome';
-            let celula = m.celula || '-';
-            let categoria = m.categoria || 'Frequentador';
-            let tel = String(m.telefone || '');
+            // Lendo direto do objeto do Supabase com os nomes EXATOS da sua tabela
+            let nome = m.Nome || 'Sem Nome'; 
+            let celula = m['Célula'] || '-'; // Usamos colchetes aqui por causa do acento
+            let categoria = m.Tipo || 'Frequentador'; // A coluna no banco se chama "Tipo"
+            let tel = String(m.Telefone || '');
+            
             let telClean = tel.replace(/\D/g, '');
             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
-            let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+            
+            // Usando m.Nascimento (assumindo que você vai criar com N maiúsculo)
+            let nasc = m.Nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.Nascimento)}</span>` : '';
 
             grid.innerHTML += `
               <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
                  <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge cat-${categoria}">${categoria}</span></div>
                  <div class="card-info"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${nasc}</div>
                  <div class="status-row">
-                    <div class="status-pill ${check(m.batizado)}">Batismo</div>
-                    <div class="status-pill ${check(m.cursao)}">Cursão</div>
-                    <div class="status-pill ${check(m.ctl)}">CTL</div>
-                    <div class="status-pill ${check(m.encontro)}">Encontro</div>
+                    <div class="status-pill ${check(m.Batizado)}">Batismo</div>
+                    <div class="status-pill ${check(m.Cursao)}">Cursão</div>
+                    <div class="status-pill ${check(m.CTL)}">CTL</div>
+                    <div class="status-pill ${check(m.Encontro)}">Encontro</div>
                  </div>
                  ${btnZap}
               </div>`;
