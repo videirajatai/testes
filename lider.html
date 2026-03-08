@@ -980,7 +980,7 @@ async function carregarVersiculoDoDia() {
           selectCapitulo.disabled = false;
       }
 
-      async function carregarCapitulo() {
+      /*async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const inputCapitulo = document.getElementById('biblia-capitulo');
           const conteudo = document.getElementById('biblia-conteudo');
@@ -1017,10 +1017,10 @@ async function carregarVersiculoDoDia() {
           } catch (e) {
               conteudo.innerHTML = `<p style="color: var(--danger-text); text-align: center;">Erro ao carregar o capítulo. Verifique se o livro e o capítulo existem.</p>`;
           }
-      }
+      }*/
 
       //LEITURA PELO GITHUB REPOSITORIO - USO FUTURO
-      /*async function carregarCapitulo() {
+      async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const inputCapitulo = document.getElementById('biblia-capitulo');
           const conteudo = document.getElementById('biblia-conteudo');
@@ -1038,7 +1038,7 @@ async function carregarVersiculoDoDia() {
           try {
               // --- A MÁGICA ACONTECE AQUI ---
               // Substitua 'SEU_USUARIO' e 'SEU_REPO' pelos seus dados do GitHub
-              const urlGithub = `https://raw.githubusercontent.com/videirajatai/sistema/main/biblia/${livro}/${capitulo}.json`;
+              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`;
               
               const resposta = await fetch(urlGithub);
               if (!resposta.ok) throw new Error("Capítulo não encontrado");
@@ -1064,7 +1064,7 @@ async function carregarVersiculoDoDia() {
               console.error(e);
               conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar do GitHub. Verifique a conexão ou se o arquivo existe no repositório.</p>`;
           }
-      }*/
+      }
     </script>
   </body>
 </html>
