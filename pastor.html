@@ -1072,7 +1072,7 @@
           selectCapitulo.disabled = false;
       }
 
-      async function carregarCapitulo() {
+      /*async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const inputCapitulo = document.getElementById('biblia-capitulo');
           const conteudo = document.getElementById('biblia-conteudo');
@@ -1108,6 +1108,53 @@
 
           } catch (e) {
               conteudo.innerHTML = `<p style="color: var(--danger-text); text-align: center;">Erro ao carregar o capítulo. Verifique se o livro e o capítulo existem.</p>`;
+          }
+      }*/
+
+            //LEITURA PELO GITHUB REPOSITORIO - USO FUTURO
+      async function carregarCapitulo() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const inputCapitulo = document.getElementById('biblia-capitulo');
+          const conteudo = document.getElementById('biblia-conteudo');
+          
+          const livro = selectLivro.value; // ex: genesis
+          const capitulo = inputCapitulo.value; // ex: 1
+
+          if (!livro || !capitulo) {
+              alert("Por favor, selecione um livro e o capítulo.");
+              return;
+          }
+
+          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Lendo do GitHub...</p>";
+          
+          try {
+              // --- A MÁGICA ACONTECE AQUI ---
+              // Substitua 'SEU_USUARIO' e 'SEU_REPO' pelos seus dados do GitHub
+              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`;
+              
+              const resposta = await fetch(urlGithub);
+              if (!resposta.ok) throw new Error("Capítulo não encontrado");
+              
+              const versiculos = await resposta.json();
+              
+              // Monta o texto na tela
+              conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
+              
+              versiculos.forEach(v => {
+                  let blocoHTML = `<div style="margin-bottom: 15px;">`;
+                  if (v.title) {
+                      blocoHTML += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
+                  }
+                  blocoHTML += `<p style="margin: 0; text-align: justify;">
+                                  <sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>
+                                  ${v.content}
+                                </p></div>`;
+                  conteudo.innerHTML += blocoHTML;
+              });
+
+          } catch (e) {
+              console.error(e);
+              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar do GitHub. Verifique a conexão ou se o arquivo existe no repositório.</p>`;
           }
       }
     </script>
