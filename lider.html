@@ -534,6 +534,11 @@
 
     <script>
       const API_URL = sessionStorage.getItem('urlApi');
+      
+      // --- CREDENCIAIS DO SUPABASE ---
+      const SB_URL = "COLE_SUA_URL_AQUI"; // Ex: https://xyz.supabase.co
+      const SB_KEY = "COLE_SUA_CHAVE_ANON_PUBLIC_AQUI";
+
       let dadosMembros = [], dadosCelulas = [], listaPalavras = [], listaAgenda = [];
       
       window.onload = carregarTudo;
@@ -555,6 +560,16 @@
               throw e;
           }
       }
+///////////////////////////// nova abaixo
+      async function lerSupabase(tabela) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
+              method: 'GET',
+              headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+          });
+          if (!res.ok) throw new Error(`Erro ao ler ${tabela}`);
+          return await res.json();
+      }
+      //////////////////////nova acima
 
       async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); 
@@ -562,13 +577,17 @@
         
         document.getElementById('relData').valueAsDate = new Date();
         
-        try {
-            // Busca dados iniciais e atualiza a badge
+       try {
+            // --- NOVA BUSCA HÍBRIDA (Membros no Supabase, Resto no Google) ---
+            
+            // 1. Busca os membros voando no Supabase
+            dadosMembros = await lerSupabase('membros'); 
+            document.getElementById('badge-total-membros').innerText = dadosMembros.length;
+            renderizarMembros(dadosMembros);
+
+            // 2. Busca o resto no Google (por enquanto)
             const res = await fetchGoogle('buscarDadosIniciais');
-            dadosMembros = res.membros; 
             dadosCelulas = res.celulas;
-            document.getElementById('badge-total-membros').innerText = res.total;
-            renderizarMembros(res.membros);
             renderizarCelulas(res.celulas);
             preencherSelects(res.celulas);
             
@@ -621,20 +640,24 @@
          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
 
          lista.forEach(m => {
-            let nome=m[1], celula=m[3]||'-', tel=String(m[4]||'');
+            // Lendo direto do objeto do Supabase
+            let nome = m.nome || 'Sem Nome';
+            let celula = m.celula || '-';
+            let categoria = m.categoria || 'Frequentador';
+            let tel = String(m.telefone || '');
             let telClean = tel.replace(/\D/g, '');
             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
-            let nasc = m[10] ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m[10])}</span>` : '';
+            let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
 
             grid.innerHTML += `
               <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
-                 <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge cat-${m[2]}">${m[2]}</span></div>
+                 <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge cat-${categoria}">${categoria}</span></div>
                  <div class="card-info"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${nasc}</div>
                  <div class="status-row">
-                    <div class="status-pill ${check(m[6])}">Batismo</div>
-                    <div class="status-pill ${check(m[7])}">Cursão</div>
-                    <div class="status-pill ${check(m[8])}">CTL</div>
-                    <div class="status-pill ${check(m[9])}">Encontro</div>
+                    <div class="status-pill ${check(m.batizado)}">Batismo</div>
+                    <div class="status-pill ${check(m.cursao)}">Cursão</div>
+                    <div class="status-pill ${check(m.ctl)}">CTL</div>
+                    <div class="status-pill ${check(m.encontro)}">Encontro</div>
                  </div>
                  ${btnZap}
               </div>`;
