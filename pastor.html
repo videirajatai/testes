@@ -718,6 +718,70 @@
 
       function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
 
+
+             // ==========================================
+      // MEMBROS E ARQUIVOS (Listagem, Edição, Arquivamento)
+      // ==========================================
+      
+      function renderizarMembrosEArquivos(lista) {
+          const gridAtivos = document.getElementById('gridMembros'); gridAtivos.innerHTML = '';
+          const gridArquivos = document.getElementById('gridArquivos'); gridArquivos.innerHTML = '';
+          
+          if(!lista || lista.length === 0){
+              gridAtivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro encontrado.</p>';
+              return;
+          }
+
+          // 1. SEPARAÇÃO DOS DADOS
+          let ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
+          let arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
+
+          document.getElementById('badge-total-membros').innerText = ativos.length;
+
+          const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
+          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+
+          // 2. FUNÇÃO ÚNICA PARA MONTAR O CARD
+          const montarCard = (m, isArquivado) => {
+             let nome = m.nome || 'Sem Nome'; let celula = m.celula || '-'; let categoria = m.tipo || 'Frequentador'; 
+             let tel = String(m.telefone || ''); let telClean = tel.replace(/\D/g, '');
+             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap" style="margin-top:10px;"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
+             let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+             let bDiz = (String(m.dizimista).toLowerCase() === 'sim' || m.dizimista === true) ? `<span style="font-size:0.7rem; margin-left:5px; color:#166534; background:#dcfce7; padding:2px 6px; border-radius:4px;">Dizimista</span>` : '';
+
+             let acoesHTML = isArquivado 
+                ? `<button onclick="restaurarMembro('${m.id}')" class="btn-icon" title="Restaurar"><i class="fas fa-undo"></i></button>`
+                : `<div style="display:flex; gap:5px;">
+                    <button onclick="abrirEditarMembro('${m.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button onclick="arquivarMembro('${m.id}')" class="btn-icon" title="Arquivar"><i class="fas fa-archive"></i></button>
+                   </div>`;
+
+             return `
+               <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+                  <div class="card-header">
+                      <div style="display:flex; flex-direction: column; gap: 4px;">
+                          <h4 class="card-name">${nome}</h4>
+                          <span class="cat-badge" style="width: fit-content;">${categoria}</span>
+                      </div>
+                      ${acoesHTML}
+                  </div>
+                  <div class="card-info" style="flex-wrap: wrap;"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${bDiz} ${nasc}</div>
+                  <div class="status-row">
+                     <div class="status-pill ${check(m.batizado)}">Batismo</div>
+                     <div class="status-pill ${check(m.cursao)}">Cursão</div>
+                     <div class="status-pill ${check(m.ctl)}">CTL</div>
+                     <div class="status-pill ${check(m.encontro)}">Encontro</div>
+                  </div>
+                  ${!isArquivado ? btnZap : ''}
+               </div>`;
+          };
+
+          // 3. RENDERIZAÇÃO NAS DUAS GRIDS
+          ativos.forEach(m => gridAtivos.innerHTML += montarCard(m, false));
+          arquivados.forEach(m => gridArquivos.innerHTML += montarCard(m, true));
+
+          if(arquivados.length === 0) gridArquivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro arquivado.</p>';
+      }
       
 
 
