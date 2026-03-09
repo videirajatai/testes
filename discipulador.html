@@ -826,6 +826,9 @@
             // ==========================================
       // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
+      // Variável para carregar Gênesis sozinho na primeira vez
+      let bibliaIniciada = false;
+
       const dadosBiblia = [
           { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
           { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
@@ -863,27 +866,16 @@
           { id: "apocalipse", nome: "Apocalipse", caps: 22 }
       ];
 
-      let primeiraVezBiblia = true;
-
       function abrirBiblia() {
           document.getElementById('painel-biblia').classList.add('aberto');
-          const overlay = document.getElementById('biblia-overlay'); 
-          overlay.style.display = 'block'; 
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.display = 'block';
           setTimeout(() => overlay.style.opacity = '1', 10);
           
-          iniciarBiblia(); // Preenche a lista com todos os livros
-
-          // Se for a primeira vez que abre, já carrega Gênesis 1 direto
-          if (primeiraVezBiblia) {
-              const selectLivro = document.getElementById('biblia-livro');
-              const selectCapitulo = document.getElementById('biblia-capitulo');
-              
-              selectLivro.value = "genesis"; // Crava Gênesis
-              atualizarCapitulos();          // Gera os 50 capítulos
-              selectCapitulo.value = "1";    // Crava o capítulo 1
-              
-              carregarCapitulo(); // Puxa o texto do GitHub
-              primeiraVezBiblia = false; // Desliga a chave para não recarregar toda vez
+          if (!bibliaIniciada) {
+              iniciarLivros(); 
+              buscarTextoBiblia("genesis", 1, "Gênesis"); 
+              bibliaIniciada = true;
           }
       }
 
@@ -894,64 +886,74 @@
           setTimeout(() => overlay.style.display = 'none', 300);
       }
 
-      function iniciarBiblia() {
-          const selectLivro = document.getElementById('biblia-livro'); 
-          if(selectLivro.options.length > 0) return; // Evita duplicar os livros
-
-          // Usando document.createElement igual ao Painel do Líder (funciona em todos)
+      function iniciarLivros() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const selectCapitulo = document.getElementById('biblia-capitulo');
+          
+          // Forçando a injeção do HTML direto para não ter erro no Discipulador
+          let htmlLivros = '';
           dadosBiblia.forEach((livro, index) => {
-              let option = document.createElement('option');
-              option.value = livro.id;
-              option.text = livro.nome;
-              if (index >= 39) option.style.fontWeight = "bold"; // Novo Testamento
-              selectLivro.appendChild(option);
+              let negrito = index >= 39 ? 'font-weight: bold;' : '';
+              htmlLivros += `<option value="${livro.id}" style="${negrito}">${livro.nome}</option>`;
           });
+          selectLivro.innerHTML = htmlLivros;
+          selectLivro.value = "genesis"; 
+          
+          let htmlCaps = '';
+          for (let i = 1; i <= 50; i++) { 
+              htmlCaps += `<option value="${i}">${i}</option>`;
+          }
+          selectCapitulo.innerHTML = htmlCaps;
+          selectCapitulo.value = "1"; 
+          selectCapitulo.disabled = false;
       }
 
       function atualizarCapitulos() {
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
           
-          selectCapitulo.innerHTML = ''; // Limpa os capítulos anteriores
-          
-          const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
-          if (livroEscolhido) {
-              for (let i = 1; i <= livroEscolhido.caps; i++) {
-                  let option = document.createElement('option');
-                  option.value = i; 
-                  option.text = i; 
-                  selectCapitulo.appendChild(option);
+          const livro = dadosBiblia.find(l => l.id === selectLivro.value);
+          if (livro) {
+              let htmlCaps = '';
+              for (let i = 1; i <= livro.caps; i++) {
+                  htmlCaps += `<option value="${i}">${i}</option>`;
               }
+              selectCapitulo.innerHTML = htmlCaps;
               selectCapitulo.disabled = false;
           }
       }
 
-      async function carregarCapitulo() {
+      function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const inputCapitulo = document.getElementById('biblia-capitulo');
-          const conteudo = document.getElementById('biblia-conteudo');
           
-          const livro = selectLivro.value; const capitulo = inputCapitulo.value; 
-          if (!livro || !capitulo) { alert("Por favor, selecione um livro e o capítulo."); return; }
+          if (!selectLivro.value || !inputCapitulo.value) { alert("Selecione um livro e capítulo."); return; }
+          
+          const nomeLivro = selectLivro.options[selectLivro.selectedIndex].text;
+          buscarTextoBiblia(selectLivro.value, inputCapitulo.value, nomeLivro);
+      }
 
-          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Lendo do GitHub...</p>";
+      async function buscarTextoBiblia(livroId, capitulo, nomeLivro) {
+          const conteudo = document.getElementById('biblia-conteudo');
+          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando texto...</p>";
           
           try {
-              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`;
+              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livroId}/${capitulo}.json`;
               const resposta = await fetch(urlGithub);
               if (!resposta.ok) throw new Error("Capítulo não encontrado");
               
               const versiculos = await resposta.json();
-              conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
+              let htmlText = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${nomeLivro} ${capitulo}</h3>`;
               
               versiculos.forEach(v => {
-                  let blocoHTML = `<div style="margin-bottom: 15px;">`;
-                  if (v.title) blocoHTML += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
-                  blocoHTML += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>${v.content}</p></div>`;
-                  conteudo.innerHTML += blocoHTML;
+                  htmlText += `<div style="margin-bottom: 15px;">`;
+                  if (v.title) htmlText += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
+                  htmlText += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>${v.content}</p></div>`;
               });
+              conteudo.innerHTML = htmlText;
+              
           } catch (e) {
-              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar do GitHub.</p>`;
+              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar o capítulo.</p>`;
           }
       }
     </script>
