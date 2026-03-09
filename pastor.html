@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabaseClient/supabaseClient-js@2"></script>
     
     <style>
       .container { max-width: 900px; margin: 0 auto; padding: 15px 15px; }
@@ -593,10 +593,10 @@
     <div id="biblia-overlay" onclick="fecharBiblia()"></div>
 
     <script>
-      // CONFIGURAÇÃO SUPABASE - Substitua pelos seus dados
-      const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
+      // CONFIGURAÇÃO supabaseClient - Substitua pelos seus dados
+      const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabaseClient.co';
       const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
-      const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      const supabaseClient = window.supabaseClient.createClient(supabaseUrl, supabaseKey);
 
       // Função Mantida para a Agenda (Integração Google)
       const API_URL = sessionStorage.getItem('urlApi');
@@ -628,13 +628,13 @@
         const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
         try {
             // Membros (Não Arquivados)
-            const { data: memData, error: memErr } = await supabase.from('membros').select('*').is('arquivado', false);
+            const { data: memData, error: memErr } = await supabaseClient.from('membros').select('*').is('arquivado', false);
             if (memErr) throw memErr;
             dadosMembros = memData || [];
             document.getElementById('totalMembros').innerText = dadosMembros.length;
 
             // Células
-            const { data: celData, error: celErr } = await supabase.from('celulas').select('*');
+            const { data: celData, error: celErr } = await supabaseClient.from('celulas').select('*');
             if (celErr) throw celErr;
             dadosCelulas = celData || [];
 
@@ -658,7 +658,7 @@
 
             carregarVersiculoDoDia();
 
-        } catch(e) { console.error(e); alert("Erro ao carregar dados do Supabase"); } finally { if(icon) icon.classList.remove('fa-spin'); }
+        } catch(e) { console.error(e); alert("Erro ao carregar dados do supabaseClient"); } finally { if(icon) icon.classList.remove('fa-spin'); }
       }
 
       function renderizarCards(lista) {
@@ -705,7 +705,7 @@
          mudarSecao('palavras');
          const div = document.getElementById('listaPalavras'); div.innerHTML = '<p style="text-align:center;">Carregando...</p>';
          try { 
-             const { data, error } = await supabase.from('palavras').select('*').order('data', { ascending: false });
+             const { data, error } = await supabaseClient.from('palavras').select('*').order('data', { ascending: false });
              if(error) throw error;
              listaPalavras = data || []; 
              renderizarPalavras(listaPalavras); 
@@ -734,7 +734,7 @@
           e.preventDefault(); const btn = document.getElementById('btnSalvarPalavra'); btn.disabled = true; btn.innerText = "Salvando...";
           try {
               const obj = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link: this.link.value };
-              const { error } = await supabase.from('palavras').insert([obj]);
+              const { error } = await supabaseClient.from('palavras').insert([obj]);
               if(error) throw error;
               alert("Publicado com sucesso!"); carregarPalavras();
           } catch(e) { console.error(e); alert("Erro ao salvar palavra."); }
@@ -852,7 +852,7 @@
       async function carregarSugestoes() {
         mudarSecao('sugestoes'); const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="2" align="center">Carregando...</td></tr>';
         try {
-            const { data, error } = await supabase.from('sugestoes').select('*').order('data', { ascending: false });
+            const { data, error } = await supabaseClient.from('sugestoes').select('*').order('data', { ascending: false });
             if (error) throw error;
             corpo.innerHTML = '';
             if(!data || data.length === 0) { corpo.innerHTML = '<tr><td colspan="2" align="center">Vazio.</td></tr>'; return; }
@@ -869,7 +869,7 @@
         const sel = document.getElementById('filtroRelCelula'); sel.innerHTML = '<option value="">Todas as Células</option>';
         dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
         try { 
-            const { data, error } = await supabase.from('relatorios').select('*').order('data', { ascending: false });
+            const { data, error } = await supabaseClient.from('relatorios').select('*').order('data', { ascending: false });
             if (error) throw error;
             dadosRelatorios = data || []; 
             filtrarRelatorios(); 
@@ -903,7 +903,7 @@
       async function carregarArquivados() { 
         mudarSecao('arquivo'); const corpo = document.getElementById('corpoArquivo'); corpo.innerHTML = '<tr><td colspan="3" align="center">Carregando...</td></tr>';
         try {
-            const { data, error } = await supabase.from('membros').select('*').is('arquivado', true);
+            const { data, error } = await supabaseClient.from('membros').select('*').is('arquivado', true);
             if (error) throw error;
             corpo.innerHTML=''; 
             if (!data || data.length === 0) { corpo.innerHTML = '<tr><td colspan="3" align="center">Vazio.</td></tr>'; return; }
@@ -919,7 +919,7 @@
       // --- FINANCEIRO BÁSICO ---
       async function carregarFinanceiro() { 
           try { 
-              const { data, error } = await supabase.from('financeiro').select('*').order('data', { ascending: false });
+              const { data, error } = await supabaseClient.from('financeiro').select('*').order('data', { ascending: false });
               if (error) throw error;
               dadosFinanceiros = data || []; 
               recalcularFinanceiro(); 
@@ -957,7 +957,7 @@
           let desc = (this.tipo.value==='Entrada' && this.categoria.value==='Dízimo') ? this.membro.value : this.descricao.value; 
           const obj = { tipo: this.tipo.value, categoria: this.categoria.value, descricao: desc, valor: parseFloat(this.valor.value), data: this.data.value, metodo: this.metodo.value }; 
           try {
-              const { error } = await supabase.from('financeiro').insert([obj]);
+              const { error } = await supabaseClient.from('financeiro').insert([obj]);
               if (error) throw error;
               alert("Registrado!"); this.reset(); document.getElementById('finData').valueAsDate = new Date(); 
               carregarFinanceiro(); atualizarCategorias(); 
@@ -994,8 +994,8 @@
               batizado: this.batizado.checked, cursao: this.cursao.checked, ctl: this.ctl.checked, encontro: this.encontro.checked, arquivado: false
           }; 
           try { 
-              if(id) { const {error} = await supabase.from('membros').update(d).eq('id', id); if(error) throw error; }
-              else { const {error} = await supabase.from('membros').insert([d]); if(error) throw error; } 
+              if(id) { const {error} = await supabaseClient.from('membros').update(d).eq('id', id); if(error) throw error; }
+              else { const {error} = await supabaseClient.from('membros').insert([d]); if(error) throw error; } 
               mudarSecao('lista'); carregarTudo(); 
           } catch(err) { console.error(err); alert("Erro ao salvar membro."); }
           finally { btn.disabled=false; btn.innerText="Salvar"; }
@@ -1024,8 +1024,8 @@
           const id = document.getElementById('idCelula').value;
           const dados = { nome: this.nome.value, lider: this.lider.value, dia: this.dia.value, endereco: this.endereco.value }; 
           try { 
-              if (id) { const {error} = await supabase.from('celulas').update(dados).eq('id', id); if(error) throw error; }
-              else { const {error} = await supabase.from('celulas').insert([dados]); if(error) throw error;}
+              if (id) { const {error} = await supabaseClient.from('celulas').update(dados).eq('id', id); if(error) throw error; }
+              else { const {error} = await supabaseClient.from('celulas').insert([dados]); if(error) throw error;}
               alert("Célula salva com sucesso!"); mudarSecao('celulas'); carregarTudo(); 
           } catch(err) { console.error(err); alert("Erro ao salvar célula."); } 
           finally { btn.disabled=false; btn.innerText="Salvar"; }
@@ -1034,7 +1034,7 @@
       async function arquivar(id, n) { 
           if(confirm(`Arquivar ${n}?`)) { 
               try { 
-                  const { error } = await supabase.from('membros').update({ arquivado: true }).eq('id', id);
+                  const { error } = await supabaseClient.from('membros').update({ arquivado: true }).eq('id', id);
                   if (error) throw error;
                   carregarTudo(); 
               } catch(e) { console.error(e); alert("Erro ao arquivar."); } 
@@ -1044,7 +1044,7 @@
       async function restaurar(id) { 
           if(confirm("Restaurar?")) { 
               try { 
-                  const { error } = await supabase.from('membros').update({ arquivado: false }).eq('id', id);
+                  const { error } = await supabaseClient.from('membros').update({ arquivado: false }).eq('id', id);
                   if (error) throw error;
                   mudarSecao('lista'); carregarTudo(); 
               } catch(e) { console.error(e); alert("Erro ao restaurar."); } 
