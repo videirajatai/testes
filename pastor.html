@@ -328,19 +328,21 @@
 
       <div class="nav-menu">
         <button onclick="mudarSecao('lista')" class="nav-btn active" id="btn-lista"><i class="fas fa-users"></i> Membros</button>
-        <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
-        <button onclick="mudarSecao('financeiro')" class="nav-btn" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button>
-        <button onclick="carregarArquivados()" class="nav-btn" id="btn-arquivo"><i class="fas fa-archive"></i> Arquivo</button>
-        <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos </button>
-        <button onclick="carregarRelatorios()" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>
         
-        <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda" style="flex: 1 1 30%; margin-top: 5px;">
-           <i class="far fa-calendar-alt"></i> Agenda
-        </button>
+        <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
+        
+        <button onclick="mudarSecao('financeiro')" class="nav-btn" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button> 
+        
+        <button onclick="mudarSecao('arquivos')" class="nav-btn" id="btn-arquivos"><i class="fas fa-archive"></i> Arquivos</button>
+        
+        <!-- <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos</button> -->
+        
+        <button onclick="mudarSecao('relatorios')" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>
+      
+        
+        <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
 
-        <button onclick="carregarPalavras()" class="nav-btn" id="btn-palavras" style="flex: 1 1 30%; margin-top: 5px;">
-           <i class="fas fa-book-open"></i> Palavras
-        </button>
+        <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button> 
 
         <button onclick="abrirBiblia()" class="nav-btn" id="btn-biblia" style="flex: 1 1 30%; margin-top: 5px;">
            <i class="fas fa-bible"></i> Bíblia A Mensagem
@@ -603,8 +605,7 @@
 
     <div id="biblia-overlay" onclick="fecharBiblia()"></div>
 
-    <script>
-      
+   <script>
       const API_URL = sessionStorage.getItem('urlApi');
 
       // --- CREDENCIAIS DO SUPABASE EXATAS ---
@@ -671,7 +672,9 @@
           });
           if (!res.ok) throw new Error(`Erro ao atualizar no Supabase.`);
           return "Atualizado com sucesso!";
-      }// ==========================================
+      }
+
+      // ==========================================
       // CARREGAMENTO INICIAL
       // ==========================================
       async function carregarTudo() {
@@ -718,8 +721,7 @@
 
       function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
 
-
-             // ==========================================
+      // ==========================================
       // MEMBROS E ARQUIVOS (Listagem, Edição, Arquivamento)
       // ==========================================
       
@@ -781,6 +783,361 @@
           arquivados.forEach(m => gridArquivos.innerHTML += montarCard(m, true));
 
           if(arquivados.length === 0) gridArquivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro arquivado.</p>';
+      }
+
+      function filtrarMembros() {
+         const b = document.getElementById('inputBusca').value.toLowerCase();
+         const c = document.getElementById('filtroCelula').value.toLowerCase();
+         document.querySelectorAll('#gridMembros .member-card').forEach(card => {
+            if(card.hasAttribute('data-nome')){
+                const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c));
+                card.style.display = match ? 'flex' : 'none';
+            }
+         });
+      }
+
+      async function arquivarMembro(id) {
+          if(!confirm("Deseja arquivar este membro? Ele irá para a aba Arquivos.")) return;
+          try {
+              await atualizarSupabase('membros', id, { arquivado: "Sim" });
+              carregarTudo();
+          } catch(e) { alert("Erro ao arquivar."); }
+      }
+
+      async function restaurarMembro(id) {
+          if(!confirm("Deseja restaurar este membro de volta para a célula?")) return;
+          try {
+              await atualizarSupabase('membros', id, { arquivado: "Não" });
+              carregarTudo();
+          } catch(e) { alert("Erro ao restaurar."); }
+      }
+
+      function abrirEditarMembro(id) {
+          const m = dadosMembros.find(x => String(x.id) === String(id));
+          if(!m) return;
+          
+          document.getElementById('editMembroId').value = m.id;
+          document.getElementById('editMembroNome').value = m.nome || '';
+          document.getElementById('editMembroNasc').value = m.nascimento || '';
+          document.getElementById('editMembroTel').value = m.telefone || '';
+          document.getElementById('editMembroCelula').value = m.celula || '';
+          document.getElementById('editMembroCat').value = m.tipo || 'Frequentador';
+
+          const chk = (val) => String(val).toLowerCase() === 'sim' || val === true;
+          document.getElementById('editMembroBatizado').checked = chk(m.batizado);
+          document.getElementById('editMembroCursao').checked = chk(m.cursao);
+          document.getElementById('editMembroCtl').checked = chk(m.ctl);
+          document.getElementById('editMembroEncontro').checked = chk(m.encontro);
+
+          document.getElementById('modalEditarMembro').classList.remove('hidden');
+      }
+
+      document.getElementById('formEditarMembro').onsubmit = async function(e) {
+          e.preventDefault();
+          const btn = document.getElementById('btnSalvarEdicaoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
+          const id = document.getElementById('editMembroId').value;
+          
+          const dados = {
+              nome: document.getElementById('editMembroNome').value,
+              nascimento: document.getElementById('editMembroNasc').value,
+              telefone: document.getElementById('editMembroTel').value,
+              celula: document.getElementById('editMembroCelula').value,
+              tipo: document.getElementById('editMembroCat').value,
+              batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
+              cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
+              ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
+              encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não"
+          };
+
+          try {
+              await atualizarSupabase('membros', id, dados);
+              fecharModal('modalEditarMembro');
+              carregarTudo();
+          } catch(err) { alert("Erro ao atualizar membro."); }
+          finally { btn.innerText = "Salvar Alterações"; btn.disabled = false; }
+      };
+
+              function abrirAdicionarMembro() {
+            const form = document.getElementById('formAdicionarMembro');
+            if(form) form.reset(); // Limpa o formulário
+            
+            // Preenche as opções de células disponíveis no select
+            const selectAdd = document.getElementById('addMembroCelula');
+            if(selectAdd){
+                selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
+                dadosCelulas.forEach(c => {
+                    if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+                });
+            }
+        
+            const modal = document.getElementById('modalAdicionarMembro');
+            if(modal) modal.classList.remove('hidden');
+        }
+        
+        
+        // Proteção para não quebrar o JS se o form não existir
+        const formAdicionar = document.getElementById('formAdicionarMembro');
+        
+        if(formAdicionar){
+        formAdicionar.onsubmit = async function(e) {
+            e.preventDefault();
+        
+            const btn = document.getElementById('btnSalvarNovoMembro');
+            if(btn){
+                btn.innerText = "Salvando...";
+                btn.disabled = true;
+            }
+        
+            const dados = {
+                nome: document.getElementById('addMembroNome')?.value || "",
+                nascimento: document.getElementById('addMembroNasc')?.value || "",
+                telefone: document.getElementById('addMembroTel')?.value || "",
+                celula: document.getElementById('addMembroCelula')?.value || "",
+                tipo: document.getElementById('addMembroCat')?.value || "",
+                batizado: document.getElementById('addMembroBatizado')?.checked ? "Sim" : "Não",
+                cursao: document.getElementById('addMembroCursao')?.checked ? "Sim" : "Não",
+                ctl: document.getElementById('addMembroCtl')?.checked ? "Sim" : "Não",
+                encontro: document.getElementById('addMembroEncontro')?.checked ? "Sim" : "Não",
+                arquivado: "Não",
+                status: "Ativo"
+            };
+        
+            try {
+                await inserirSupabase('membros', dados);
+                fecharModal('modalAdicionarMembro');
+                carregarTudo();
+            } 
+            catch(err){
+                alert("Erro ao cadastrar membro.");
+                console.error(err);
+            } 
+            finally {
+                if(btn){
+                    btn.innerText = "Cadastrar Membro";
+                    btn.disabled = false;
+                }
+            }
+        };
+        }
+      // ==========================================
+      // CÉLULAS (Listagem e Edição)
+      // ==========================================
+
+      function renderizarCelulas(lista) {
+         const tb = document.getElementById('corpoCelulas'); tb.innerHTML = '';
+         if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="4" style="text-align:center;">Nenhuma célula.</td></tr>'; return; }
+         lista.forEach(c => {
+            tb.innerHTML += `<tr>
+               <td>
+                   <div style="font-weight:700;">${c.nome || ''}</div>
+                   <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">
+                      <i class="fas fa-map-marker-alt"></i> ${c.endereco || ''}
+                   </div>
+                </td>
+                <td>${c.lider || ''}</td>
+                <td>${c.dia_horario || ''}</td>
+                <td style="text-align:center;">
+                    <button onclick="abrirEditarCelula('${c.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
+                </td>
+            </tr>`;
+         });
+      }
+
+      function preencherSelects(celulas) {
+         const s1 = document.getElementById('filtroCelula'); const s2 = document.getElementById('filtroRelCelula');
+         const s3 = document.getElementById('editMembroCelula'); // Preenche também o select do Modal de Edição
+         
+         s1.innerHTML='<option value="">Todas</option>'; s2.innerHTML='<option value="">Todas as Células</option>';
+         if(s3) s3.innerHTML='';
+         
+         if(!celulas) return;
+         celulas.forEach(c => {
+            if(c.nome) {
+                let opt = `<option value="${c.nome}">${c.nome}</option>`;
+                s1.innerHTML += opt; s2.innerHTML += opt; if(s3) s3.innerHTML += opt;
+            }
+         });
+      }
+
+      function abrirEditarCelula(id) {
+          const c = dadosCelulas.find(x => String(x.id) === String(id));
+          if(!c) {
+              alert("Erro ao puxar dados da célula. ID não encontrado.");
+              return;
+          }
+          
+          document.getElementById('editCelulaId').value = c.id;
+          document.getElementById('editCelulaNome').value = c.nome || '';
+          document.getElementById('editCelulaLider').value = c.lider || '';
+          document.getElementById('editCelulaDia').value = c.dia_horario || '';
+          document.getElementById('editCelulaEnd').value = c.endereco || ''; // Puxando o endereço da base
+
+          document.getElementById('modalEditarCelula').classList.remove('hidden');
+      }
+
+      document.getElementById('formEditarCelula').onsubmit = async function(e) {
+          e.preventDefault();
+          const btn = document.getElementById('btnSalvarEdicaoCelula'); btn.innerText = "Salvando..."; btn.disabled = true;
+          const id = document.getElementById('editCelulaId').value;
+          
+          const dados = {
+              nome: document.getElementById('editCelulaNome').value,
+              lider: document.getElementById('editCelulaLider').value,
+              dia_horario: document.getElementById('editCelulaDia').value,
+              endereco: document.getElementById('editCelulaEnd').value // Salvando o endereço
+          };
+
+          try {
+              await atualizarSupabase('celulas', id, dados);
+              fecharModal('modalEditarCelula');
+              carregarTudo(); // Recarrega para atualizar a tabela
+          } catch(err) { 
+              alert("Erro ao atualizar célula."); 
+              console.error(err);
+          }
+          finally { btn.innerText = "Salvar Célula"; btn.disabled = false; }
+      };
+
+      // ==========================================
+      // RELATÓRIOS (Listagem e Modal de Detalhe)
+      // ==========================================
+
+      function filtrarRelatorios() {
+          const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '';
+          const celulaFiltro = document.getElementById('filtroRelCelula').value.toLowerCase();
+          
+          if(!dadosRelatorios || dadosRelatorios.length === 0) {
+              divLista.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">Nenhum relatório na base.</div>';
+              return;
+          }
+
+          const listaFiltrada = dadosRelatorios.filter(r => (celulaFiltro === "" || String(r.celula||'').toLowerCase().includes(celulaFiltro)));
+
+          if(listaFiltrada.length === 0) {
+              divLista.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório para esta célula.</p>';
+              return;
+          }
+
+          // Ordenar por ID ou data descrescente (Mais recentes primeiro)
+          listaFiltrada.sort((a,b) => b.id - a.id);
+
+          listaFiltrada.forEach(r => {
+              let dataF = r.data || '';
+              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+              divLista.innerHTML += `
+                  <div class="report-list-item" onclick="abrirDetalheRelatorio('${r.id}')">
+                      <div>
+                          <strong style="color:var(--primary); font-size:1.1rem;">${r.celula || '-'}</strong>
+                          <div style="font-size:0.85rem; color:#666; margin-top:5px;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
+                          <div style="font-size:0.85rem; color:#444; margin-top:3px; font-weight:600;"><i class="fas fa-users"></i> ${r.presentes ? r.presentes.split('(Total:')[0].trim() : '0'} presentes</div>
+                      </div>
+                      <i class="fas fa-chevron-right" style="color:#ccc; font-size:1.2rem;"></i>
+                  </div>
+              `;
+          });
+      }
+
+      function abrirDetalheRelatorio(id) {
+          const r = dadosRelatorios.find(x => String(x.id) === String(id));
+          if(!r) return;
+
+          let dataF = r.data || '';
+          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+          document.getElementById('detalheRelCelula').innerText = r.celula || 'Célula';
+          document.getElementById('detalheRelData').innerText = dataF;
+          document.getElementById('detalheRelPresentes').innerText = r.presentes || 'Nenhum listado';
+          document.getElementById('detalheRelQuebra').innerText = r.quebra_gelo || '-';
+          document.getElementById('detalheRelPalavra').innerText = r.palavra || '-';
+          document.getElementById('detalheRelLouvor').innerText = r.louvor || '-';
+          document.getElementById('detalheRelLanche').innerText = r.lanche || '-';
+          document.getElementById('detalheRelObs').innerText = r.observacoes || 'Nenhuma observação.';
+
+          document.getElementById('modalRelatorio').classList.remove('hidden');
+      }
+
+      // ==========================================
+      // AGENDA
+      // ==========================================
+      function renderizarAgenda(lista) {
+         const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+         if(!lista || lista.length === 0) {
+             div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento na agenda.</p>'; return;
+         }
+         lista.sort((a, b) => {
+             const parseDate = (d) => {
+                 if(!d) return 0;
+                 if(d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                 if(d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                 return new Date(d).getTime();
+             };
+             return parseDate(a[0]) - parseDate(b[0]);
+         });
+         
+         lista.forEach((a) => {
+             let dataF = a[0] || ''; try { if(a[0] && a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+             let corCategoria = '#555';
+             if(a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3'; else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)'; else if(a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
+             let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+
+             div.innerHTML += `
+             <div class="member-card">
+                 <div class="card-header"><h4 class="card-name" style="color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                     <span class="cat-badge" style="background:${corCategoria}; color:white; border:none;">${a[4]||'Sem Categoria'}</span></div>
+                 <div style="font-size: 1rem; font-weight: 700; color: #333; margin-top: 5px;">${a[1]||''}</div>
+                 <div style="font-size: 0.85rem; color: #666; margin-top: 5px; min-height: 20px;">${a[2]||''}</div>
+                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                     <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: #f9f9f9; color: ${corTipo}; font-weight: bold; border: 1px solid #ddd;">
+                         <i class="fas fa-info-circle"></i> -> ${a[3]||''}</span>
+                 </div>
+             </div>`;
+         });
+      }
+
+
+// ==========================================
+      // PALAVRAS (Listagem e Modal)
+      // ==========================================
+      function renderizarPalavras(lista) {
+          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+          if(!lista || lista.length === 0) {
+              div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada.</p>';
+              return;
+          }
+          lista.forEach((p, index) => {
+              let dataF = p.data || '';
+              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+              div.innerHTML += `
+              <div class="report-list-item" onclick="abrirPalavra(${index})">
+                  <div>
+                      <div style="font-weight: 800; color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
+                      <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">${p.tema || 'Sem Título'}</div>
+                  </div>
+                  <i class="fas fa-chevron-right" style="color:var(--text-light);"></i>
+              </div>`;
+          });
+      }
+
+      function abrirPalavra(index) {
+          const p = listaPalavras[index]; 
+          document.getElementById('modalTitulo').innerText = p.tema || '';
+          let dataF = p.data || '';
+          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+          document.getElementById('modalData').innerText = dataF;
+          document.getElementById('modalTexto').innerText = p.texto || '';
+
+          const btn = document.getElementById('btnLinkYoutube');
+          const link = p.link_youtube; 
+
+          if (link && link.trim() !== "") {
+              btn.href = link;
+              btn.classList.remove('hidden');
+          } else {
+              btn.classList.add('hidden');
+              btn.href = "#";
+          }
+          document.getElementById('modalPalavra').classList.remove('hidden');
       }
       
 
