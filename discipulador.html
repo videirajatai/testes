@@ -639,7 +639,12 @@
          if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="4" style="text-align:center;">Nenhuma célula.</td></tr>'; return; }
          lista.forEach(c => {
             tb.innerHTML += `<tr>
-                <td><strong>${c.nome || ''}</strong></td>
+               <td>
+                   <div style="font-weight:700;">${c.nome || ''}</div>
+                   <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">
+                      <i class="fas fa-map-marker-alt"></i> ${c.endereco || ''}
+                   </div>
+                </td>
                 <td>${c.lider || ''}</td>
                 <td>${c.dia_horario || ''}</td>
                 <td style="text-align:center;">
