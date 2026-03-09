@@ -849,18 +849,15 @@
           overlay.style.display = 'block'; 
           setTimeout(() => overlay.style.opacity = '1', 10);
           
-          iniciarBiblia(); // Preenche a lista de livros
+          iniciarBiblia(); // Preenche a lista de livros, começando por Gênesis
 
-          // NOVO: Seleciona Gênesis e carrega o Cap 1 automaticamente se estiver vazio
-          const selectLivro = document.getElementById('biblia-livro');
           const conteudo = document.getElementById('biblia-conteudo');
-
-          // Se for a primeira vez que abre (conteúdo padrão), carrega Gênesis 1
-          if (conteudo.innerText.includes("Selecione o livro")) {
-              selectLivro.value = "genesis";
-              atualizarCapitulos(); // Preenche os capítulos de Gênesis
-              document.getElementById('biblia-capitulo').value = "1"; // Seleciona o 1
-              carregarCapitulo(); // Busca no GitHub
+          // Se for a primeira vez que abre, já força carregar Gênesis 1
+          if (conteudo.innerText.includes("Selecione o livro") || conteudo.innerText.includes("começar a leitura")) {
+              const selectLivro = document.getElementById('biblia-livro');
+              selectLivro.value = "genesis"; // Trava no Gênesis
+              atualizarCapitulos(); // Preenche os capítulos (1 a 50) e já seleciona o 1
+              carregarCapitulo(); // Já puxa o texto de Gênesis 1 direto pra tela
           }
       }
 
@@ -871,17 +868,18 @@
 
       function iniciarBiblia() {
           const selectLivro = document.getElementById('biblia-livro'); 
-          // Só preenche se o select estiver vazio
-          if(selectLivro.options.length > 1) return; 
+          
+          // Se já tem livros, não faz nada
+          if(selectLivro.options.length > 0) return; 
 
-          selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
+          // Limpa a lista de forma segura (sem o "Selecione o Livro")
+          selectLivro.options.length = 0; 
+
+          // Preenche os livros direto (Gênesis será o primeiro e já fica nativo)
           dadosBiblia.forEach((livro, index) => {
-              let opt = document.createElement('option'); 
-              opt.value = livro.id; 
-              opt.text = livro.nome;
-              // Destaca o Novo Testamento (Mateus em diante)
-              if (index >= 39) opt.style.fontWeight = "bold"; 
-              selectLivro.appendChild(opt);
+              let opt = new Option(livro.nome, livro.id);
+              if (index >= 39) opt.style.fontWeight = "bold"; // Destaca o Novo Testamento
+              selectLivro.options.add(opt);
           });
       }
 
@@ -889,26 +887,19 @@
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
           
-          // Reseta o select de capítulos
-          selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
-          
-          if (selectLivro.value === "") { 
-              selectCapitulo.disabled = true; 
-              return; 
-          }
+          // Limpa os capítulos de forma segura (sem o "Selecione o Capítulo")
+          selectCapitulo.options.length = 0;
           
           const livro = dadosBiblia.find(l => l.id === selectLivro.value);
           if (livro) {
               for (let i = 1; i <= livro.caps; i++) {
-                  let opt = document.createElement('option'); 
-                  opt.value = i; 
-                  opt.text = i; 
-                  selectCapitulo.appendChild(opt);
+                  selectCapitulo.options.add(new Option(i, i));
               }
               selectCapitulo.disabled = false; // Habilita o select
           }
       }
 
+      
       async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo'); // Corrigido de input para select
