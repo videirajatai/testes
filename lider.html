@@ -230,7 +230,8 @@
              <div style="flex:1;"><label>Data</label><input type="date" name="data" id="relData" required></div>
              <div style="flex:1;"><label>Célula</label><select name="celula" id="selectCelulasRel" required></select></div>
            </div>
-           <label>Presentes (Quantidade)</label><input type="number" name="presentes" required min="0">
+           <label>Nomes dos Presentes (Separados por vírgula)</label>
+           <textarea name="presentes" rows="2" required placeholder="Escreva o 1º nome e separe por vírgula. Ex: João, Pedro, Maria..."></textarea>
            
            <h4 style="margin-bottom:10px; color:#555; border-bottom:1px solid #eee; padding-bottom:5px;">Avaliação da Reunião</h4>
            <label>Quebra-Gelo</label><select name="quebraGelo"><option>Ótimo</option><option>Bom</option><option>Regular</option><option>Não Teve</option></select>
@@ -619,10 +620,21 @@
          e.preventDefault(); 
          const btn = document.getElementById('btnRelatorio'); btn.disabled = true; btn.innerText="Enviando...";
          
+         // Lógica para contar os nomes separados por vírgula
+         let nomes = this.presentes.value.trim();
+         // Divide os nomes pela vírgula e remove espaços em branco extras para contar certo
+         let quantidade = nomes.split(',').filter(n => n.trim() !== '').length;
+         let textoPresentes = `${nomes} (Total: ${quantidade})`;
+         
          const d = { 
-            data: this.data.value, celula: this.celula.value, presentes: this.presentes.value, 
-            quebra_gelo: this.quebraGelo.value, palavra: this.palavra.value, louvor: this.louvor.value, 
-            lanche: this.lanche.value, observacoes: this.observacoes.value 
+            data: this.data.value, 
+            celula: this.celula.value, 
+            presentes: textoPresentes, // Salva os nomes e a contagem automática
+            quebra_gelo: this.quebraGelo.value, 
+            palavra: this.palavra.value, 
+            louvor: this.louvor.value, 
+            lanche: this.lanche.value, 
+            observacoes: this.observacoes.value 
          };
          
          try {
@@ -634,7 +646,6 @@
          } catch (err) { alert(err.message); } 
          finally { btn.disabled = false; btn.innerText="Enviar Relatório"; }
       };
-
       // SALVAR SUGESTÃO (Supabase)
       document.getElementById('formSugestao').onsubmit = async function(e) {
          e.preventDefault(); 
