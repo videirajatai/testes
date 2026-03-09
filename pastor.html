@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
       .container { max-width: 900px; margin: 0 auto; padding: 15px 15px; }
 
@@ -316,36 +316,24 @@
         <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
       </div>
 
-      <!--<div class="stat-card" id="card-versiculo">
-        <span class="titulo-versiculo"><i class="fas fa-star"></i> Versículo do Dia</span>
-        <p class="texto-versiculo" id="texto-versiculo-dia">Carregando...</p>
-        <span class="ref-versiculo" id="ref-versiculo-dia"></span>
-      </div>-->
-
-      <!--<button onclick="abrirBiblia()" class="btn-biblia-destaque">
-        <i class="fas fa-bible"></i>Bíblia A Mensagem
-      </button>-->
-
       <div class="nav-menu">
         <button onclick="mudarSecao('lista')" class="nav-btn active" id="btn-lista"><i class="fas fa-users"></i> Membros</button>
-        
         <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
+        <button onclick="mudarSecao('financeiro')" class="nav-btn" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button>
+        <button onclick="carregarArquivados()" class="nav-btn" id="btn-arquivo"><i class="fas fa-archive"></i> Arquivo</button>
+        <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos </button>
+        <button onclick="carregarRelatorios()" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>
         
-        <button onclick="mudarSecao('financeiro')" class="nav-btn" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button> 
-        
-        <button onclick="mudarSecao('arquivos')" class="nav-btn" id="btn-arquivos"><i class="fas fa-archive"></i> Arquivos</button>
-        
-        <!-- <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos</button> -->
-        
-        <button onclick="mudarSecao('relatorios')" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>
-      
-        
-        <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
+        <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda" style="flex: 1 1 30%; margin-top: 5px;">
+           <i class="far fa-calendar-alt"></i> Agenda
+        </button>
 
-        <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button> 
+        <button onclick="carregarPalavras()" class="nav-btn" id="btn-palavras" style="flex: 1 1 30%; margin-top: 5px;">
+           <i class="fas fa-book-open"></i> Palavras
+        </button>
 
         <button onclick="abrirBiblia()" class="nav-btn" id="btn-biblia" style="flex: 1 1 30%; margin-top: 5px;">
-           <i class="fas fa-bible"></i> Bíblia A Mensagem
+           <i class="fas fa-bible"></i>A Mensagem
         </button>
       </div>
 
@@ -445,7 +433,6 @@
         <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
           <div style="display:flex; justify-content: space-between; align-items: center;">
               <h4 style="margin:0; color: var(--text-light);">Agenda de Eventos</h4>
-              <!--<button onclick="novaAgenda()" class="btn-add-member" style="background:var(--primary);"><i class="fas fa-plus"></i> Novo Evento</button>-->
           </div>
         </div>
         <div id="listaAgenda" class="member-grid">
@@ -565,7 +552,7 @@
       <div id="secao-form-celula" class="form-box hidden">
         <h3 id="tituloFormCelula" style="color:var(--primary); margin-top:0;">Nova Célula</h3>
         <form id="formCelula">
-          <input type="hidden" name="nomeOriginal" id="nomeOriginalCelula">
+          <input type="hidden" name="idCelula" id="idCelula">
           <label>Nome</label><input type="text" name="nome" id="celNome" required>
           <label>Líder</label><select name="lider" id="celLider" required></select>
           <label>Dia</label><select name="dia" id="celDia"><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option></select>
@@ -605,21 +592,14 @@
 
     <div id="biblia-overlay" onclick="fecharBiblia()"></div>
 
-   <script>
+    <script>
+      // CONFIGURAÇÃO SUPABASE - Substitua pelos seus dados
+      const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
+      const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
+      const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+      // Função Mantida para a Agenda (Integração Google)
       const API_URL = sessionStorage.getItem('urlApi');
-
-      // --- CREDENCIAIS DO SUPABASE EXATAS ---
-      const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
-      const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
-
-      let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [], listaPalavras = [];
-      
-      window.onload = carregarTudo;
-
-      // ==========================================
-      // MOTORES DE COMUNICAÇÃO
-      // ==========================================
-      
       async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
           try {
@@ -630,531 +610,452 @@
               let json = await res.json();
               if (json.status === "sucesso") return json.dados || json.mensagem;
               else throw new Error(json.mensagem);
-          } catch(e) { throw e; }
+          } catch(e) {
+              console.error(e); alert("Erro na API da Agenda: " + e.message); throw e;
+          }
       }
 
-      async function lerSupabase(tabela) {
-          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
-              method: 'GET',
-              headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-          });
-          if (!res.ok) throw new Error(`Erro ao ler tabela: ${tabela}`);
-          return await res.json();
-      }
-
-// NOVO: Função para Inserir dados no Supabase via POST
-      async function inserirSupabase(tabela, dados) {
-          const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
-              method: 'POST',
-              headers: { 
-                  'apikey': SB_KEY, 
-                  'Authorization': `Bearer ${SB_KEY}`,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(dados)
-          });
-          if (!res.ok) throw new Error(`Erro ao inserir no Supabase.`);
-          return "Inserido com sucesso!";
-      }
+      let dadosMembros = [], dadosCelulas = [], dadosFinanceiros = [], lideres = [], dadosRelatorios = [], listaPalavras = [], listaAgenda = [];
       
-      // NOVO: Função para Atualizar dados no Supabase via PATCH
-      async function atualizarSupabase(tabela, id, dados) {
-          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
-              method: 'PATCH',
-              headers: { 
-                  'apikey': SB_KEY, 
-                  'Authorization': `Bearer ${SB_KEY}`,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(dados)
-          });
-          if (!res.ok) throw new Error(`Erro ao atualizar no Supabase.`);
-          return "Atualizado com sucesso!";
+      window.onload = function() {
+          const hoje = new Date();
+          const campoData = document.getElementById('finData'); if(campoData) campoData.valueAsDate = hoje;
+          const filtroMes = document.getElementById('filtroMesFin'); if(filtroMes) filtroMes.value = hoje.toISOString().slice(0, 7);
+          carregarTudo();
       }
 
-      // ==========================================
-      // CARREGAMENTO INICIAL
-      // ==========================================
       async function carregarTudo() {
-        const icon = document.getElementById('iconRefresh'); 
-        if(icon) icon.classList.add('fa-spin');
-        
+        const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
         try {
-            dadosMembros = await lerSupabase('membros'); 
-            renderizarMembrosEArquivos(dadosMembros);
-        } catch (e) { console.error(e); }
+            // Membros (Não Arquivados)
+            const { data: memData, error: memErr } = await supabase.from('membros').select('*').is('arquivado', false);
+            if (memErr) throw memErr;
+            dadosMembros = memData || [];
+            document.getElementById('totalMembros').innerText = dadosMembros.length;
 
-        try {
-            dadosCelulas = await lerSupabase('celulas');
+            // Células
+            const { data: celData, error: celErr } = await supabase.from('celulas').select('*');
+            if (celErr) throw celErr;
+            dadosCelulas = celData || [];
+
+            // Extrair Líderes dos membros
+            lideres = [...new Set(dadosMembros.filter(m => ['Líder', 'Pastor', 'Discipulador'].includes(m.categoria)).map(m => m.nome))];
+
+            renderizarCards(dadosMembros); 
             renderizarCelulas(dadosCelulas);
-            preencherSelects(dadosCelulas);
-        } catch (e) { console.error(e); }
+            preencherSelects(dadosCelulas); 
+            preencherSelectMembrosFin(dadosMembros);
+            
+            carregarFinanceiro();
 
-        try {
-            dadosRelatorios = await lerSupabase('relatorios');
-            filtrarRelatorios();
-        } catch (e) { console.error(e); }
+            // Tentar carregar Agenda via API do Google (mantido)
+            try {
+                listaAgenda = await fetchGoogle('buscarAgenda') || [];
+                renderizarAgenda(listaAgenda);
+            } catch(e) {
+                renderizarAgenda([]);
+            }
 
-        try {
-            const agendaRes = await fetchGoogle('buscarAgenda');
-            listaAgenda = agendaRes || [];
-            renderizarAgenda(listaAgenda);
-        } catch(e) { renderizarAgenda([]); }
+            carregarVersiculoDoDia();
 
-        try {
-            listaPalavras = await lerSupabase('palavras');
-            listaPalavras.reverse(); 
-            renderizarPalavras(listaPalavras);
-        } catch (e) { console.error(e); }
+        } catch(e) { console.error(e); alert("Erro ao carregar dados do Supabase"); } finally { if(icon) icon.classList.remove('fa-spin'); }
+      }
 
-        if(icon) icon.classList.remove('fa-spin');
+      function renderizarCards(lista) {
+        const grid = document.getElementById('gridMembros'); grid.innerHTML = '';
+        const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+
+        lista.forEach(m => {
+          let nome=m.nome, categoria=m.categoria, celula=m.celula||'-', tel=String(m.telefone||'');
+          let telClean = tel.replace(/\D/g, '');
+          let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
+          let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+
+          grid.innerHTML += `
+            <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+               <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge ${categoria}">${categoria}</span></div>
+               <div class="card-info"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${nasc}</div>
+               <div class="status-row">
+                  <div class="status-pill ${m.batizado ? 'active' : ''}">Batismo</div>
+                  <div class="status-pill ${m.cursao ? 'active' : ''}">Cursão</div>
+                  <div class="status-pill ${m.ctl ? 'active' : ''}">CTL</div>
+                  <div class="status-pill ${m.encontro ? 'active' : ''}">Encontro</div>
+               </div>
+               <div class="card-actions">
+                  ${btnZap}
+                  <button onclick="editarMembro('${m.id}')" class="btn-card" title="Editar"><i class="fas fa-pencil-alt"></i></button>
+                  <button onclick="arquivar('${m.id}', '${m.nome}')" class="btn-card" title="Arquivar" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>
+               </div>
+            </div>`;
+        });
       }
 
       function mudarSecao(s) {
-         ['lista','celulas','relatorios','arquivos','agenda','palavras'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
-         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-         document.getElementById('secao-'+s).classList.remove('hidden');
-         if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
+        ['lista','celulas','financeiro','arquivo','cadastro','form-celula','sugestoes', 'relatorios', 'modal-ver-relatorio', 'palavras', 'nova-palavra', 'agenda', 'cadastro-agenda'].forEach(id => {
+            const el = document.getElementById('secao-'+id) || document.getElementById(id);
+            if(el) el.classList.add('hidden');
+        });
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if(s === 'modal-ver-relatorio') { document.getElementById(s).classList.remove('hidden'); }
+        else { document.getElementById('secao-'+s).classList.remove('hidden'); const btn = document.getElementById('btn-'+s); if(btn) btn.classList.add('active'); }
       }
 
-      function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
-
-      // ==========================================
-      // MEMBROS E ARQUIVOS (Listagem, Edição, Arquivamento)
-      // ==========================================
-      
-      function renderizarMembrosEArquivos(lista) {
-          const gridAtivos = document.getElementById('gridMembros'); gridAtivos.innerHTML = '';
-          const gridArquivos = document.getElementById('gridArquivos'); gridArquivos.innerHTML = '';
-          
-          if(!lista || lista.length === 0){
-              gridAtivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro encontrado.</p>';
-              return;
-          }
-
-          // 1. SEPARAÇÃO DOS DADOS
-          let ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
-          let arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
-
-          document.getElementById('badge-total-membros').innerText = ativos.length;
-
-          const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
-          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
-
-          // 2. FUNÇÃO ÚNICA PARA MONTAR O CARD
-          const montarCard = (m, isArquivado) => {
-             let nome = m.nome || 'Sem Nome'; let celula = m.celula || '-'; let categoria = m.tipo || 'Frequentador'; 
-             let tel = String(m.telefone || ''); let telClean = tel.replace(/\D/g, '');
-             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap" style="margin-top:10px;"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
-             let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
-             let bDiz = (String(m.dizimista).toLowerCase() === 'sim' || m.dizimista === true) ? `<span style="font-size:0.7rem; margin-left:5px; color:#166534; background:#dcfce7; padding:2px 6px; border-radius:4px;">Dizimista</span>` : '';
-
-             let acoesHTML = isArquivado 
-                ? `<button onclick="restaurarMembro('${m.id}')" class="btn-icon" title="Restaurar"><i class="fas fa-undo"></i></button>`
-                : `<div style="display:flex; gap:5px;">
-                    <button onclick="abrirEditarMembro('${m.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button onclick="arquivarMembro('${m.id}')" class="btn-icon" title="Arquivar"><i class="fas fa-archive"></i></button>
-                   </div>`;
-
-             return `
-               <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
-                  <div class="card-header">
-                      <div style="display:flex; flex-direction: column; gap: 4px;">
-                          <h4 class="card-name">${nome}</h4>
-                          <span class="cat-badge" style="width: fit-content;">${categoria}</span>
-                      </div>
-                      ${acoesHTML}
-                  </div>
-                  <div class="card-info" style="flex-wrap: wrap;"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${bDiz} ${nasc}</div>
-                  <div class="status-row">
-                     <div class="status-pill ${check(m.batizado)}">Batismo</div>
-                     <div class="status-pill ${check(m.cursao)}">Cursão</div>
-                     <div class="status-pill ${check(m.ctl)}">CTL</div>
-                     <div class="status-pill ${check(m.encontro)}">Encontro</div>
-                  </div>
-                  ${!isArquivado ? btnZap : ''}
-               </div>`;
-          };
-
-          // 3. RENDERIZAÇÃO NAS DUAS GRIDS
-          ativos.forEach(m => gridAtivos.innerHTML += montarCard(m, false));
-          arquivados.forEach(m => gridArquivos.innerHTML += montarCard(m, true));
-
-          if(arquivados.length === 0) gridArquivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro arquivado.</p>';
+      // --- PALAVRAS ---
+      async function carregarPalavras() {
+         mudarSecao('palavras');
+         const div = document.getElementById('listaPalavras'); div.innerHTML = '<p style="text-align:center;">Carregando...</p>';
+         try { 
+             const { data, error } = await supabase.from('palavras').select('*').order('data', { ascending: false });
+             if(error) throw error;
+             listaPalavras = data || []; 
+             renderizarPalavras(listaPalavras); 
+         } catch(e){ console.error(e); }
       }
-
-      function filtrarMembros() {
-         const b = document.getElementById('inputBusca').value.toLowerCase();
-         const c = document.getElementById('filtroCelula').value.toLowerCase();
-         document.querySelectorAll('#gridMembros .member-card').forEach(card => {
-            if(card.hasAttribute('data-nome')){
-                const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c));
-                card.style.display = match ? 'flex' : 'none';
-            }
-         });
-      }
-
-      async function arquivarMembro(id) {
-          if(!confirm("Deseja arquivar este membro? Ele irá para a aba Arquivos.")) return;
-          try {
-              await atualizarSupabase('membros', id, { arquivado: "Sim" });
-              carregarTudo();
-          } catch(e) { alert("Erro ao arquivar."); }
-      }
-
-      async function restaurarMembro(id) {
-          if(!confirm("Deseja restaurar este membro de volta para a célula?")) return;
-          try {
-              await atualizarSupabase('membros', id, { arquivado: "Não" });
-              carregarTudo();
-          } catch(e) { alert("Erro ao restaurar."); }
-      }
-
-      function abrirEditarMembro(id) {
-          const m = dadosMembros.find(x => String(x.id) === String(id));
-          if(!m) return;
-          
-          document.getElementById('editMembroId').value = m.id;
-          document.getElementById('editMembroNome').value = m.nome || '';
-          document.getElementById('editMembroNasc').value = m.nascimento || '';
-          document.getElementById('editMembroTel').value = m.telefone || '';
-          document.getElementById('editMembroCelula').value = m.celula || '';
-          document.getElementById('editMembroCat').value = m.tipo || 'Frequentador';
-
-          const chk = (val) => String(val).toLowerCase() === 'sim' || val === true;
-          document.getElementById('editMembroBatizado').checked = chk(m.batizado);
-          document.getElementById('editMembroCursao').checked = chk(m.cursao);
-          document.getElementById('editMembroCtl').checked = chk(m.ctl);
-          document.getElementById('editMembroEncontro').checked = chk(m.encontro);
-
-          document.getElementById('modalEditarMembro').classList.remove('hidden');
-      }
-
-      document.getElementById('formEditarMembro').onsubmit = async function(e) {
-          e.preventDefault();
-          const btn = document.getElementById('btnSalvarEdicaoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
-          const id = document.getElementById('editMembroId').value;
-          
-          const dados = {
-              nome: document.getElementById('editMembroNome').value,
-              nascimento: document.getElementById('editMembroNasc').value,
-              telefone: document.getElementById('editMembroTel').value,
-              celula: document.getElementById('editMembroCelula').value,
-              tipo: document.getElementById('editMembroCat').value,
-              batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
-              cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
-              ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
-              encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não"
-          };
-
-          try {
-              await atualizarSupabase('membros', id, dados);
-              fecharModal('modalEditarMembro');
-              carregarTudo();
-          } catch(err) { alert("Erro ao atualizar membro."); }
-          finally { btn.innerText = "Salvar Alterações"; btn.disabled = false; }
-      };
-
-              function abrirAdicionarMembro() {
-            const form = document.getElementById('formAdicionarMembro');
-            if(form) form.reset(); // Limpa o formulário
-            
-            // Preenche as opções de células disponíveis no select
-            const selectAdd = document.getElementById('addMembroCelula');
-            if(selectAdd){
-                selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
-                dadosCelulas.forEach(c => {
-                    if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-                });
-            }
-        
-            const modal = document.getElementById('modalAdicionarMembro');
-            if(modal) modal.classList.remove('hidden');
-        }
-        
-        
-        // Proteção para não quebrar o JS se o form não existir
-        const formAdicionar = document.getElementById('formAdicionarMembro');
-        
-        if(formAdicionar){
-        formAdicionar.onsubmit = async function(e) {
-            e.preventDefault();
-        
-            const btn = document.getElementById('btnSalvarNovoMembro');
-            if(btn){
-                btn.innerText = "Salvando...";
-                btn.disabled = true;
-            }
-        
-            const dados = {
-                nome: document.getElementById('addMembroNome')?.value || "",
-                nascimento: document.getElementById('addMembroNasc')?.value || "",
-                telefone: document.getElementById('addMembroTel')?.value || "",
-                celula: document.getElementById('addMembroCelula')?.value || "",
-                tipo: document.getElementById('addMembroCat')?.value || "",
-                batizado: document.getElementById('addMembroBatizado')?.checked ? "Sim" : "Não",
-                cursao: document.getElementById('addMembroCursao')?.checked ? "Sim" : "Não",
-                ctl: document.getElementById('addMembroCtl')?.checked ? "Sim" : "Não",
-                encontro: document.getElementById('addMembroEncontro')?.checked ? "Sim" : "Não",
-                arquivado: "Não",
-                status: "Ativo"
-            };
-        
-            try {
-                await inserirSupabase('membros', dados);
-                fecharModal('modalAdicionarMembro');
-                carregarTudo();
-            } 
-            catch(err){
-                alert("Erro ao cadastrar membro.");
-                console.error(err);
-            } 
-            finally {
-                if(btn){
-                    btn.innerText = "Cadastrar Membro";
-                    btn.disabled = false;
-                }
-            }
-        };
-        }
-      // ==========================================
-      // CÉLULAS (Listagem e Edição)
-      // ==========================================
-
-      function renderizarCelulas(lista) {
-         const tb = document.getElementById('corpoCelulas'); tb.innerHTML = '';
-         if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="4" style="text-align:center;">Nenhuma célula.</td></tr>'; return; }
-         lista.forEach(c => {
-            tb.innerHTML += `<tr>
-               <td>
-                   <div style="font-weight:700;">${c.nome || ''}</div>
-                   <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">
-                      <i class="fas fa-map-marker-alt"></i> ${c.endereco || ''}
-                   </div>
-                </td>
-                <td>${c.lider || ''}</td>
-                <td>${c.dia_horario || ''}</td>
-                <td style="text-align:center;">
-                    <button onclick="abrirEditarCelula('${c.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
-                </td>
-            </tr>`;
-         });
-      }
-
-      function preencherSelects(celulas) {
-         const s1 = document.getElementById('filtroCelula'); const s2 = document.getElementById('filtroRelCelula');
-         const s3 = document.getElementById('editMembroCelula'); // Preenche também o select do Modal de Edição
-         
-         s1.innerHTML='<option value="">Todas</option>'; s2.innerHTML='<option value="">Todas as Células</option>';
-         if(s3) s3.innerHTML='';
-         
-         if(!celulas) return;
-         celulas.forEach(c => {
-            if(c.nome) {
-                let opt = `<option value="${c.nome}">${c.nome}</option>`;
-                s1.innerHTML += opt; s2.innerHTML += opt; if(s3) s3.innerHTML += opt;
-            }
-         });
-      }
-
-      function abrirEditarCelula(id) {
-          const c = dadosCelulas.find(x => String(x.id) === String(id));
-          if(!c) {
-              alert("Erro ao puxar dados da célula. ID não encontrado.");
-              return;
-          }
-          
-          document.getElementById('editCelulaId').value = c.id;
-          document.getElementById('editCelulaNome').value = c.nome || '';
-          document.getElementById('editCelulaLider').value = c.lider || '';
-          document.getElementById('editCelulaDia').value = c.dia_horario || '';
-          document.getElementById('editCelulaEnd').value = c.endereco || ''; // Puxando o endereço da base
-
-          document.getElementById('modalEditarCelula').classList.remove('hidden');
-      }
-
-      document.getElementById('formEditarCelula').onsubmit = async function(e) {
-          e.preventDefault();
-          const btn = document.getElementById('btnSalvarEdicaoCelula'); btn.innerText = "Salvando..."; btn.disabled = true;
-          const id = document.getElementById('editCelulaId').value;
-          
-          const dados = {
-              nome: document.getElementById('editCelulaNome').value,
-              lider: document.getElementById('editCelulaLider').value,
-              dia_horario: document.getElementById('editCelulaDia').value,
-              endereco: document.getElementById('editCelulaEnd').value // Salvando o endereço
-          };
-
-          try {
-              await atualizarSupabase('celulas', id, dados);
-              fecharModal('modalEditarCelula');
-              carregarTudo(); // Recarrega para atualizar a tabela
-          } catch(err) { 
-              alert("Erro ao atualizar célula."); 
-              console.error(err);
-          }
-          finally { btn.innerText = "Salvar Célula"; btn.disabled = false; }
-      };
-
-      // ==========================================
-      // RELATÓRIOS (Listagem e Modal de Detalhe)
-      // ==========================================
-
-      function filtrarRelatorios() {
-          const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '';
-          const celulaFiltro = document.getElementById('filtroRelCelula').value.toLowerCase();
-          
-          if(!dadosRelatorios || dadosRelatorios.length === 0) {
-              divLista.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">Nenhum relatório na base.</div>';
-              return;
-          }
-
-          const listaFiltrada = dadosRelatorios.filter(r => (celulaFiltro === "" || String(r.celula||'').toLowerCase().includes(celulaFiltro)));
-
-          if(listaFiltrada.length === 0) {
-              divLista.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório para esta célula.</p>';
-              return;
-          }
-
-          // Ordenar por ID ou data descrescente (Mais recentes primeiro)
-          listaFiltrada.sort((a,b) => b.id - a.id);
-
-          listaFiltrada.forEach(r => {
-              let dataF = r.data || '';
-              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-
-              divLista.innerHTML += `
-                  <div class="report-list-item" onclick="abrirDetalheRelatorio('${r.id}')">
-                      <div>
-                          <strong style="color:var(--primary); font-size:1.1rem;">${r.celula || '-'}</strong>
-                          <div style="font-size:0.85rem; color:#666; margin-top:5px;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
-                          <div style="font-size:0.85rem; color:#444; margin-top:3px; font-weight:600;"><i class="fas fa-users"></i> ${r.presentes ? r.presentes.split('(Total:')[0].trim() : '0'} presentes</div>
-                      </div>
-                      <i class="fas fa-chevron-right" style="color:#ccc; font-size:1.2rem;"></i>
-                  </div>
-              `;
+      function renderizarPalavras(lista) {
+          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+          if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center; color:#999;">Vazio.</p>'; return; }
+          lista.forEach((p, index) => {
+              let dataF = p.data; try { if(p.data.includes('-')) { const dp=p.data.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+              div.innerHTML += `<div class="word-list-item" onclick="abrirPalavra(${index})"><div><div class="word-date"><i class="far fa-calendar-alt"></i> ${dataF}</div><div class="word-theme">${p.tema}</div></div><i class="fas fa-chevron-right" style="color:var(--text-light);"></i></div>`;
           });
       }
-
-      function abrirDetalheRelatorio(id) {
-          const r = dadosRelatorios.find(x => String(x.id) === String(id));
-          if(!r) return;
-
-          let dataF = r.data || '';
-          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-
-          document.getElementById('detalheRelCelula').innerText = r.celula || 'Célula';
-          document.getElementById('detalheRelData').innerText = dataF;
-          document.getElementById('detalheRelPresentes').innerText = r.presentes || 'Nenhum listado';
-          document.getElementById('detalheRelQuebra').innerText = r.quebra_gelo || '-';
-          document.getElementById('detalheRelPalavra').innerText = r.palavra || '-';
-          document.getElementById('detalheRelLouvor').innerText = r.louvor || '-';
-          document.getElementById('detalheRelLanche').innerText = r.lanche || '-';
-          document.getElementById('detalheRelObs').innerText = r.observacoes || 'Nenhuma observação.';
-
-          document.getElementById('modalRelatorio').classList.remove('hidden');
+      function abrirPalavra(index) {
+          const p = listaPalavras[index]; document.getElementById('modalTitulo').innerText = p.tema;
+          let dataF = p.data; try { if(p.data.includes('-')) { const dp=p.data.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+          document.getElementById('modalDataPalavra').innerText = dataF; document.getElementById('modalTexto').innerText = p.texto;
+          const btn = document.getElementById('btnLinkYoutube');
+          if (p.link && p.link.trim() !== "") { btn.href = p.link; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); }
+          document.getElementById('modalPalavra').classList.remove('hidden');
       }
+      function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraData').valueAsDate = new Date(); mudarSecao('nova-palavra'); }
+      function fecharModal(e) { if(e === null || e.target.id === 'modalPalavra') document.getElementById('modalPalavra').classList.add('hidden'); }
+      
+      document.getElementById('formPalavra').onsubmit = async function(e) {
+          e.preventDefault(); const btn = document.getElementById('btnSalvarPalavra'); btn.disabled = true; btn.innerText = "Salvando...";
+          try {
+              const obj = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link: this.link.value };
+              const { error } = await supabase.from('palavras').insert([obj]);
+              if(error) throw error;
+              alert("Publicado com sucesso!"); carregarPalavras();
+          } catch(e) { console.error(e); alert("Erro ao salvar palavra."); }
+          finally { btn.disabled = false; btn.innerText = "Publicar"; }
+      };
 
-      // ==========================================
-      // AGENDA
-      // ==========================================
+      // --- AGENDA COM EDITAR E EXCLUIR (Continua no Google Apps Script) ---
       function renderizarAgenda(lista) {
-         const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+         const div = document.getElementById('listaAgenda');
+         div.innerHTML = '';
+         
          if(!lista || lista.length === 0) {
-             div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento na agenda.</p>'; return;
+             div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1; margin-top:20px;">Nenhum evento na agenda.</p>';
+             return;
          }
-         lista.sort((a, b) => {
+
+         let listaComIndex = lista.map((item, index) => {
+             return { originalIndex: index, data: item };
+         });
+
+         listaComIndex.sort((a, b) => {
              const parseDate = (d) => {
                  if(!d) return 0;
                  if(d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
                  if(d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
                  return new Date(d).getTime();
              };
-             return parseDate(a[0]) - parseDate(b[0]);
+             return parseDate(a.data[0]) - parseDate(b.data[0]); 
          });
-         
-         lista.forEach((a) => {
-             let dataF = a[0] || ''; try { if(a[0] && a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+         listaComIndex.forEach((obj) => {
+             let a = obj.data;
+             let originalIndex = obj.originalIndex;
+             let dataF = a[0];
+             try { if(a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
              let corCategoria = '#555';
-             if(a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3'; else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)'; else if(a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
+             if(a[4] === 'RL') corCategoria = '#0056b3';
+             else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)';
+             else if(a[4] === 'KIDS') corCategoria = '#b58900';
+
              let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
 
              div.innerHTML += `
              <div class="member-card">
-                 <div class="card-header"><h4 class="card-name" style="color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
-                     <span class="cat-badge" style="background:${corCategoria}; color:white; border:none;">${a[4]||'Sem Categoria'}</span></div>
+                 <div class="card-header">
+                     <h4 class="card-name" style="color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                     <span class="cat-badge" style="background:${corCategoria}; color:white; border:none;">${a[4]||'Sem Categoria'}</span>
+                 </div>
                  <div style="font-size: 1rem; font-weight: 700; color: #333; margin-top: 5px;">${a[1]||''}</div>
                  <div style="font-size: 0.85rem; color: #666; margin-top: 5px; min-height: 20px;">${a[2]||''}</div>
-                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                 
+                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; display:flex; justify-content:space-between; align-items:center;">
                      <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: #f9f9f9; color: ${corTipo}; font-weight: bold; border: 1px solid #ddd;">
-                         <i class="fas fa-info-circle"></i> -> ${a[3]||''}</span>
+                         <i class="fas fa-info-circle"></i> -> ${a[3]||''}
+                     </span>
                  </div>
              </div>`;
          });
       }
 
-
-// ==========================================
-      // PALAVRAS (Listagem e Modal)
-      // ==========================================
-      function renderizarPalavras(lista) {
-          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
-          if(!lista || lista.length === 0) {
-              div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada.</p>';
-              return;
-          }
-          lista.forEach((p, index) => {
-              let dataF = p.data || '';
-              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-              div.innerHTML += `
-              <div class="report-list-item" onclick="abrirPalavra(${index})">
-                  <div>
-                      <div style="font-weight: 800; color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
-                      <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">${p.tema || 'Sem Título'}</div>
-                  </div>
-                  <i class="fas fa-chevron-right" style="color:var(--text-light);"></i>
-              </div>`;
-          });
+      function novaAgenda() {
+          document.getElementById('formAgenda').reset();
+          document.getElementById('indexAgenda').value = "";
+          document.getElementById('tituloFormAgenda').innerText = "Cadastrar Evento na Agenda";
+          mudarSecao('cadastro-agenda');
       }
 
-      function abrirPalavra(index) {
-          const p = listaPalavras[index]; 
-          document.getElementById('modalTitulo').innerText = p.tema || '';
-          let dataF = p.data || '';
-          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-          document.getElementById('modalData').innerText = dataF;
-          document.getElementById('modalTexto').innerText = p.texto || '';
-
-          const btn = document.getElementById('btnLinkYoutube');
-          const link = p.link_youtube; 
-
-          if (link && link.trim() !== "") {
-              btn.href = link;
-              btn.classList.remove('hidden');
-          } else {
-              btn.classList.add('hidden');
-              btn.href = "#";
+      function editarAgenda(index) {
+          const a = listaAgenda[index];
+          if(!a) return;
+          
+          document.getElementById('indexAgenda').value = index;
+          
+          let dataA = a[0];
+          if (dataA.includes('/')) {
+             const p = dataA.split('/');
+             dataA = `${p[2]}-${p[1]}-${p[0]}`; 
           }
-          document.getElementById('modalPalavra').classList.remove('hidden');
+          
+          document.getElementById('agendaData').value = dataA;
+          document.getElementById('agendaDesc').value = a[1];
+          document.getElementById('agendaObs').value = a[2];
+          document.getElementById('agendaTipo').value = a[3];
+          document.getElementById('agendaCat').value = a[4];
+          
+          document.getElementById('tituloFormAgenda').innerText = "Editar Evento";
+          mudarSecao('cadastro-agenda');
+      }
+
+      async function excluirAgenda(index) {
+          if(!confirm("Tem certeza que deseja excluir este evento permanentemente?")) return;
+          try {
+              const res = await fetchGoogle('excluirAgenda', { index: index });
+              alert(res); carregarTudo(); 
+          } catch(e) { console.error(e); }
+      }
+
+      document.getElementById('formAgenda').onsubmit = async function(e) {
+         e.preventDefault(); 
+         const btn = document.getElementById('btnSalvarAgenda'); btn.disabled = true; btn.innerText="Salvando...";
+         const indexOriginal = document.getElementById('indexAgenda').value;
+         const d = { 
+            dataEvento: this.dataEvento.value, descricao: this.descricao.value, observacao: this.observacao.value, 
+            tipo: this.tipo.value, categoria: this.categoria.value 
+         };
+         try {
+             if (indexOriginal !== "") { alert(await fetchGoogle('editarAgenda', { index: indexOriginal, dados: d })); } 
+             else { alert(await fetchGoogle('salvarAgenda', d)); }
+             this.reset(); mudarSecao('agenda'); carregarTudo();
+         } catch(err) { console.error(err); } finally { btn.disabled = false; btn.innerText="Salvar Evento"; }
+      };
+
+      // --- SUGESTOES ---
+      async function carregarSugestoes() {
+        mudarSecao('sugestoes'); const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="2" align="center">Carregando...</td></tr>';
+        try {
+            const { data, error } = await supabase.from('sugestoes').select('*').order('data', { ascending: false });
+            if (error) throw error;
+            corpo.innerHTML = '';
+            if(!data || data.length === 0) { corpo.innerHTML = '<tr><td colspan="2" align="center">Vazio.</td></tr>'; return; }
+            data.forEach(row => { 
+                let d = String(row.data); if(d.length > 16) d = d.substring(0, 16); 
+                corpo.innerHTML += `<tr><td style="width:130px; font-size:0.8rem; color:#666;">${d}</td><td style="font-weight:500;">${row.mensagem}</td></tr>`; 
+            });
+        } catch(e){ console.error(e); } 
+      }
+
+      // --- RELATÓRIOS ---
+      async function carregarRelatorios() {
+        mudarSecao('relatorios'); const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '<p align="center">Carregando...</p>';
+        const sel = document.getElementById('filtroRelCelula'); sel.innerHTML = '<option value="">Todas as Células</option>';
+        dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+        try { 
+            const { data, error } = await supabase.from('relatorios').select('*').order('data', { ascending: false });
+            if (error) throw error;
+            dadosRelatorios = data || []; 
+            filtrarRelatorios(); 
+        } catch(e){ console.error(e); }
+      }
+      function filtrarRelatorios() {
+         const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '';
+         const celulaFiltro = document.getElementById('filtroRelCelula').value.toLowerCase();
+         if(!dadosRelatorios || dadosRelatorios.length === 0) { divLista.innerHTML = '<p align="center">Vazio.</p>'; return; }
+         const listaFiltrada = dadosRelatorios.filter(r => { return celulaFiltro === "" || String(r.celula).toLowerCase().includes(celulaFiltro); });
+         if(listaFiltrada.length === 0) { divLista.innerHTML = '<p align="center">Vazio.</p>'; return; }
+         
+         listaFiltrada.forEach((r) => {
+             const index = dadosRelatorios.indexOf(r); 
+             let dataExibicao = String(r.data); if(dataExibicao.length > 10) dataExibicao = dataExibicao.substring(0,10);
+             divLista.innerHTML += `<div class="report-list-item" onclick="verRelatorio(${index})"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-weight:bold; color:var(--text-main); font-size:0.95rem;">${r.celula}</span><span style="font-size:0.8rem; color:var(--text-light);"><i class="far fa-calendar-alt"></i> ${dataExibicao}</span></div><div style="color:var(--accent);"><i class="fas fa-chevron-right"></i></div></div>`;
+         });
+      }
+      function verRelatorio(index) {
+         const item = dadosRelatorios[index]; 
+         let dataF = String(item.data); if(dataF.length>10) dataF = dataF.substring(0,10);
+         document.getElementById('relData').innerText = dataF; document.getElementById('relCelula').innerText = item.celula;
+         let lista = String(item.nomes || ""); let contagem = lista.split(',').filter(x => x.trim().length > 0).length; if(contagem === 0 && lista.length > 2) contagem = 1;
+         document.getElementById('relTotal').innerText = contagem; document.getElementById('relLista').innerText = lista || "-";
+         document.getElementById('relGelo').innerText = item.quebra_gelo || "-"; document.getElementById('relPalavra').innerText = item.palavra || "-";
+         document.getElementById('relLanche').innerText = item.lanche || "-"; document.getElementById('relLouvor').innerText = item.louvor || "-";
+         document.getElementById('relObs').innerText = item.observacao || "Sem observações."; mudarSecao('modal-ver-relatorio');
+      }
+
+      // --- ARQUIVO ---
+      async function carregarArquivados() { 
+        mudarSecao('arquivo'); const corpo = document.getElementById('corpoArquivo'); corpo.innerHTML = '<tr><td colspan="3" align="center">Carregando...</td></tr>';
+        try {
+            const { data, error } = await supabase.from('membros').select('*').is('arquivado', true);
+            if (error) throw error;
+            corpo.innerHTML=''; 
+            if (!data || data.length === 0) { corpo.innerHTML = '<tr><td colspan="3" align="center">Vazio.</td></tr>'; return; }
+            
+            data.forEach(r => { 
+                // Assumindo que queremos mostrar quando foi atualizado/arquivado (neste exemplo, mostrando só nome se não houver data arquivamento)
+                let dataF = ""; // Opcional colocar um 'updated_at' se tiver na tabela.
+                corpo.innerHTML += `<tr><td>-</td><td>${r.nome}</td><td><button onclick="restaurar('${r.id}')" style="color:var(--success-text);border:none;background:none; cursor:pointer;"><i class="fas fa-undo"></i></button></td></tr>`; 
+            }); 
+        } catch(e){ console.error(e); }
+      }
+
+      // --- FINANCEIRO BÁSICO ---
+      async function carregarFinanceiro() { 
+          try { 
+              const { data, error } = await supabase.from('financeiro').select('*').order('data', { ascending: false });
+              if (error) throw error;
+              dadosFinanceiros = data || []; 
+              recalcularFinanceiro(); 
+          } catch(e){ console.error(e); } 
+      }
+      function recalcularFinanceiro() { 
+          const mes = document.getElementById('filtroMesFin').value; let ent = 0, sai = 0, fil = []; 
+          dadosFinanceiros.forEach(r => { 
+              if(r.data && r.data.startsWith(mes)){ 
+                  let v = parseFloat(r.valor); 
+                  if(r.tipo === 'Entrada') ent += v; else sai += v; 
+                  fil.push(r); 
+              }
+          }); 
+          const fmt = (v) => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); 
+          document.getElementById('finSaldo').innerText = fmt(ent - sai); document.getElementById('finEntrada').innerText = fmt(ent); document.getElementById('finSaida').innerText = fmt(sai); 
+          renderizarExtrato(fil); 
+      }
+      function renderizarExtrato(lista) { 
+          const corpo = document.getElementById('corpoFin'); corpo.innerHTML = ''; 
+          const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); 
+          lista.forEach(l => { 
+              let c = l.tipo === 'Entrada' ? 'var(--success-text)' : 'var(--danger-text)'; 
+              let df = l.data; if(df.includes('-')) df = `${df.split('-')[2]}/${df.split('-')[1]}`;
+              corpo.innerHTML += `<tr><td>${df}</td><td>${l.descricao}</td><td style="font-weight:bold; color:${c};">${fmt(l.valor)}</td></tr>`; 
+          }); 
+      }
+      function mudarTabFin(tab, btn) { document.getElementById('tab-lancamento').classList.add('hidden'); document.getElementById('tab-extrato').classList.add('hidden'); document.getElementById('tab-'+tab).classList.remove('hidden'); btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+      function atualizarCategorias() { const t = document.getElementById('finTipo').value; const c = document.getElementById('finCategoria'); c.innerHTML = t === 'Saída' ? '<option value="Despesa Fixa">Despesa Fixa</option><option value="Eventual">Eventual</option><option value="Manutenção">Manutenção</option>' : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>'; atualizarCampos(); }
+      function atualizarCampos() { const t = document.getElementById('finTipo').value, c = document.getElementById('finCategoria').value, m = document.getElementById('finMembroSelect'), d = document.getElementById('finDescricaoInput'); if(t==='Entrada' && c==='Dízimo'){ m.classList.remove('hidden'); d.classList.add('hidden'); } else { m.classList.add('hidden'); d.classList.remove('hidden'); } }
+      function preencherSelectMembrosFin(m) { const s = document.getElementById('finMembroSelect'); s.innerHTML = '<option value="">Membro...</option>'; [...m].sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(i => s.innerHTML += `<option value="${i.nome}">${i.nome}</option>`); }
+
+      document.getElementById('formFinanceiro').onsubmit = async function(e) { 
+          e.preventDefault(); const btn = document.getElementById('btnSalvarFin'); btn.disabled=true; btn.innerText="Salvando..."; 
+          let desc = (this.tipo.value==='Entrada' && this.categoria.value==='Dízimo') ? this.membro.value : this.descricao.value; 
+          const obj = { tipo: this.tipo.value, categoria: this.categoria.value, descricao: desc, valor: parseFloat(this.valor.value), data: this.data.value, metodo: this.metodo.value }; 
+          try {
+              const { error } = await supabase.from('financeiro').insert([obj]);
+              if (error) throw error;
+              alert("Registrado!"); this.reset(); document.getElementById('finData').valueAsDate = new Date(); 
+              carregarFinanceiro(); atualizarCategorias(); 
+          } catch(err) { console.error(err); alert("Erro ao registrar no financeiro."); } 
+          finally { btn.disabled=false; btn.innerText="Registrar Movimentação"; }
+      }
+
+      // --- UTILITÁRIOS E SUBMITS ---
+      function filtrarMembros() { const b = document.getElementById('inputBusca').value.toLowerCase(), c = document.getElementById('filtroCelula').value.toLowerCase(); document.querySelectorAll('.member-card').forEach(card => { const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c)); card.style.display = match ? 'flex' : 'none'; }); }
+      function preencherSelects(celulas) { const s1 = document.getElementById('selectCelulas'), s2 = document.getElementById('filtroCelula'), s3 = document.getElementById('celLider'); s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Todas</option>'; s3.innerHTML='<option value="">Selecione...</option>'; celulas.forEach(c => { s1.innerHTML += `<option value="${c.nome}">${c.nome}</option>`; s2.innerHTML += `<option value="${c.nome}">${c.nome}</option>`; }); lideres.forEach(l => s3.innerHTML += `<option value="${l}">${l}</option>`); }
+      
+      function editarMembro(id) { 
+          const m = dadosMembros.find(i => i.id == id); if(!m) return; 
+          document.getElementById('idMembro').value = m.id; 
+          document.getElementById('campoNome').value = m.nome; 
+          document.getElementById('campoNasc').value = m.nascimento || ''; 
+          document.getElementById('campoTel').value = m.telefone || ''; 
+          document.getElementById('selectCelulas').value = m.celula || ''; 
+          document.getElementById('campoCategoria').value = m.categoria || ''; 
+          document.getElementById('checkBat').checked = (m.batizado == true); 
+          document.getElementById('checkCur').checked = (m.cursao == true); 
+          document.getElementById('checkCtl').checked = (m.ctl == true); 
+          document.getElementById('checkDiz').checked = (m.encontro == true); 
+          mudarSecao('cadastro'); 
       }
       
-
-
-
-
-
-
-
+      function novoCadastro() { document.getElementById('formMembro').reset(); document.getElementById('idMembro').value=''; mudarSecao('cadastro'); }
       
+      document.getElementById('formMembro').onsubmit = async function(e) { 
+          e.preventDefault(); const id = document.getElementById('idMembro').value; const btn = document.getElementById('btnSalvar'); btn.disabled=true; btn.innerText="Salvando...";
+          const d = { 
+              nome: this.nome.value, nascimento: this.nascimento.value || null, categoria: this.categoria.value, 
+              celula: this.celula.value, telefone: this.telefone.value, 
+              batizado: this.batizado.checked, cursao: this.cursao.checked, ctl: this.ctl.checked, encontro: this.encontro.checked, arquivado: false
+          }; 
+          try { 
+              if(id) { const {error} = await supabase.from('membros').update(d).eq('id', id); if(error) throw error; }
+              else { const {error} = await supabase.from('membros').insert([d]); if(error) throw error; } 
+              mudarSecao('lista'); carregarTudo(); 
+          } catch(err) { console.error(err); alert("Erro ao salvar membro."); }
+          finally { btn.disabled=false; btn.innerText="Salvar"; }
+      };
+      
+      function renderizarCelulas(l) { 
+          const c = document.getElementById('corpoCelulas'); c.innerHTML=''; 
+          l.forEach((i, x) => c.innerHTML += `<tr><td>${i.nome}</td><td>${i.lider}</td><td>${i.dia}</td><td align="center"><button onclick="editarCelula(${x})" style="background:none;border:none;color:orange;cursor:pointer;"><i class="fas fa-edit"></i></button></td></tr>`); 
+      }
+      
+      function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('idCelula').value = ""; document.getElementById('tituloFormCelula').innerText = "Nova Célula"; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => s.innerHTML += `<option value="${l}">${l}</option>`); mudarSecao('form-celula'); }
+      
+      function editarCelula(index) { 
+          const c = dadosCelulas[index]; if(!c) return; 
+          document.getElementById('idCelula').value = c.id; 
+          document.getElementById('celNome').value = c.nome; 
+          document.getElementById('celDia').value = c.dia; 
+          document.getElementById('celEndereco').value = c.endereco || ''; 
+          const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; 
+          lideres.forEach(l => { let opt = document.createElement('option'); opt.value = l; opt.text = l; if(l === c.lider) opt.selected = true; s.appendChild(opt); }); 
+          document.getElementById('tituloFormCelula').innerText = "Editar Célula"; mudarSecao('form-celula'); 
+      }
+      
+      document.getElementById('formCelula').onsubmit = async function(e) { 
+          e.preventDefault(); const btn = document.getElementById('btnSalvarCelula'); btn.disabled=true; btn.innerText="Salvando...";
+          const id = document.getElementById('idCelula').value;
+          const dados = { nome: this.nome.value, lider: this.lider.value, dia: this.dia.value, endereco: this.endereco.value }; 
+          try { 
+              if (id) { const {error} = await supabase.from('celulas').update(dados).eq('id', id); if(error) throw error; }
+              else { const {error} = await supabase.from('celulas').insert([dados]); if(error) throw error;}
+              alert("Célula salva com sucesso!"); mudarSecao('celulas'); carregarTudo(); 
+          } catch(err) { console.error(err); alert("Erro ao salvar célula."); } 
+          finally { btn.disabled=false; btn.innerText="Salvar"; }
+      };
+      
+      async function arquivar(id, n) { 
+          if(confirm(`Arquivar ${n}?`)) { 
+              try { 
+                  const { error } = await supabase.from('membros').update({ arquivado: true }).eq('id', id);
+                  if (error) throw error;
+                  carregarTudo(); 
+              } catch(e) { console.error(e); alert("Erro ao arquivar."); } 
+          } 
+      }
+      
+      async function restaurar(id) { 
+          if(confirm("Restaurar?")) { 
+              try { 
+                  const { error } = await supabase.from('membros').update({ arquivado: false }).eq('id', id);
+                  if (error) throw error;
+                  mudarSecao('lista'); carregarTudo(); 
+              } catch(e) { console.error(e); alert("Erro ao restaurar."); } 
+          } 
+      }
+      
+      function filtrarTabela(id) { const b = document.getElementById('inputBuscaArquivo').value.toLowerCase(); const rows = document.getElementById('corpoArquivo').getElementsByTagName('tr'); for(let r of rows) r.style.display = r.innerText.toLowerCase().includes(b)?'':'none'; }
 
-      // ======================================================================================================================================================
-      // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
-      // Variável para carregar Gênesis sozinho na primeira vez
-      let bibliaIniciada = false;
-
+      // FUNÇÕES DA BÍBLIA & VERSÍCULO (INALTERADO)
+      // ==========================================
       const dadosBiblia = [
           { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
           { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
@@ -1176,6 +1077,7 @@
           { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
           { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, 
           { id: "malaquias", nome: "Malaquias", caps: 4 },
+          // NOVO TESTAMENTO
           { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, 
           { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
           { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, 
@@ -1192,17 +1094,38 @@
           { id: "apocalipse", nome: "Apocalipse", caps: 22 }
       ];
 
+      async function carregarVersiculoDoDia() {
+          const versiculosNT = [
+              "rm/8/28", "jo/3/16", "fp/4/13", "mt/11/28", "rm/12/2",
+              "gl/2/20", "ef/2/8", "fp/4/6", "cl/3/14", "2tm/1/7",
+              "hb/11/1", "tg/1/5", "1pe/5/7", "1jo/4/8", "ap/3/20",
+              "mt/6/33", "mc/11/24", "lc/1/37", "jo/14/6", "at/1/8",
+              "rm/5/8", "1co/13/4", "2co/5/17", "gl/5/22", "ef/6/11",
+              "fp/1/6", "cl/1/15", "1ts/5/16", "hb/12/2", "tg/4/8", "1pe/2/9"
+          ];
+
+          const diaHoje = new Date().getDate(); 
+          const referenciaEscolhida = versiculosNT[diaHoje - 1]; 
+
+          try {
+              const resposta = await fetch(`https://www.abibliadigital.com.br/api/verses/ara/${referenciaEscolhida}`);
+              const dados = await resposta.json();
+
+              document.getElementById('texto-versiculo-dia').innerText = `"${dados.text}"`;
+              document.getElementById('ref-versiculo-dia').innerText = `- ${dados.book.name} ${dados.chapter}:${dados.number}`;
+          } catch (erro) {
+              document.getElementById('texto-versiculo-dia').innerText = '"Tudo posso naquele que me fortalece."';
+              document.getElementById('ref-versiculo-dia').innerText = "- Filipenses 4:13";
+          }
+      }
+
       function abrirBiblia() {
           document.getElementById('painel-biblia').classList.add('aberto');
           const overlay = document.getElementById('biblia-overlay');
           overlay.style.display = 'block';
           setTimeout(() => overlay.style.opacity = '1', 10);
           
-          if (!bibliaIniciada) {
-              iniciarLivros(); 
-              buscarTextoBiblia("genesis", 1, "Gênesis"); 
-              bibliaIniciada = true;
-          }
+          iniciarBiblia(); 
       }
 
       function fecharBiblia() {
@@ -1211,75 +1134,64 @@
           overlay.style.opacity = '0';
           setTimeout(() => overlay.style.display = 'none', 300);
       }
-
-      function iniciarLivros() {
+      
+      function iniciarBiblia() {
           const selectLivro = document.getElementById('biblia-livro');
-          const selectCapitulo = document.getElementById('biblia-capitulo');
-          
-          // Forçando a injeção do HTML direto para não ter erro no Discipulador
-          let htmlLivros = '';
+          selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
+
           dadosBiblia.forEach((livro, index) => {
-              let negrito = index >= 39 ? 'font-weight: bold;' : '';
-              htmlLivros += `<option value="${livro.id}" style="${negrito}">${livro.nome}</option>`;
+              let option = document.createElement('option');
+              option.value = livro.id;
+              option.text = livro.nome;
+              if (index >= 39) option.style.fontWeight = "bold"; 
+              selectLivro.appendChild(option);
           });
-          selectLivro.innerHTML = htmlLivros;
-          selectLivro.value = "genesis"; 
-          
-          let htmlCaps = '';
-          for (let i = 1; i <= 50; i++) { 
-              htmlCaps += `<option value="${i}">${i}</option>`;
-          }
-          selectCapitulo.innerHTML = htmlCaps;
-          selectCapitulo.value = "1"; 
-          selectCapitulo.disabled = false;
       }
 
       function atualizarCapitulos() {
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
-          
-          const livro = dadosBiblia.find(l => l.id === selectLivro.value);
-          if (livro) {
-              let htmlCaps = '';
-              for (let i = 1; i <= livro.caps; i++) {
-                  htmlCaps += `<option value="${i}">${i}</option>`;
-              }
-              selectCapitulo.innerHTML = htmlCaps;
-              selectCapitulo.disabled = false;
+          selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
+          if (selectLivro.value === "") { selectCapitulo.disabled = true; return; }
+          const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
+          for (let i = 1; i <= livroEscolhido.caps; i++) {
+              let option = document.createElement('option');
+              option.value = i; option.text = i;
+              selectCapitulo.appendChild(option);
           }
+          selectCapitulo.disabled = false;
       }
 
-      function carregarCapitulo() {
+      async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const inputCapitulo = document.getElementById('biblia-capitulo');
-          
-          if (!selectLivro.value || !inputCapitulo.value) { alert("Selecione um livro e capítulo."); return; }
-          
-          const nomeLivro = selectLivro.options[selectLivro.selectedIndex].text;
-          buscarTextoBiblia(selectLivro.value, inputCapitulo.value, nomeLivro);
-      }
-
-      async function buscarTextoBiblia(livroId, capitulo, nomeLivro) {
           const conteudo = document.getElementById('biblia-conteudo');
-          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando texto...</p>";
+          
+          const livro = selectLivro.value;
+          const capitulo = inputCapitulo.value;
+
+          if (!livro || !capitulo) { alert("Por favor, selecione um livro e o capítulo."); return; }
+
+          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando...</p>";
           
           try {
-              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livroId}/${capitulo}.json`;
-              const resposta = await fetch(urlGithub);
-              if (!resposta.ok) throw new Error("Capítulo não encontrado");
-              
+              // Requisição direta a API em vez do Google Apps Script
+              const resposta = await fetch(`https://www.abibliadigital.com.br/api/verses/ara/${livro}/${capitulo}`);
+              if(!resposta.ok) throw new Error("Erro na API");
               const versiculos = await resposta.json();
-              let htmlText = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${nomeLivro} ${capitulo}</h3>`;
               
-              versiculos.forEach(v => {
-                  htmlText += `<div style="margin-bottom: 15px;">`;
-                  if (v.title) htmlText += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
-                  htmlText += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>${v.content}</p></div>`;
+              conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
+              
+              versiculos.verses.forEach(v => {
+                  let blocoHTML = `<div style="margin-bottom: 15px;">`;
+                  blocoHTML += `<p style="margin: 0; text-align: justify;">
+                                  <sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>
+                                  ${v.text}
+                                </p></div>`;
+                  conteudo.innerHTML += blocoHTML;
               });
-              conteudo.innerHTML = htmlText;
-              
           } catch (e) {
-              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar o capítulo.</p>`;
+              conteudo.innerHTML = `<p style="color: var(--danger-text); text-align: center;">Erro ao carregar o capítulo. Verifique se o livro e o capítulo existem.</p>`;
           }
       }
     </script>
