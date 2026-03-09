@@ -350,7 +350,7 @@
       </div>
 
 <div class="stat-card" id="card-versiculo">
-        <span class="titulo-versiculo"><i class="fas fa-star"></i> Versículo do Dia</span>
+        <span class="titulo-versiculo"><!--<i class="fas fa-star"></i>--> Versículo do Dia</span>
         
         <div id="dailyVersesWrapper"></div>
         <script async defer src="https://dailyverses.net/get/verse.js?language=arc"></script>
@@ -684,8 +684,8 @@
               </div>`;
           });
       }
-
-      function renderizarAgenda(lista) {
+//////////////////////// COMUNICAÇÃO SUPABASE //////////////////////////
+     /* function renderizarAgenda(lista) {
          const div = document.getElementById('listaAgenda');
          div.innerHTML = '';
          if(!lista || lista.length === 0) {
@@ -727,8 +727,55 @@
                  </div>
              </div>`;
          });
-      }
+      }*/
 
+function renderizarAgenda(lista) {
+         const div = document.getElementById('listaAgenda');
+         div.innerHTML = '';
+         
+         if(!lista || lista.length === 0) {
+             div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1; margin-top:20px;">Nenhum evento na agenda.</p>';
+             return;
+         }
+
+         lista.sort((a, b) => {
+             const parseDate = (d) => {
+                 if(!d) return 0;
+                 if(d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                 if(d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                 return new Date(d).getTime();
+             };
+             return parseDate(a[0]) - parseDate(b[0]);
+         });
+
+         lista.forEach((a) => {
+             let dataF = a[0];
+             try { if(a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+             let corCategoria = '#555';
+             if(a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3';
+             else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)';
+             else if(a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
+
+             let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+
+             div.innerHTML += `
+             <div class="member-card">
+                 <div class="card-header">
+                     <h4 class="card-name" style="color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                     <span class="cat-badge" style="background:${corCategoria}; color:white; border:none;">${a[4]||'Sem Categoria'}</span>
+                 </div>
+                 <div style="font-size: 1rem; font-weight: 700; color: #333; margin-top: 5px;">${a[1]||''}</div>
+                 <div style="font-size: 0.85rem; color: #666; margin-top: 5px; min-height: 20px;">${a[2]||''}</div>
+                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                     <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: #f9f9f9; color: ${corTipo}; font-weight: bold; border: 1px solid #ddd;">
+                         <i class="fas fa-info-circle"></i> -> ${a[3]||''}
+                     </span>
+                 </div>
+             </div>`;
+         });
+      }
+  
       function abrirPalavra(index) {
           const p = listaPalavras[index]; 
           document.getElementById('modalTitulo').innerText = p.tema || '';
