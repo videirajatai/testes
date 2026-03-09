@@ -603,279 +603,321 @@
     <div id="biblia-overlay" onclick="fecharBiblia()"></div>
 
 
-<script>
-// ==========================================
-// CONFIGURAÇÃO SUPABASE E GOOGLE
-// ==========================================
-const SB_URL = 'https://ryvfogmfpjyamgqsltks.supabase.co'; 
-const SB_KEY = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
-const URL_GOOGLE_AGENDA = 'https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec'; 
+ <script>
+      const API_URL = sessionStorage.getItem('urlApi');
 
-let dadosMembros = [], dadosCelulas = [], dadosFinanceiro = [], dadosPalavras = [], dadosRelatorios = [];
+      // --- CREDENCIAIS DO SUPABASE EXATAS ---
+      const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
+      const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
 
-// ==========================================
-// FUNÇÕES CORE (COMUNICAÇÃO SEGURA)
-// ==========================================
-async function lerSupabase(tabela, query = "*") {
-    try {
-        const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=${query}`, {
-            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-        });
-        const data = await res.json();
+      let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [], listaPalavras = [];
+      
+      window.onload = carregarTudo;
+
+      // ==========================================
+      // MOTORES DE COMUNICAÇÃO
+      // ==========================================
+      
+      async function fetchGoogle(action, payload = {}) {
+        payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
+          try {
+              let res = await fetch(API_URL, {
+                  method: 'POST',
+                  body: JSON.stringify({ action: action, payload: payload })
+              });
+              let json = await res.json();
+              if (json.status === "sucesso") return json.dados || json.mensagem;
+              else throw new Error(json.mensagem);
+          } catch(e) { throw e; }
+      }
+
+      async function lerSupabase(tabela) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
+              method: 'GET',
+              headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+          });
+          if (!res.ok) throw new Error(`Erro ao ler tabela: ${tabela}`);
+          return await res.json();
+      }
+
+// NOVO: Função para Inserir dados no Supabase via POST
+      async function inserirSupabase(tabela, dados) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
+              method: 'POST',
+              headers: { 
+                  'apikey': SB_KEY, 
+                  'Authorization': `Bearer ${SB_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(dados)
+          });
+          if (!res.ok) throw new Error(`Erro ao inserir no Supabase.`);
+          return "Inserido com sucesso!";
+      }
+      
+      // NOVO: Função para Atualizar dados no Supabase via PATCH
+      async function atualizarSupabase(tabela, id, dados) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
+              method: 'PATCH',
+              headers: { 
+                  'apikey': SB_KEY, 
+                  'Authorization': `Bearer ${SB_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(dados)
+          });
+          if (!res.ok) throw new Error(`Erro ao atualizar no Supabase.`);
+          return "Atualizado com sucesso!";
+      }
+
+      // ==========================================
+      // CARREGAMENTO INICIAL
+      // ==========================================
+      async function carregarTudo() {
+        const icon = document.getElementById('iconRefresh'); 
+        if(icon) icon.classList.add('fa-spin');
         
-        // Se o Supabase retornar um erro (ex: coluna que não existe), devolvemos array vazio pra não quebrar a tela
-        if (!res.ok) {
-            console.error(`Erro ao ler tabela ${tabela}:`, data);
-            return []; 
+        try {
+            dadosMembros = await lerSupabase('membros'); 
+            renderizarMembrosEArquivos(dadosMembros);
+        } catch (e) { console.error(e); }
+
+        try {
+            dadosCelulas = await lerSupabase('celulas');
+            renderizarCelulas(dadosCelulas);
+            preencherSelects(dadosCelulas);
+        } catch (e) { console.error(e); }
+
+        try {
+            dadosRelatorios = await lerSupabase('relatorios');
+            filtrarRelatorios();
+        } catch (e) { console.error(e); }
+
+        try {
+            const agendaRes = await fetchGoogle('buscarAgenda');
+            listaAgenda = agendaRes || [];
+            renderizarAgenda(listaAgenda);
+        } catch(e) { renderizarAgenda([]); }
+
+        try {
+            listaPalavras = await lerSupabase('palavras');
+            listaPalavras.reverse(); 
+            renderizarPalavras(listaPalavras);
+        } catch (e) { console.error(e); }
+
+        if(icon) icon.classList.remove('fa-spin');
+      }
+
+      function mudarSecao(s) {
+         ['lista','celulas','relatorios','arquivos','agenda','palavras'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
+         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+         document.getElementById('secao-'+s).classList.remove('hidden');
+         if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
+      }
+
+      function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
+
+      // ==========================================
+      // MEMBROS E ARQUIVOS (Listagem, Edição, Arquivamento)
+      // ==========================================
+      
+      function renderizarMembrosEArquivos(lista) {
+          const gridAtivos = document.getElementById('gridMembros'); gridAtivos.innerHTML = '';
+          const gridArquivos = document.getElementById('gridArquivos'); gridArquivos.innerHTML = '';
+          
+          if(!lista || lista.length === 0){
+              gridAtivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro encontrado.</p>';
+              return;
+          }
+
+          // 1. SEPARAÇÃO DOS DADOS
+          let ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
+          let arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
+
+          document.getElementById('badge-total-membros').innerText = ativos.length;
+
+          const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
+          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+
+          // 2. FUNÇÃO ÚNICA PARA MONTAR O CARD
+          const montarCard = (m, isArquivado) => {
+             let nome = m.nome || 'Sem Nome'; let celula = m.celula || '-'; let categoria = m.tipo || 'Frequentador'; 
+             let tel = String(m.telefone || ''); let telClean = tel.replace(/\D/g, '');
+             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap" style="margin-top:10px;"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
+             let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+             let bDiz = (String(m.dizimista).toLowerCase() === 'sim' || m.dizimista === true) ? `<span style="font-size:0.7rem; margin-left:5px; color:#166534; background:#dcfce7; padding:2px 6px; border-radius:4px;">Dizimista</span>` : '';
+
+             let acoesHTML = isArquivado 
+                ? `<button onclick="restaurarMembro('${m.id}')" class="btn-icon" title="Restaurar"><i class="fas fa-undo"></i></button>`
+                : `<div style="display:flex; gap:5px;">
+                    <button onclick="abrirEditarMembro('${m.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button onclick="arquivarMembro('${m.id}')" class="btn-icon" title="Arquivar"><i class="fas fa-archive"></i></button>
+                   </div>`;
+
+             return `
+               <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+                  <div class="card-header">
+                      <div style="display:flex; flex-direction: column; gap: 4px;">
+                          <h4 class="card-name">${nome}</h4>
+                          <span class="cat-badge" style="width: fit-content;">${categoria}</span>
+                      </div>
+                      ${acoesHTML}
+                  </div>
+                  <div class="card-info" style="flex-wrap: wrap;"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${bDiz} ${nasc}</div>
+                  <div class="status-row">
+                     <div class="status-pill ${check(m.batizado)}">Batismo</div>
+                     <div class="status-pill ${check(m.cursao)}">Cursão</div>
+                     <div class="status-pill ${check(m.ctl)}">CTL</div>
+                     <div class="status-pill ${check(m.encontro)}">Encontro</div>
+                  </div>
+                  ${!isArquivado ? btnZap : ''}
+               </div>`;
+          };
+
+          // 3. RENDERIZAÇÃO NAS DUAS GRIDS
+          ativos.forEach(m => gridAtivos.innerHTML += montarCard(m, false));
+          arquivados.forEach(m => gridArquivos.innerHTML += montarCard(m, true));
+
+          if(arquivados.length === 0) gridArquivos.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum membro arquivado.</p>';
+      }
+
+      function filtrarMembros() {
+         const b = document.getElementById('inputBusca').value.toLowerCase();
+         const c = document.getElementById('filtroCelula').value.toLowerCase();
+         document.querySelectorAll('#gridMembros .member-card').forEach(card => {
+            if(card.hasAttribute('data-nome')){
+                const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c));
+                card.style.display = match ? 'flex' : 'none';
+            }
+         });
+      }
+
+      async function arquivarMembro(id) {
+          if(!confirm("Deseja arquivar este membro? Ele irá para a aba Arquivos.")) return;
+          try {
+              await atualizarSupabase('membros', id, { arquivado: "Sim" });
+              carregarTudo();
+          } catch(e) { alert("Erro ao arquivar."); }
+      }
+
+      async function restaurarMembro(id) {
+          if(!confirm("Deseja restaurar este membro de volta para a célula?")) return;
+          try {
+              await atualizarSupabase('membros', id, { arquivado: "Não" });
+              carregarTudo();
+          } catch(e) { alert("Erro ao restaurar."); }
+      }
+
+      function abrirEditarMembro(id) {
+          const m = dadosMembros.find(x => String(x.id) === String(id));
+          if(!m) return;
+          
+          document.getElementById('editMembroId').value = m.id;
+          document.getElementById('editMembroNome').value = m.nome || '';
+          document.getElementById('editMembroNasc').value = m.nascimento || '';
+          document.getElementById('editMembroTel').value = m.telefone || '';
+          document.getElementById('editMembroCelula').value = m.celula || '';
+          document.getElementById('editMembroCat').value = m.tipo || 'Frequentador';
+
+          const chk = (val) => String(val).toLowerCase() === 'sim' || val === true;
+          document.getElementById('editMembroBatizado').checked = chk(m.batizado);
+          document.getElementById('editMembroCursao').checked = chk(m.cursao);
+          document.getElementById('editMembroCtl').checked = chk(m.ctl);
+          document.getElementById('editMembroEncontro').checked = chk(m.encontro);
+
+          document.getElementById('modalEditarMembro').classList.remove('hidden');
+      }
+
+      document.getElementById('formEditarMembro').onsubmit = async function(e) {
+          e.preventDefault();
+          const btn = document.getElementById('btnSalvarEdicaoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
+          const id = document.getElementById('editMembroId').value;
+          
+          const dados = {
+              nome: document.getElementById('editMembroNome').value,
+              nascimento: document.getElementById('editMembroNasc').value,
+              telefone: document.getElementById('editMembroTel').value,
+              celula: document.getElementById('editMembroCelula').value,
+              tipo: document.getElementById('editMembroCat').value,
+              batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
+              cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
+              ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
+              encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não"
+          };
+
+          try {
+              await atualizarSupabase('membros', id, dados);
+              fecharModal('modalEditarMembro');
+              carregarTudo();
+          } catch(err) { alert("Erro ao atualizar membro."); }
+          finally { btn.innerText = "Salvar Alterações"; btn.disabled = false; }
+      };
+
+              function abrirAdicionarMembro() {
+            const form = document.getElementById('formAdicionarMembro');
+            if(form) form.reset(); // Limpa o formulário
+            
+            // Preenche as opções de células disponíveis no select
+            const selectAdd = document.getElementById('addMembroCelula');
+            if(selectAdd){
+                selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
+                dadosCelulas.forEach(c => {
+                    if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+                });
+            }
+        
+            const modal = document.getElementById('modalAdicionarMembro');
+            if(modal) modal.classList.remove('hidden');
         }
-        return data;
-    } catch (e) {
-        console.error(`Falha de conexão com a tabela ${tabela}:`, e);
-        return []; 
-    }
-}
-
-async function inserirSupabase(tabela, dados) {
-    const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
-        method: 'POST',
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-    });
-    if (!res.ok) alert(`Erro ao inserir em ${tabela}. Verifique as colunas no Supabase.`);
-}
-
-async function atualizarSupabase(tabela, id, dados) {
-    await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-    });
-}
-
-async function deletarSupabase(tabela, id) {
-    await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-    });
-}
-
-// ==========================================
-// INICIALIZAÇÃO E NAVEGAÇÃO
-// ==========================================
-window.onload = function() {
-    iniciarBiblia(); 
-    carregarTudo();
-};
-
-async function carregarTudo() {
-    const icon = document.getElementById('iconRefresh');
-    if(icon) icon.classList.add('fa-spin');
-    
-    try {
-        dadosMembros = await lerSupabase('membros');
-        dadosCelulas = await lerSupabase('celulas');
-        dadosFinanceiro = await lerSupabase('financeiro');
-
-        renderizarMembros(dadosMembros);
-        renderizarCelulas();
-        renderizarFinanceiro();
-        atualizarSelectCelulas();
-
-        // Carrega a agenda do Google em paralelo
-        carregarAgendaGoogle();
-    } catch(e) { 
-        console.error("Erro no load geral:", e); 
-    } finally { 
-        if(icon) icon.classList.remove('fa-spin'); 
-    }
-}
-
-function mudarSecao(s) {
-    // Esconde tudo
-    ['lista','celulas','financeiro','arquivo','sugestoes','relatorios','agenda','cadastro-agenda','palavras','nova-palavra','cadastro','form-celula'].forEach(id => {
-        const el = document.getElementById('secao-'+id);
-        if(el) el.classList.add('hidden');
-    });
-    document.getElementById('modal-ver-relatorio').classList.add('hidden');
-    
-    // Mostra o alvo
-    const target = document.getElementById('secao-'+s);
-    if(target) target.classList.remove('hidden');
-
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById('btn-'+s);
-    if(btn) btn.classList.add('active');
-}
-
-// ==========================================
-// MÓDULO: MEMBROS
-// ==========================================
-function renderizarMembros(lista) {
-    const grid = document.getElementById('gridMembros');
-    grid.innerHTML = '';
-    
-    // Proteção: se não for uma lista válida, avisa na tela e para a função
-    if (!Array.isArray(lista)) {
-        grid.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar membros. Tabela não encontrada ou colunas incorretas.</p>';
-        return;
-    }
-
-    const ativos = lista.filter(m => m.status !== 'Arquivado');
-    const badge = document.getElementById('totalMembros');
-    if(badge) badge.innerText = ativos.length;
-
-    ativos.forEach(m => {
-        grid.innerHTML += `
-        <div class="member-card" data-nome="${(m.nome||'').toLowerCase()}" data-celula="${(m.celula||'').toLowerCase()}">
-            <div class="card-header">
-                <div>
-                    <h4 class="card-name">${m.nome}</h4>
-                    <span class="cat-badge ${m.categoria}">${m.categoria || 'Membro'}</span>
-                </div>
-            </div>
-            <div class="card-info"><i class="fas fa-network-wired"></i> ${m.celula || 'S/ Célula'}</div>
-            <div class="card-info"><i class="fas fa-phone"></i> ${m.telefone || '-'}</div>
-            <div class="status-row">
-                <div class="status-pill ${m.batismo === 'Sim' ? 'active':''}"><i class="fas fa-water"></i> Batismo</div>
-                <div class="status-pill ${m.cursao === 'Sim' ? 'active':''}"><i class="fas fa-book"></i> Cursão</div>
-                <div class="status-pill ${m.ctl === 'Sim' ? 'active':''}"><i class="fas fa-graduation-cap"></i> CTL</div>
-                <div class="status-pill ${m.encontro === 'Sim' ? 'active':''}"><i class="fas fa-fire"></i> Encontro</div>
-            </div>
-            <div class="card-actions">
-                <button onclick="editarMembro('${m.id}')" class="btn-card"><i class="fas fa-edit"></i> Editar</button>
-                <button onclick="arquivar('${m.id}')" class="btn-card" style="color:red"><i class="fas fa-archive"></i></button>
-                <a href="https://wa.me/55${(m.telefone||'').replace(/\D/g,'')}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>
-            </div>
-        </div>`;
-    });
-}
-
-function novoCadastro() {
-    document.getElementById('formMembro').reset();
-    document.getElementById('idMembro').value = "";
-    document.getElementById('tituloForm').innerText = "Cadastro de Membro";
-    mudarSecao('cadastro');
-}
-
-function editarMembro(id) {
-    const m = dadosMembros.find(x => x.id == id);
-    if(!m) return;
-    document.getElementById('idMembro').value = m.id;
-    document.getElementById('tituloForm').innerText = "Editar Membro";
-    document.getElementById('campoNome').value = m.nome || '';
-    document.getElementById('campoNasc').value = m.nascimento || '';
-    document.getElementById('campoTel').value = m.telefone || '';
-    document.getElementById('selectCelulas').value = m.celula || '';
-    document.getElementById('campoCategoria').value = m.categoria || 'Membro';
-    
-    document.getElementById('checkBat').checked = m.batismo === 'Sim';
-    document.getElementById('checkCur').checked = m.cursao === 'Sim';
-    document.getElementById('checkCtl').checked = m.ctl === 'Sim';
-    document.getElementById('checkDiz').checked = m.encontro === 'Sim';
-    
-    mudarSecao('cadastro');
-}
-
-document.getElementById('formMembro').onsubmit = async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnSalvar');
-    btn.innerText = "Salvando..."; btn.disabled = true;
-
-    const id = document.getElementById('idMembro').value;
-    const dados = {
-        nome: document.getElementById('campoNome').value,
-        nascimento: document.getElementById('campoNasc').value,
-        categoria: document.getElementById('campoCategoria').value,
-        celula: document.getElementById('selectCelulas').value,
-        telefone: document.getElementById('campoTel').value,
-        status: 'Ativo',
-        batismo: document.getElementById('checkBat').checked ? 'Sim' : 'Não',
-        cursao: document.getElementById('checkCur').checked ? 'Sim' : 'Não',
-        ctl: document.getElementById('checkCtl').checked ? 'Sim' : 'Não',
-        encontro: document.getElementById('checkDiz').checked ? 'Sim' : 'Não'
-    };
-    
-    try {
-        id ? await atualizarSupabase('membros', id, dados) : await inserirSupabase('membros', dados);
-        dadosMembros = await lerSupabase('membros'); 
-        renderizarMembros(dadosMembros);
-        mudarSecao('lista');
-    } catch(err) {
-        alert("Erro ao salvar membro.");
-    } finally {
-        btn.innerText = "Salvar"; btn.disabled = false;
-    }
-};
-
-function filtrarMembros() {
-    const txt = document.getElementById('inputBusca').value.toLowerCase();
-    const cel = document.getElementById('filtroCelula').value.toLowerCase();
-    document.querySelectorAll('.member-card').forEach(c => {
-        if(!c.hasAttribute('data-nome')) return;
-        const n = c.getAttribute('data-nome');
-        const cc = c.getAttribute('data-celula');
-        c.style.display = (n.includes(txt) && (cel === "" || cc === cel)) ? "flex" : "none";
-    });
-}
-
-// Arquivo Morto
-async function arquivar(id) {
-    if(confirm("Arquivar membro?")) {
-        await atualizarSupabase('membros', id, { status: 'Arquivado' });
-        dadosMembros = await lerSupabase('membros'); 
-        renderizarMembros(dadosMembros);
-    }
-}
-
-function carregarArquivados() {
-    mudarSecao('arquivo');
-    const tb = document.getElementById('corpoArquivo');
-    
-    if (!Array.isArray(dadosMembros)) return;
-    
-    const arquivados = dadosMembros.filter(m => m.status === 'Arquivado');
-    if(arquivados.length === 0) {
-        tb.innerHTML = '<tr><td colspan="3" align="center">Nenhum membro arquivado.</td></tr>';
-        return;
-    }
-    tb.innerHTML = arquivados.map(m => `
-        <tr>
-            <td><small>${m.nascimento || '-'}</small></td>
-            <td><b>${m.nome}</b><br><small>${m.celula}</small></td>
-            <td>
-                <button onclick="restaurarMembro('${m.id}')" class="btn-card" style="color:green; margin-bottom:5px;"><i class="fas fa-undo"></i></button>
-                <button onclick="excluirMembroFisico('${m.id}')" class="btn-card" style="color:red;"><i class="fas fa-trash"></i></button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-async function restaurarMembro(id) {
-    await atualizarSupabase('membros', id, { status: 'Ativo' });
-    dadosMembros = await lerSupabase('membros'); 
-    renderizarMembros(dadosMembros);
-    carregarArquivados();
-}
-
-async function excluirMembroFisico(id) {
-    if(confirm("ATENÇÃO: Isso vai excluir o membro para sempre. Continuar?")) {
-        await deletarSupabase('membros', id);
-        dadosMembros = await lerSupabase('membros'); 
-        renderizarMembros(dadosMembros);
-        carregarArquivados();
-    }
-}
-
-function filtrarTabela(idTabela) {
-    const input = document.getElementById(idTabela === 'tabelaArquivo' ? 'inputBuscaArquivo' : 'inputBusca');
-    const filter = input.value.toLowerCase();
-    const trs = document.getElementById(idTabela).querySelectorAll("tbody tr");
-    trs.forEach(tr => {
-        tr.style.display = tr.innerText.toLowerCase().includes(filter) ? "" : "none";
-    });
-}
-
- // ==========================================
+        
+        
+        // Proteção para não quebrar o JS se o form não existir
+        const formAdicionar = document.getElementById('formAdicionarMembro');
+        
+        if(formAdicionar){
+        formAdicionar.onsubmit = async function(e) {
+            e.preventDefault();
+        
+            const btn = document.getElementById('btnSalvarNovoMembro');
+            if(btn){
+                btn.innerText = "Salvando...";
+                btn.disabled = true;
+            }
+        
+            const dados = {
+                nome: document.getElementById('addMembroNome')?.value || "",
+                nascimento: document.getElementById('addMembroNasc')?.value || "",
+                telefone: document.getElementById('addMembroTel')?.value || "",
+                celula: document.getElementById('addMembroCelula')?.value || "",
+                tipo: document.getElementById('addMembroCat')?.value || "",
+                batizado: document.getElementById('addMembroBatizado')?.checked ? "Sim" : "Não",
+                cursao: document.getElementById('addMembroCursao')?.checked ? "Sim" : "Não",
+                ctl: document.getElementById('addMembroCtl')?.checked ? "Sim" : "Não",
+                encontro: document.getElementById('addMembroEncontro')?.checked ? "Sim" : "Não",
+                arquivado: "Não",
+                status: "Ativo"
+            };
+        
+            try {
+                await inserirSupabase('membros', dados);
+                fecharModal('modalAdicionarMembro');
+                carregarTudo();
+            } 
+            catch(err){
+                alert("Erro ao cadastrar membro.");
+                console.error(err);
+            } 
+            finally {
+                if(btn){
+                    btn.innerText = "Cadastrar Membro";
+                    btn.disabled = false;
+                }
+            }
+        };
+        }
+      // ==========================================
       // CÉLULAS (Listagem e Edição)
       // ==========================================
 
@@ -1051,263 +1093,52 @@ function filtrarTabela(idTabela) {
          });
       }
 
-// ==========================================
-// MÓDULO: FINANCEIRO
-// ==========================================
-function mudarTabFin(tab, btn) {
-    document.getElementById('tab-lancamento').classList.add('hidden');
-    document.getElementById('tab-extrato').classList.add('hidden');
-    document.getElementById('tab-'+tab).classList.remove('hidden');
-    
-    const botoes = btn.parentElement.querySelectorAll('.nav-btn');
-    botoes.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
-
-function atualizarCategorias() {
-    const tipo = document.getElementById('finTipo').value;
-    const cat = document.getElementById('finCategoria');
-    if(tipo === 'Entrada') {
-        cat.innerHTML = '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option><option value="Outros">Outros</option>';
-    } else {
-        cat.innerHTML = '<option value="Água/Luz">Água/Luz</option><option value="Aluguel">Aluguel</option><option value="Manutenção">Manutenção</option><option value="Eventos">Eventos</option><option value="Outros">Outros</option>';
-    }
-    atualizarCampos();
-}
-
-function atualizarCampos() {
-    const cat = document.getElementById('finCategoria').value;
-    const descInput = document.getElementById('finDescricaoInput');
-    const memSelect = document.getElementById('finMembroSelect');
-    const lbl = document.getElementById('lblDescricao');
-
-    if(cat === 'Dízimo' || cat === 'Oferta') {
-        lbl.innerText = "Nome do Membro";
-        descInput.classList.add('hidden');
-        memSelect.classList.remove('hidden');
-        descInput.required = false;
-        memSelect.required = true;
-        
-        memSelect.innerHTML = '<option value="">Selecione o membro...</option>' + 
-                              (Array.isArray(dadosMembros) ? dadosMembros.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('') : '');
-    } else {
-        lbl.innerText = "Descrição da Despesa/Entrada";
-        memSelect.classList.add('hidden');
-        descInput.classList.remove('hidden');
-        memSelect.required = false;
-        descInput.required = true;
-    }
-}
-
-function renderizarFinanceiro() {
-    const corpo = document.getElementById('corpoFin');
-    let saldo = 0, entradas = 0, saidas = 0;
-    
-    if (!Array.isArray(dadosFinanceiro)) return;
-
-    corpo.innerHTML = dadosFinanceiro.map(f => {
-        const valor = parseFloat(f.valor || 0);
-        if(f.tipo === 'Entrada') { entradas += valor; saldo += valor; }
-        else { saidas += valor; saldo -= valor; }
-        
-        return `
-        <tr>
-            <td>${f.data}</td>
-            <td><b>${f.descricao}</b><br><small>${f.categoria || ''}</small></td>
-            <td style="color:${f.tipo==='Entrada'?'green':'red'}">R$ ${valor.toFixed(2)}
-                <br><button onclick="deletarFinanceiro('${f.id}')" style="background:none; border:none; color:#ccc; font-size:0.7rem; cursor:pointer;">[Excluir]</button>
-            </td>
-        </tr>`;
-    }).join('');
-    
-    document.getElementById('finSaldo').innerText = `R$ ${saldo.toFixed(2)}`;
-    document.getElementById('finEntrada').innerText = `R$ ${entradas.toFixed(2)}`;
-    document.getElementById('finSaida').innerText = `R$ ${saidas.toFixed(2)}`;
-}
-
-document.getElementById('formFinanceiro').onsubmit = async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnSalvarFin');
-    btn.disabled = true; btn.innerText = "Salvando...";
-    
-    const cat = document.getElementById('finCategoria').value;
-    let descricaoFinal = "";
-    if(cat === 'Dízimo' || cat === 'Oferta') {
-        descricaoFinal = document.getElementById('finMembroSelect').value;
-    } else {
-        descricaoFinal = document.getElementById('finDescricaoInput').value;
-    }
-
-    const dados = {
-        data: document.getElementById('finData').value,
-        tipo: document.getElementById('finTipo').value,
-        categoria: cat,
-        descricao: descricaoFinal,
-        valor: parseFloat(this.valor.value)
-    };
-    
-    await inserirSupabase('financeiro', dados);
-    this.reset();
-    dadosFinanceiro = await lerSupabase('financeiro');
-    renderizarFinanceiro();
-    btn.disabled = false; btn.innerText = "Registrar Movimentação";
-    mudarTabFin('extrato', document.querySelectorAll('.nav-btn')[3]); 
-};
-
-async function deletarFinanceiro(id) {
-    if(confirm("Excluir este lançamento financeiro?")) {
-        await deletarSupabase('financeiro', id);
-        dadosFinanceiro = await lerSupabase('financeiro');
-        renderizarFinanceiro();
-    }
-}
-
-
 
 // ==========================================
-// MÓDULO: PEDIDOS DE ORAÇÃO (SUGESTÕES)
-// ==========================================
-async function carregarSugestoes() {
-    mudarSecao('sugestoes');
-    const corpo = document.getElementById('corpoSugestoes');
-    corpo.innerHTML = '<tr><td colspan="2" align="center">Buscando...</td></tr>';
-    
-    const dados = await lerSupabase('sugestoes');
-    if (!Array.isArray(dados) || dados.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="2" align="center">Nenhum pedido recebido.</td></tr>';
-        return;
-    }
-    
-    corpo.innerHTML = dados.reverse().map(s => `
-        <tr>
-            <td style="width:100px;"><small>${s.data}</small></td>
-            <td>${s.texto || s.mensagem}</td>
-        </tr>`).join('');
-}
+      // PALAVRAS (Listagem e Modal)
+      // ==========================================
+      function renderizarPalavras(lista) {
+          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+          if(!lista || lista.length === 0) {
+              div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada.</p>';
+              return;
+          }
+          lista.forEach((p, index) => {
+              let dataF = p.data || '';
+              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+              div.innerHTML += `
+              <div class="report-list-item" onclick="abrirPalavra(${index})">
+                  <div>
+                      <div style="font-weight: 800; color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
+                      <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">${p.tema || 'Sem Título'}</div>
+                  </div>
+                  <i class="fas fa-chevron-right" style="color:var(--text-light);"></i>
+              </div>`;
+          });
+      }
 
-// ==========================================
-// MÓDULO: RELATÓRIOS
-// ==========================================
-async function carregarRelatorios() {
-    mudarSecao('relatorios');
-    const lista = document.getElementById('listaRelatorios');
-    lista.innerHTML = '<p style="text-align:center;">Buscando relatórios...</p>';
-    
-    dadosRelatorios = await lerSupabase('relatorios'); 
-    if(!Array.isArray(dadosRelatorios)) dadosRelatorios = [];
+      function abrirPalavra(index) {
+          const p = listaPalavras[index]; 
+          document.getElementById('modalTitulo').innerText = p.tema || '';
+          let dataF = p.data || '';
+          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+          document.getElementById('modalData').innerText = dataF;
+          document.getElementById('modalTexto').innerText = p.texto || '';
 
-    const celulasUnicas = [...new Set(dadosRelatorios.map(r => r.celula))];
-    document.getElementById('filtroRelCelula').innerHTML = '<option value="">Todas as Células</option>' + 
-        celulasUnicas.map(c => `<option value="${c}">${c}</option>`).join('');
+          const btn = document.getElementById('btnLinkYoutube');
+          const link = p.link_youtube; 
 
-    renderizarRelatorios(dadosRelatorios);
-}
-
-function renderizarRelatorios(dados) {
-    const lista = document.getElementById('listaRelatorios');
-    if(dados.length === 0) {
-        lista.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório encontrado.</p>';
-        return;
-    }
-    
-    lista.innerHTML = dados.map(r => `
-        <div class="report-list-item" onclick="verRelatorio('${r.id}')">
-            <div>
-                <b style="color:var(--primary); display:block;">Célula: ${r.celula}</b>
-                <small style="color:#777;"><i class="far fa-calendar-alt"></i> ${r.data_reuniao}</small>
-            </div>
-            <i class="fas fa-chevron-right" style="color:#ccc;"></i>
-        </div>
-    `).join('');
-}
-
-function filtrarRelatorios() {
-    const sel = document.getElementById('filtroRelCelula').value;
-    if(sel === "") { renderizarRelatorios(dadosRelatorios); } 
-    else { renderizarRelatorios(dadosRelatorios.filter(r => r.celula === sel)); }
-}
-
-function verRelatorio(id) {
-    const r = dadosRelatorios.find(x => x.id == id);
-    if(!r) return;
-    document.getElementById('modal-ver-relatorio').classList.remove('hidden');
-    
-    document.getElementById('relCelula').innerText = r.celula;
-    document.getElementById('relData').innerText = r.data_reuniao;
-    document.getElementById('relTotal').innerText = (parseInt(r.presentes_membros||0) + parseInt(r.presentes_visitantes||0));
-    
-    document.getElementById('relPalavra').innerText = r.palavra || '-';
-    document.getElementById('relLouvor').innerText = r.louvor || '-';
-    document.getElementById('relLanche').innerText = r.lanche || '-';
-    document.getElementById('relGelo').innerText = r.quebra_gelo || '-';
-    
-    document.getElementById('relLista').innerHTML = (r.nomes_presentes || 'Não preenchido').replace(/\n/g, '<br>');
-    document.getElementById('relObs').innerText = r.observacoes || 'Sem observações adicionais.';
-}
-
-// ==========================================
-// MÓDULO: PALAVRAS
-// ==========================================
-async function carregarPalavras() {
-    mudarSecao('palavras');
-    document.getElementById('listaPalavras').innerHTML = '<p align="center">Carregando palavras...</p>';
-    dadosPalavras = await lerSupabase('palavras');
-    
-    if(!Array.isArray(dadosPalavras) || dadosPalavras.length === 0) {
-        document.getElementById('listaPalavras').innerHTML = '<p align="center" style="color:#999;">Nenhuma palavra cadastrada.</p>';
-        return;
-    }
-
-    document.getElementById('listaPalavras').innerHTML = dadosPalavras.map(p => `
-        <div class="word-list-item" onclick="abrirModalPalavra('${p.id}')">
-            <div>
-                <div class="word-date">${p.data}</div>
-                <div class="word-theme">${p.tema}</div>
-            </div>
-            <i class="fas fa-chevron-right" style="color:#ccc;"></i>
-        </div>`).join('');
-}
-
-function novaPalavra() {
-    document.getElementById('formPalavra').reset();
-    mudarSecao('nova-palavra');
-}
-
-document.getElementById('formPalavra').onsubmit = async function(e) {
-    e.preventDefault();
-    const dados = {
-        data: this.data.value,
-        tema: this.tema.value,
-        link_youtube: this.link.value,
-        texto: this.texto.value
-    };
-    await inserirSupabase('palavras', dados);
-    await carregarPalavras();
-};
-
-function abrirModalPalavra(id) {
-    const p = dadosPalavras.find(x => x.id == id);
-    if(!p) return;
-    document.getElementById('modalTitulo').innerText = p.tema;
-    document.getElementById('modalDataPalavra').innerText = "Data: " + p.data;
-    document.getElementById('modalTexto').innerText = p.texto;
-    
-    const btnTube = document.getElementById('btnLinkYoutube');
-    if(p.link_youtube && p.link_youtube.includes('http')) {
-        btnTube.href = p.link_youtube;
-        btnTube.classList.remove('hidden');
-    } else {
-        btnTube.classList.add('hidden');
-    }
-    document.getElementById('modalPalavra').classList.remove('hidden');
-}
-
-function fecharModal(e) {
-    if(e && e.target !== document.getElementById('modalPalavra') && !e.target.classList.contains('btn-close-modal')) return;
-    document.getElementById('modalPalavra').classList.add('hidden');
-}
-
-       // ==========================================
+          if (link && link.trim() !== "") {
+              btn.href = link;
+              btn.classList.remove('hidden');
+          } else {
+              btn.classList.add('hidden');
+              btn.href = "#";
+          }
+          document.getElementById('modalPalavra').classList.remove('hidden');
+      }
+      
+            // ==========================================
       // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
       // Variável para carregar Gênesis sozinho na primeira vez
