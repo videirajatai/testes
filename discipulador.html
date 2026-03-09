@@ -109,6 +109,10 @@
       .biblia-controles { padding: 15px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 10px; }
       .biblia-controles select { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
       .btn-ler-ouro { background-color: var(--ouro-videira); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; }
+
+      /* YOUTUBE*/
+      .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; transition: background 0.2s; box-sizing: border-box; }
+      .btn-youtube:hover { background-color: #cc0000; }
     </style>
   </head>
   <body>
@@ -146,6 +150,7 @@
         <button onclick="mudarSecao('relatorios')" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>
         <button onclick="mudarSecao('arquivos')" class="nav-btn" id="btn-arquivos"><i class="fas fa-archive"></i> Arquivos</button>
         <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
+        <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
       </div>
 
       <div id="secao-lista">
@@ -196,6 +201,13 @@
         <div id="listaAgenda" class="member-grid"></div>
       </div>
 
+      <div id="secao-palavras" class="hidden">
+         <h4 style="color: var(--primary); margin-top:0; margin-bottom: 15px;"><i class="fas fa-book-open"></i> Palavras & Estudos</h4>
+         <div id="listaPalavras">
+           <p style="text-align:center; color:#999;">Carregando...</p>
+         </div>
+      </div>
+
     </div> <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
@@ -231,6 +243,18 @@
             </div>
         </div>
     </div>
+
+
+    <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal('modalPalavra')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModal('modalPalavra')">&times;</button>
+            <h3 id="modalTitulo" style="color:var(--primary); margin-top:10px;"></h3>
+            <small id="modalData" style="color:#777; display:block; margin-bottom:15px;"></small>
+            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
+            <div id="modalTexto" style="line-height: 1.6; color: #444; font-size: 0.95rem; white-space: pre-wrap; margin-top: 15px;"></div>
+        </div>
+    </div>
+    
 
     <div id="modalEditarMembro" class="modal-overlay hidden" onclick="fecharModal('modalEditarMembro')">
         <div class="modal-content" onclick="event.stopPropagation()">
@@ -295,7 +319,7 @@
       const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
       const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
 
-      let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [];
+      let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [], listaPalavras = [];
       
       window.onload = carregarTudo;
 
@@ -370,11 +394,17 @@
             renderizarAgenda(listaAgenda);
         } catch(e) { renderizarAgenda([]); }
 
+        try {
+            listaPalavras = await lerSupabase('palavras');
+            listaPalavras.reverse(); 
+            renderizarPalavras(listaPalavras);
+        } catch (e) { console.error(e); }
+
         if(icon) icon.classList.remove('fa-spin');
       }
 
       function mudarSecao(s) {
-         ['lista','celulas','relatorios','arquivos','agenda'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
+         ['lista','celulas','relatorios','arquivos','agenda','palavras'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
          document.getElementById('secao-'+s).classList.remove('hidden');
          if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
@@ -686,6 +716,51 @@
          });
       }
 
+
+// ==========================================
+      // PALAVRAS (Listagem e Modal)
+      // ==========================================
+      function renderizarPalavras(lista) {
+          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+          if(!lista || lista.length === 0) {
+              div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada.</p>';
+              return;
+          }
+          lista.forEach((p, index) => {
+              let dataF = p.data || '';
+              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+              div.innerHTML += `
+              <div class="report-list-item" onclick="abrirPalavra(${index})">
+                  <div>
+                      <div style="font-weight: 800; color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
+                      <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">${p.tema || 'Sem Título'}</div>
+                  </div>
+                  <i class="fas fa-chevron-right" style="color:var(--text-light);"></i>
+              </div>`;
+          });
+      }
+
+      function abrirPalavra(index) {
+          const p = listaPalavras[index]; 
+          document.getElementById('modalTitulo').innerText = p.tema || '';
+          let dataF = p.data || '';
+          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+          document.getElementById('modalData').innerText = dataF;
+          document.getElementById('modalTexto').innerText = p.texto || '';
+
+          const btn = document.getElementById('btnLinkYoutube');
+          const link = p.link_youtube; 
+
+          if (link && link.trim() !== "") {
+              btn.href = link;
+              btn.classList.remove('hidden');
+          } else {
+              btn.classList.add('hidden');
+              btn.href = "#";
+          }
+          document.getElementById('modalPalavra').classList.remove('hidden');
+      }
+      
       // ==========================================
       // BÍBLIA
       // ==========================================
