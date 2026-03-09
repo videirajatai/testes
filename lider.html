@@ -532,18 +532,18 @@
 
     <div id="biblia-overlay" onclick="fecharBiblia()"></div>
 
-    <script>
+   <script>
       const API_URL = sessionStorage.getItem('urlApi');
       
       // --- CREDENCIAIS DO SUPABASE ---
-      const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; // Ex: https://xyz.supabase.co
+      const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
       const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
 
       let dadosMembros = [], dadosCelulas = [], listaPalavras = [], listaAgenda = [];
       
       window.onload = carregarTudo;
 
-      // --- O NOVO MOTOR DE COMUNICAÇÃO ---
+      // --- MOTOR DE COMUNICAÇÃO: GOOGLE ---
       async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
           try {
@@ -555,12 +555,12 @@
               if (json.status === "sucesso") return json.dados || json.mensagem;
               else throw new Error(json.mensagem);
           } catch(e) {
-              console.error("Erro na API:", e);
-              alert("Ocorreu um erro ao comunicar com o servidor: " + e.message);
+              console.error("Erro na API Google:", e);
               throw e;
           }
       }
-///////////////////////////// nova abaixo
+
+      // --- MOTOR DE COMUNICAÇÃO: SUPABASE (LEITURA) ---
       async function lerSupabase(tabela) {
           const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
               method: 'GET',
@@ -569,25 +569,43 @@
           if (!res.ok) throw new Error(`Erro ao ler ${tabela}`);
           return await res.json();
       }
-      //////////////////////nova acima
 
-async function carregarTudo() {
+      // --- MOTOR DE COMUNICAÇÃO: SUPABASE (GRAVAÇÃO) ---
+      async function salvarMembroSupabase(dados) {
+          const res = await fetch(`${SB_URL}/rest/v1/membros`, {
+              method: 'POST',
+              headers: { 
+                  'apikey': SB_KEY, 
+                  'Authorization': `Bearer ${SB_KEY}`,
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(dados)
+          });
+          
+          if (!res.ok) {
+              throw new Error("Erro ao salvar. Verifique se o RLS de INSERT está ativado no Supabase.");
+          }
+          return "Membro cadastrado com sucesso! 🚀";
+      }
+
+      // --- FUNÇÃO PRINCIPAL ---
+      async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); 
         if(icon) icon.classList.add('fa-spin');
         
         document.getElementById('relData').valueAsDate = new Date();
         
-        // --- 1. BUSCA O SUPABASE (Se falhar, não quebra o resto) ---
+        // 1. BUSCA O SUPABASE (Se falhar, não quebra o resto)
         try {
             dadosMembros = await lerSupabase('membros'); 
             document.getElementById('badge-total-membros').innerText = dadosMembros.length;
             renderizarMembros(dadosMembros);
         } catch (erroSupabase) {
-            console.error("Supabase bloqueou a leitura:", erroSupabase);
-            document.getElementById('gridMembros').innerHTML = '<p style="text-align:center; color:#dc3545; padding: 20px; font-weight: bold;">Erro no Supabase. Verifique a chave Anon e a política RLS.</p>';
+            console.error("Supabase falhou:", erroSupabase);
+            document.getElementById('gridMembros').innerHTML = '<p style="text-align:center; color:#dc3545; padding: 20px;">Erro ao carregar membros do Supabase.</p>';
         }
 
-        // --- 2. BUSCA O GOOGLE (Funciona independente do Supabase) ---
+        // 2. BUSCA O GOOGLE E GITHUB
         try {
             const res = await fetchGoogle('buscarDadosIniciais');
             dadosCelulas = res.celulas;
@@ -606,7 +624,7 @@ async function carregarTudo() {
                 renderizarAgenda([]);
             }
 
-            carregarVersiculoDoDia();
+            carregarVersiculoAleatorio();
             
         } catch(erroGoogle) {
             console.log("Erro ao carregar dados do Google:", erroGoogle);
@@ -614,7 +632,7 @@ async function carregarTudo() {
             if(icon) icon.classList.remove('fa-spin');
         }
       }
-/////////////////////////////////////////
+
       function mudarSecao(s) {
          ['lista','celulas','cadastro','relatorio','sugestao','palavras','agenda','cadastro-agenda'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -622,6 +640,7 @@ async function carregarTudo() {
          if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
       }
 
+      // --- RENDERIZAR MEMBROS (Padrão Minúsculo) ---
       function renderizarMembros(lista) {
          const grid = document.getElementById('gridMembros'); 
          grid.innerHTML = '';
@@ -630,7 +649,6 @@ async function carregarTudo() {
          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
 
          lista.forEach(m => {
-            // Lendo do banco padronizado (tudo minúsculo, sem acentos)
             let nome = m.nome || 'Sem Nome'; 
             let celula = m.celula || '-';  
             let categoria = m.tipo || 'Frequentador'; 
@@ -639,10 +657,8 @@ async function carregarTudo() {
             let telClean = tel.replace(/\D/g, '');
             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
             
-            // Data de nascimento
             let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
             
-            // Badge de Dizimista
             let badgeDizimista = (String(m.dizimista).toLowerCase() === 'sim' || m.dizimista === true) 
                 ? `<span style="font-size:0.7rem; margin-left:5px; color:#166534; background:#dcfce7; padding:2px 6px; border-radius:4px; border:1px solid #bbf7d0;"><i class="fas fa-seedling"></i> Dizimista</span>` 
                 : '';
@@ -674,11 +690,9 @@ async function carregarTudo() {
               div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada.</p>';
               return;
           }
-
           lista.forEach((p, index) => {
               let dataF = p[0];
               try { if(p[0].includes('-')) { const dp=p[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-
               div.innerHTML += `
               <div class="word-list-item" onclick="abrirPalavra(${index})">
                   <div>
@@ -693,12 +707,10 @@ async function carregarTudo() {
       function renderizarAgenda(lista) {
          const div = document.getElementById('listaAgenda');
          div.innerHTML = '';
-         
          if(!lista || lista.length === 0) {
              div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1; margin-top:20px;">Nenhum evento na agenda.</p>';
              return;
          }
-
          lista.sort((a, b) => {
              const parseDate = (d) => {
                  if(!d) return 0;
@@ -708,7 +720,6 @@ async function carregarTudo() {
              };
              return parseDate(a[0]) - parseDate(b[0]);
          });
-
          lista.forEach((a) => {
              let dataF = a[0];
              try { if(a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
@@ -717,7 +728,6 @@ async function carregarTudo() {
              if(a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3';
              else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)';
              else if(a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
-
              let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
 
              div.innerHTML += `
@@ -794,21 +804,30 @@ async function carregarTudo() {
       // --- ENVIOS DOS FORMULÁRIOS ---
       document.getElementById('formMembro').onsubmit = async function(e) {
          e.preventDefault(); 
-         const btn = document.getElementById('btnSalvar'); btn.disabled = true; btn.innerText="Salvando...";
+         const btn = document.getElementById('btnSalvar'); 
+         btn.disabled = true; btn.innerText="Salvando...";
          
-         const d = { 
-            nome: this.nome.value, nascimento: this.nascimento.value, categoria: this.categoria.value, 
-            celula: this.celula.value, telefone: this.telefone.value, 
-            batizado: this.batizado.checked?"Sim":"Não", cursao: this.cursao.checked?"Sim":"Não", 
-            ctl: this.ctl.checked?"Sim":"Não", encontro: this.encontro.checked?"Sim":"Não" 
+         const novoMembro = { 
+            nome: this.nome.value, 
+            nascimento: this.nascimento.value || null, 
+            tipo: this.categoria.value, // "Membro", "Frequentador", "Líder"
+            celula: this.celula.value, 
+            telefone: this.telefone.value, 
+            batizado: this.batizado.checked ? "Sim" : "Não", 
+            cursao: this.cursao.checked ? "Sim" : "Não", 
+            ctl: this.ctl.checked ? "Sim" : "Não", 
+            encontro: this.encontro.checked ? "Sim" : "Não",
+            dizimista: "Não" 
          };
          
          try {
-            const resposta = await fetchGoogle('salvarMembro', d);
+            const resposta = await salvarMembroSupabase(novoMembro);
             alert(resposta);
             this.reset();
             mudarSecao('lista');
-            carregarTudo();
+            carregarTudo(); // Recarrega para mostrar o membro recém-adicionado
+         } catch (err) {
+            alert(err.message);
          } finally {
             btn.disabled = false; btn.innerText="Salvar";
          }
@@ -840,11 +859,8 @@ async function carregarTudo() {
          const btn = document.getElementById('btnSalvarAgenda'); btn.disabled = true; btn.innerText="Salvando...";
          
          const d = { 
-            dataEvento: this.dataEvento.value, 
-            descricao: this.descricao.value, 
-            observacao: this.observacao.value, 
-            tipo: this.tipo.value, 
-            categoria: this.categoria.value 
+            dataEvento: this.dataEvento.value, descricao: this.descricao.value, 
+            observacao: this.observacao.value, tipo: this.tipo.value, categoria: this.categoria.value 
          };
          
          try {
@@ -854,7 +870,6 @@ async function carregarTudo() {
              mudarSecao('agenda');
              carregarTudo();
          } catch(err) {
-             // O erro já é tratado no motor de comunicação
          } finally {
              btn.disabled = false; btn.innerText="Salvar Evento";
          }
@@ -876,9 +891,8 @@ async function carregarTudo() {
       };
 
       // ==========================================
-      // FUNÇÕES DA BÍBLIA
+      // DADOS E FUNÇÕES DA BÍBLIA
       // ==========================================
-      
       const dadosBiblia = [
           { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
           { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
@@ -900,7 +914,7 @@ async function carregarTudo() {
           { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
           { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, 
           { id: "malaquias", nome: "Malaquias", caps: 4 },
-          // NOVO TESTAMENTO
+          // NOVO TESTAMENTO (Índices 39 até 65)
           { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, 
           { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
           { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, 
@@ -922,7 +936,6 @@ async function carregarTudo() {
           const overlay = document.getElementById('biblia-overlay');
           overlay.style.display = 'block';
           setTimeout(() => overlay.style.opacity = '1', 10);
-          
           iniciarBiblia(); 
       }
 
@@ -933,39 +946,37 @@ async function carregarTudo() {
           setTimeout(() => overlay.style.display = 'none', 300);
       }
 
-
-async function carregarVersiculoDoDia() {
-          // 31 referências de ouro do Novo Testamento (formato: livro/capitulo/versiculo)
-          const versiculosNT = [
-              "rm/8/28", "jo/3/16", "fp/4/13", "mt/11/28", "rm/12/2",
-              "gl/2/20", "ef/2/8", "fp/4/6", "cl/3/14", "2tm/1/7",
-              "hb/11/1", "tg/1/5", "1pe/5/7", "1jo/4/8", "ap/3/20",
-              "mt/6/33", "mc/11/24", "lc/1/37", "jo/14/6", "at/1/8",
-              "rm/5/8", "1co/13/4", "2co/5/17", "gl/5/22", "ef/6/11",
-              "fp/1/6", "cl/1/15", "1ts/5/16", "hb/12/2", "tg/4/8", "1pe/2/9"
-          ];
-
-          // Pega o dia do mês (1 a 31) e descobre qual referência usar
-          const diaHoje = new Date().getDate(); 
-          const referenciaEscolhida = versiculosNT[diaHoje - 1]; 
+      // --- VERSÍCULO ALEATÓRIO DO NOVO TESTAMENTO (DIRETO DO SEU GITHUB) ---
+      async function carregarVersiculoAleatorio() {
+          // Pega apenas os livros do Novo Testamento (do Mateus em diante)
+          const livrosNT = dadosBiblia.slice(39);
+          
+          // Sorteia um livro e um capítulo
+          const livroAleatorio = livrosNT[Math.floor(Math.random() * livrosNT.length)];
+          const capAleatorio = Math.floor(Math.random() * livroAleatorio.caps) + 1;
 
           try {
-              // Chama a API pedindo a versão ARA (Almeida Revista e Atualizada)
-              const resposta = await fetch(`https://www.abibliadigital.com.br/api/verses/ara/${referenciaEscolhida}`);
-              const dados = await resposta.json();
+              // Busca no seu próprio repositório no Github
+              const url = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livroAleatorio.id}/${capAleatorio}.json`;
+              const resposta = await fetch(url);
+              
+              if (!resposta.ok) throw new Error("Erro na busca do github");
+              
+              const versiculos = await resposta.json();
+              
+              // Sorteia um versículo dentro do capítulo
+              const vAleatorio = versiculos[Math.floor(Math.random() * versiculos.length)];
 
-              // Joga o texto e o livro lá no card vermelho
-              document.getElementById('texto-versiculo-dia').innerText = `"${dados.text}"`;
-              document.getElementById('ref-versiculo-dia').innerText = `- ${dados.book.name} ${dados.chapter}:${dados.number}`;
+              document.getElementById('texto-versiculo-dia').innerText = `"${vAleatorio.content}"`;
+              document.getElementById('ref-versiculo-dia').innerText = `- ${livroAleatorio.nome} ${capAleatorio}:${vAleatorio.number}`;
+              
           } catch (erro) {
-              // Se a internet do usuário estiver ruim e a API não responder, mostra um de reserva
+              // Se a internet falhar ou der erro no github, coloca um fixo lindo
               document.getElementById('texto-versiculo-dia').innerText = '"Tudo posso naquele que me fortalece."';
               document.getElementById('ref-versiculo-dia').innerText = "- Filipenses 4:13";
           }
       }
 
-      
-      
       function iniciarBiblia() {
           const selectLivro = document.getElementById('biblia-livro');
           selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
@@ -974,11 +985,7 @@ async function carregarVersiculoDoDia() {
               let option = document.createElement('option');
               option.value = livro.id;
               option.text = livro.nome;
-              
-              if (index >= 39) {
-                  option.style.fontWeight = "bold"; 
-              }
-              
+              if (index >= 39) option.style.fontWeight = "bold"; 
               selectLivro.appendChild(option);
           });
       }
@@ -986,7 +993,6 @@ async function carregarVersiculoDoDia() {
       function atualizarCapitulos() {
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
-          
           selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
           
           if (selectLivro.value === "") {
@@ -995,64 +1001,23 @@ async function carregarVersiculoDoDia() {
           }
 
           const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
-          
           for (let i = 1; i <= livroEscolhido.caps; i++) {
               let option = document.createElement('option');
               option.value = i;
               option.text = i;
               selectCapitulo.appendChild(option);
           }
-          
           selectCapitulo.disabled = false;
       }
 
-      /*async function carregarCapitulo() {
-          const selectLivro = document.getElementById('biblia-livro');
-          const inputCapitulo = document.getElementById('biblia-capitulo');
-          const conteudo = document.getElementById('biblia-conteudo');
-          
-          const livro = selectLivro.value;
-          const capitulo = inputCapitulo.value;
-
-          if (!livro || !capitulo) {
-              alert("Por favor, selecione um livro e o capítulo.");
-              return;
-          }
-
-          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando...</p>";
-          
-          try {
-              const versiculos = await fetchGoogle('buscarCapituloBiblia', { livro: livro, capitulo: capitulo });
-              
-              conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
-              
-              versiculos.forEach(v => {
-                  let blocoHTML = `<div style="margin-bottom: 15px;">`;
-                  
-                  if (v.title && v.title.trim() !== "") {
-                      blocoHTML += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">${v.title}</h4>`;
-                  }
-                  
-                  blocoHTML += `<p style="margin: 0; text-align: justify;">
-                                  <sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>
-                                  ${v.content}
-                                </p></div>`;
-                  conteudo.innerHTML += blocoHTML;
-              });
-
-          } catch (e) {
-              conteudo.innerHTML = `<p style="color: var(--danger-text); text-align: center;">Erro ao carregar o capítulo. Verifique se o livro e o capítulo existem.</p>`;
-          }
-      }*/
-
-      //LEITURA PELO GITHUB REPOSITORIO - USO FUTURO
+      // LEITURA PELO GITHUB REPOSITORIO
       async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
           const inputCapitulo = document.getElementById('biblia-capitulo');
           const conteudo = document.getElementById('biblia-conteudo');
           
-          const livro = selectLivro.value; // ex: genesis
-          const capitulo = inputCapitulo.value; // ex: 1
+          const livro = selectLivro.value; 
+          const capitulo = inputCapitulo.value; 
 
           if (!livro || !capitulo) {
               alert("Por favor, selecione um livro e o capítulo.");
@@ -1062,16 +1027,11 @@ async function carregarVersiculoDoDia() {
           conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Lendo do GitHub...</p>";
           
           try {
-              // --- A MÁGICA ACONTECE AQUI ---
-              // Substitua 'SEU_USUARIO' e 'SEU_REPO' pelos seus dados do GitHub
               const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`;
-              
               const resposta = await fetch(urlGithub);
               if (!resposta.ok) throw new Error("Capítulo não encontrado");
               
               const versiculos = await resposta.json();
-              
-              // Monta o texto na tela
               conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
               
               versiculos.forEach(v => {
