@@ -865,14 +865,76 @@
       }
 
       function atualizarCapitulos() {
-          const selectLivro = document.getElementById('biblia-livro'); const selectCapitulo = document.getElementById('biblia-capitulo');
+          const selectLivro = document.getElementById('biblia-livro');
+          const selectCapitulo = document.getElementById('biblia-capitulo');
+          
+          // Sempre reseta e bloqueia primeiro por segurança
           selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
-          if (selectLivro.value === "") { selectCapitulo.disabled = true; return; }
+          selectCapitulo.disabled = true;
+
+          if (!selectLivro.value) return;
+
           const livro = dadosBiblia.find(l => l.id === selectLivro.value);
+          if (!livro) return; // Evita erro se o livro não for encontrado
+
           for (let i = 1; i <= livro.caps; i++) {
-              let opt = document.createElement('option'); opt.value = i; opt.text = i; selectCapitulo.appendChild(opt);
+              let opt = document.createElement('option'); 
+              opt.value = i; 
+              opt.text = i; 
+              selectCapitulo.appendChild(opt);
           }
+          
+          // Libera o campo após carregar as opções
           selectCapitulo.disabled = false;
+      }
+
+      async function carregarCapitulo() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const inputCapitulo = document.getElementById('biblia-capitulo');
+          const conteudo = document.getElementById('biblia-conteudo');
+          
+          const livro = selectLivro.value; 
+          const capitulo = inputCapitulo.value; 
+          
+          if (!livro || !capitulo) { 
+              alert("Selecione um livro e o capítulo."); 
+              return; 
+          }
+          
+          conteudo.innerHTML = "<p style='text-align:center; color:#94a3b8;'><i class='fas fa-spinner fa-spin'></i> Lendo da base...</p>";
+          
+          try {
+              const res = await fetch(`https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`);
+              if (!res.ok) throw new Error("Não encontrado");
+              
+              const dados = await res.json();
+              
+              // Garante que funcione mesmo se o JSON for um objeto em vez de array direto
+              const versiculos = Array.isArray(dados) ? dados : (dados.versiculos || dados.verses || []);
+
+              // Monta todo o HTML antes de jogar na tela (melhora a performance e evita bugs)
+              let htmlFinal = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
+              
+              versiculos.forEach(v => {
+                  htmlFinal += `<div style="margin-bottom: 15px;">`;
+                  
+                  // Aceita title ou titulo
+                  if (v.title || v.titulo) {
+                      htmlFinal += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title || v.titulo}</h4>`;
+                  }
+                  
+                  // Aceita content, text ou texto
+                  const textoVersiculo = v.content || v.texto || v.text || "";
+                  const numeroVersiculo = v.number || v.numero || "";
+                  
+                  htmlFinal += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${numeroVersiculo}</sup>${textoVersiculo}</p></div>`;
+              });
+              
+              conteudo.innerHTML = htmlFinal;
+          } catch (e) { 
+              console.error("Erro na bíblia:", e);
+              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar a passagem. Tente novamente.</p>`; 
+          }
       }
 
       async function carregarCapitulo() {
