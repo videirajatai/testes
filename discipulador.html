@@ -291,6 +291,8 @@
                 <div class="form-group"><label>Nome da Célula</label><input type="text" id="editCelulaNome" required></div>
                 <div class="form-group"><label>Líder</label><input type="text" id="editCelulaLider" required></div>
                 <div class="form-group"><label>Dia e Horário</label><input type="text" id="editCelulaDia" placeholder="Ex: Terça-feira às 20h" required></div>
+                <div class="form-group"><label>Endereço</label><input type="text" id="editCelulaEnd" placeholder="Rua, Número, Bairro..."></div>
+                
                 <button type="submit" id="btnSalvarEdicaoCelula" class="btn-save">Salvar Célula</button>
             </form>
         </div>
@@ -590,12 +592,16 @@
 
       function abrirEditarCelula(id) {
           const c = dadosCelulas.find(x => String(x.id) === String(id));
-          if(!c) return;
+          if(!c) {
+              alert("Erro ao puxar dados da célula. ID não encontrado.");
+              return;
+          }
           
           document.getElementById('editCelulaId').value = c.id;
           document.getElementById('editCelulaNome').value = c.nome || '';
           document.getElementById('editCelulaLider').value = c.lider || '';
           document.getElementById('editCelulaDia').value = c.dia_horario || '';
+          document.getElementById('editCelulaEnd').value = c.endereco || ''; // Puxando o endereço da base
 
           document.getElementById('modalEditarCelula').classList.remove('hidden');
       }
@@ -608,14 +614,18 @@
           const dados = {
               nome: document.getElementById('editCelulaNome').value,
               lider: document.getElementById('editCelulaLider').value,
-              dia_horario: document.getElementById('editCelulaDia').value
+              dia_horario: document.getElementById('editCelulaDia').value,
+              endereco: document.getElementById('editCelulaEnd').value // Salvando o endereço
           };
 
           try {
               await atualizarSupabase('celulas', id, dados);
               fecharModal('modalEditarCelula');
-              carregarTudo();
-          } catch(err) { alert("Erro ao atualizar célula."); }
+              carregarTudo(); // Recarrega para atualizar a tabela
+          } catch(err) { 
+              alert("Erro ao atualizar célula."); 
+              console.error(err);
+          }
           finally { btn.innerText = "Salvar Célula"; btn.disabled = false; }
       };
 
