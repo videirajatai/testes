@@ -605,8 +605,130 @@
 
     <script>
       
+      const API_URL = sessionStorage.getItem('urlApi');
+
+      // --- CREDENCIAIS DO SUPABASE EXATAS ---
+      const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
+      const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
+
+      let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [], listaPalavras = [];
+      
+      window.onload = carregarTudo;
 
       // ==========================================
+      // MOTORES DE COMUNICAÇÃO
+      // ==========================================
+      
+      async function fetchGoogle(action, payload = {}) {
+        payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
+          try {
+              let res = await fetch(API_URL, {
+                  method: 'POST',
+                  body: JSON.stringify({ action: action, payload: payload })
+              });
+              let json = await res.json();
+              if (json.status === "sucesso") return json.dados || json.mensagem;
+              else throw new Error(json.mensagem);
+          } catch(e) { throw e; }
+      }
+
+      async function lerSupabase(tabela) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
+              method: 'GET',
+              headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+          });
+          if (!res.ok) throw new Error(`Erro ao ler tabela: ${tabela}`);
+          return await res.json();
+      }
+
+// NOVO: Função para Inserir dados no Supabase via POST
+      async function inserirSupabase(tabela, dados) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
+              method: 'POST',
+              headers: { 
+                  'apikey': SB_KEY, 
+                  'Authorization': `Bearer ${SB_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(dados)
+          });
+          if (!res.ok) throw new Error(`Erro ao inserir no Supabase.`);
+          return "Inserido com sucesso!";
+      }
+      
+      // NOVO: Função para Atualizar dados no Supabase via PATCH
+      async function atualizarSupabase(tabela, id, dados) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
+              method: 'PATCH',
+              headers: { 
+                  'apikey': SB_KEY, 
+                  'Authorization': `Bearer ${SB_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(dados)
+          });
+          if (!res.ok) throw new Error(`Erro ao atualizar no Supabase.`);
+          return "Atualizado com sucesso!";
+      }// ==========================================
+      // CARREGAMENTO INICIAL
+      // ==========================================
+      async function carregarTudo() {
+        const icon = document.getElementById('iconRefresh'); 
+        if(icon) icon.classList.add('fa-spin');
+        
+        try {
+            dadosMembros = await lerSupabase('membros'); 
+            renderizarMembrosEArquivos(dadosMembros);
+        } catch (e) { console.error(e); }
+
+        try {
+            dadosCelulas = await lerSupabase('celulas');
+            renderizarCelulas(dadosCelulas);
+            preencherSelects(dadosCelulas);
+        } catch (e) { console.error(e); }
+
+        try {
+            dadosRelatorios = await lerSupabase('relatorios');
+            filtrarRelatorios();
+        } catch (e) { console.error(e); }
+
+        try {
+            const agendaRes = await fetchGoogle('buscarAgenda');
+            listaAgenda = agendaRes || [];
+            renderizarAgenda(listaAgenda);
+        } catch(e) { renderizarAgenda([]); }
+
+        try {
+            listaPalavras = await lerSupabase('palavras');
+            listaPalavras.reverse(); 
+            renderizarPalavras(listaPalavras);
+        } catch (e) { console.error(e); }
+
+        if(icon) icon.classList.remove('fa-spin');
+      }
+
+      function mudarSecao(s) {
+         ['lista','celulas','relatorios','arquivos','agenda','palavras'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
+         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+         document.getElementById('secao-'+s).classList.remove('hidden');
+         if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
+      }
+
+      function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
+
+      
+
+
+
+
+
+
+
+      
+
+      // ======================================================================================================================================================
       // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
       // Variável para carregar Gênesis sozinho na primeira vez
