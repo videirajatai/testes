@@ -605,12 +605,13 @@
 
 <script>
 // ==========================================
-// CONFIGURAÇÃO SUPABASE
+// CONFIGURAÇÃO SUPABASE E GOOGLE
 // ==========================================
 const SB_URL = 'https://ryvfogmfpjyamgqsltks.supabase.co'; 
 const SB_KEY = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
+const URL_GOOGLE_AGENDA = 'https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec'; 
 
-let dadosMembros = [], dadosCelulas = [], dadosFinanceiro = [], dadosAgenda = [], dadosPalavras = [], dadosRelatorios = [];
+let dadosMembros = [], dadosCelulas = [], dadosFinanceiro = [], dadosPalavras = [], dadosRelatorios = [];
 
 // ==========================================
 // FUNÇÕES CORE (COMUNICAÇÃO SEGURA)
@@ -620,11 +621,17 @@ async function lerSupabase(tabela, query = "*") {
         const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=${query}`, {
             headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
         });
-        if (!res.ok) throw new Error(`Tabela ${tabela} não encontrada ou erro de permissão.`);
-        return await res.json();
+        const data = await res.json();
+        
+        // Se o Supabase retornar um erro (ex: coluna que não existe), devolvemos array vazio pra não quebrar a tela
+        if (!res.ok) {
+            console.error(`Erro ao ler tabela ${tabela}:`, data);
+            return []; 
+        }
+        return data;
     } catch (e) {
-        console.warn(e);
-        return []; // Retorna vazio para não "quebrar" o restante do painel
+        console.error(`Falha de conexão com a tabela ${tabela}:`, e);
+        return []; 
     }
 }
 
@@ -656,7 +663,7 @@ async function deletarSupabase(tabela, id) {
 // INICIALIZAÇÃO E NAVEGAÇÃO
 // ==========================================
 window.onload = function() {
-    iniciarBiblia(); // Já deixa a bíblia pronta
+    iniciarBiblia(); 
     carregarTudo();
 };
 
@@ -665,34 +672,36 @@ async function carregarTudo() {
     if(icon) icon.classList.add('fa-spin');
     
     try {
-        // Carrega todas as tabelas. Se alguma der erro, retorna [] e não trava as outras
         dadosMembros = await lerSupabase('membros');
         dadosCelulas = await lerSupabase('celulas');
         dadosFinanceiro = await lerSupabase('financeiro');
-        dadosAgenda = await lerSupabase('agenda');
 
         renderizarMembros(dadosMembros);
         renderizarCelulas();
         renderizarFinanceiro();
-        renderizarAgenda();
         atualizarSelectCelulas();
-    } catch(e) { console.error("Erro no load geral:", e); }
-    finally { if(icon) icon.classList.remove('fa-spin'); }
+
+        // Carrega a agenda do Google em paralelo
+        carregarAgendaGoogle();
+    } catch(e) { 
+        console.error("Erro no load geral:", e); 
+    } finally { 
+        if(icon) icon.classList.remove('fa-spin'); 
+    }
 }
 
 function mudarSecao(s) {
-    // Esconde todas as seções
+    // Esconde tudo
     ['lista','celulas','financeiro','arquivo','sugestoes','relatorios','agenda','cadastro-agenda','palavras','nova-palavra','cadastro','form-celula'].forEach(id => {
         const el = document.getElementById('secao-'+id);
         if(el) el.classList.add('hidden');
     });
     document.getElementById('modal-ver-relatorio').classList.add('hidden');
     
-    // Mostra a selecionada
+    // Mostra o alvo
     const target = document.getElementById('secao-'+s);
     if(target) target.classList.remove('hidden');
 
-    // Atualiza botões do menu
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.getElementById('btn-'+s);
     if(btn) btn.classList.add('active');
@@ -701,12 +710,16 @@ function mudarSecao(s) {
 // ==========================================
 // MÓDULO: MEMBROS
 // ==========================================
-// ==========================================
-// MÓDULO: MEMBROS
-// ==========================================
 function renderizarMembros(lista) {
     const grid = document.getElementById('gridMembros');
     grid.innerHTML = '';
+    
+    // Proteção: se não for uma lista válida, avisa na tela e para a função
+    if (!Array.isArray(lista)) {
+        grid.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar membros. Tabela não encontrada ou colunas incorretas.</p>';
+        return;
+    }
+
     const ativos = lista.filter(m => m.status !== 'Arquivado');
     const badge = document.getElementById('totalMembros');
     if(badge) badge.innerText = ativos.length;
@@ -755,7 +768,6 @@ function editarMembro(id) {
     document.getElementById('selectCelulas').value = m.celula || '';
     document.getElementById('campoCategoria').value = m.categoria || 'Membro';
     
-    // Marca os checkboxes se no banco estiver escrito "Sim"
     document.getElementById('checkBat').checked = m.batismo === 'Sim';
     document.getElementById('checkCur').checked = m.cursao === 'Sim';
     document.getElementById('checkCtl').checked = m.ctl === 'Sim';
@@ -777,8 +789,6 @@ document.getElementById('formMembro').onsubmit = async function(e) {
         celula: document.getElementById('selectCelulas').value,
         telefone: document.getElementById('campoTel').value,
         status: 'Ativo',
-        
-        // Converte o Checkbox (true/false) para Texto ("Sim"/"Não")
         batismo: document.getElementById('checkBat').checked ? 'Sim' : 'Não',
         cursao: document.getElementById('checkCur').checked ? 'Sim' : 'Não',
         ctl: document.getElementById('checkCtl').checked ? 'Sim' : 'Não',
@@ -787,13 +797,11 @@ document.getElementById('formMembro').onsubmit = async function(e) {
     
     try {
         id ? await atualizarSupabase('membros', id, dados) : await inserirSupabase('membros', dados);
-        // Recarrega os dados pra mostrar atualizado na tela
         dadosMembros = await lerSupabase('membros'); 
         renderizarMembros(dadosMembros);
         mudarSecao('lista');
     } catch(err) {
-        alert("Erro ao salvar membro. Verifique o console.");
-        console.error(err);
+        alert("Erro ao salvar membro.");
     } finally {
         btn.innerText = "Salvar"; btn.disabled = false;
     }
@@ -822,6 +830,9 @@ async function arquivar(id) {
 function carregarArquivados() {
     mudarSecao('arquivo');
     const tb = document.getElementById('corpoArquivo');
+    
+    if (!Array.isArray(dadosMembros)) return;
+    
     const arquivados = dadosMembros.filter(m => m.status === 'Arquivado');
     if(arquivados.length === 0) {
         tb.innerHTML = '<tr><td colspan="3" align="center">Nenhum membro arquivado.</td></tr>';
@@ -868,6 +879,7 @@ function filtrarTabela(idTabela) {
 // MÓDULO: CÉLULAS
 // ==========================================
 function atualizarSelectCelulas() {
+    if (!Array.isArray(dadosCelulas)) return;
     const html = '<option value="">Selecione a Célula</option>' + 
                  dadosCelulas.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
     const s1 = document.getElementById('filtroCelula');
@@ -878,6 +890,9 @@ function atualizarSelectCelulas() {
 
 function renderizarCelulas() {
     const corpo = document.getElementById('corpoCelulas');
+    corpo.innerHTML = '';
+    if (!Array.isArray(dadosCelulas)) return;
+    
     corpo.innerHTML = dadosCelulas.map(c => `
         <tr>
             <td><b>${c.nome}</b><br><small>${c.endereco||''}</small></td>
@@ -892,7 +907,7 @@ function renderizarCelulas() {
 
 function novaCelula() {
     document.getElementById('formCelula').reset();
-    document.getElementById('nomeOriginalCelula').value = ""; // Usado como ID
+    document.getElementById('nomeOriginalCelula').value = ""; 
     document.getElementById('tituloFormCelula').innerText = "Nova Célula";
     mudarSecao('form-celula');
 }
@@ -900,26 +915,23 @@ function novaCelula() {
 function editarCelula(id) {
     const c = dadosCelulas.find(x => x.id == id);
     if(!c) return;
-    document.getElementById('nomeOriginalCelula').value = c.id; // Guardando o ID
+    document.getElementById('nomeOriginalCelula').value = c.id;
     document.getElementById('tituloFormCelula').innerText = "Editar Célula";
     document.getElementById('celNome').value = c.nome || '';
-    // Como o selectLider estava vazio no HTML, preenchemos com os membros
-    preencherLideresCelulas();
+    
+    const selLider = document.getElementById('celLider');
+    selLider.innerHTML = '<option value="">Selecione o Líder</option>' + 
+                         (Array.isArray(dadosMembros) ? dadosMembros.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('') : '');
+                         
     document.getElementById('celLider').value = c.lider || '';
     document.getElementById('celDia').value = c.dia_horario || '';
     document.getElementById('celEndereco').value = c.endereco || '';
     mudarSecao('form-celula');
 }
 
-function preencherLideresCelulas() {
-    const sel = document.getElementById('celLider');
-    sel.innerHTML = '<option value="">Selecione o Líder</option>' + 
-                    dadosMembros.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('');
-}
-
 document.getElementById('formCelula').onsubmit = async function(e) {
     e.preventDefault();
-    const id = document.getElementById('nomeOriginalCelula').value; // Pegando o ID
+    const id = document.getElementById('nomeOriginalCelula').value; 
     const dados = {
         nome: document.getElementById('celNome').value,
         lider: document.getElementById('celLider').value,
@@ -927,14 +939,17 @@ document.getElementById('formCelula').onsubmit = async function(e) {
         endereco: document.getElementById('celEndereco').value
     };
     id ? await atualizarSupabase('celulas', id, dados) : await inserirSupabase('celulas', dados);
-    await carregarTudo();
+    dadosCelulas = await lerSupabase('celulas');
+    renderizarCelulas();
+    atualizarSelectCelulas();
     mudarSecao('celulas');
 };
 
 async function deletarCelula(id) {
     if(confirm("Excluir esta célula?")) {
         await deletarSupabase('celulas', id);
-        await carregarTudo();
+        dadosCelulas = await lerSupabase('celulas');
+        renderizarCelulas();
     }
 }
 
@@ -976,7 +991,7 @@ function atualizarCampos() {
         memSelect.required = true;
         
         memSelect.innerHTML = '<option value="">Selecione o membro...</option>' + 
-                              dadosMembros.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('');
+                              (Array.isArray(dadosMembros) ? dadosMembros.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('') : '');
     } else {
         lbl.innerText = "Descrição da Despesa/Entrada";
         memSelect.classList.add('hidden');
@@ -990,6 +1005,8 @@ function renderizarFinanceiro() {
     const corpo = document.getElementById('corpoFin');
     let saldo = 0, entradas = 0, saidas = 0;
     
+    if (!Array.isArray(dadosFinanceiro)) return;
+
     corpo.innerHTML = dadosFinanceiro.map(f => {
         const valor = parseFloat(f.valor || 0);
         if(f.tipo === 'Entrada') { entradas += valor; saldo += valor; }
@@ -1033,43 +1050,43 @@ document.getElementById('formFinanceiro').onsubmit = async function(e) {
     
     await inserirSupabase('financeiro', dados);
     this.reset();
-    await carregarTudo();
+    dadosFinanceiro = await lerSupabase('financeiro');
+    renderizarFinanceiro();
     btn.disabled = false; btn.innerText = "Registrar Movimentação";
-    mudarTabFin('extrato', document.querySelectorAll('.nav-btn')[3]); // Muda pra aba extrato
+    mudarTabFin('extrato', document.querySelectorAll('.nav-btn')[3]); 
 };
 
 async function deletarFinanceiro(id) {
     if(confirm("Excluir este lançamento financeiro?")) {
         await deletarSupabase('financeiro', id);
-        await carregarTudo();
+        dadosFinanceiro = await lerSupabase('financeiro');
+        renderizarFinanceiro();
     }
-}
-
-function recalcularFinanceiro() {
-    // Se quiser implementar filtro por mês, basta filtrar o array dadosFinanceiro e chamar renderizarFinanceiro(arrayFiltrado)
 }
 
 // ==========================================
 // MÓDULO: AGENDA (VIA GOOGLE SCRIPT)
 // ==========================================
-// COLOQUE AQUI A MESMA URL QUE VOCÊ USA NO DISCIPULADOR
-/*const URL_GOOGLE_AGENDA = 'https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec';
-
 async function carregarAgendaGoogle() {
     const grid = document.getElementById('listaAgenda');
+    if(!grid) return;
     grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin"></i> Carregando agenda...</p>';
+
+    if(!URL_GOOGLE_AGENDA || URL_GOOGLE_AGENDA === 'COLE_AQUI_A_URL_DO_SEU_GOOGLE_SCRIPT_DA_AGENDA') {
+        grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1 / -1;">Você precisa colar a URL do Google Script no início do código!</p>';
+        return;
+    }
 
     try {
         const res = await fetch(URL_GOOGLE_AGENDA);
         const dados = await res.json();
 
-        if(!dados || dados.length === 0) {
+        if(!Array.isArray(dados) || dados.length === 0) {
             grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento agendado.</p>';
             return;
         }
 
-        // Renderiza os cards igual no discipulador, mas com botão de excluir (opcional)
-        grid.innerHTML = dados.map((a, index) => `
+        grid.innerHTML = dados.map(a => `
             <div class="member-card">
                 <div style="display:flex; justify-content:space-between;">
                     <b style="color:var(--primary);">${a.evento || a.descricao || 'Sem título'}</b>
@@ -1080,24 +1097,22 @@ async function carregarAgendaGoogle() {
                     <span class="status-pill">${a.categoria || 'Geral'}</span>
                     <span class="status-pill ${a.tipo === 'Gratuito' ? 'active' : ''}">${a.tipo || '-'}</span>
                 </div>
-                <button onclick="deletarAgendaGoogle(${index})" class="btn-card" style="color:red; margin-top:10px;"><i class="fas fa-trash"></i> Excluir Evento</button>
             </div>`).join('');
             
     } catch(e) {
-        console.error("Erro ao puxar agenda:", e);
+        console.error("Erro ao puxar agenda do Google:", e);
         grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1 / -1;">Erro ao carregar a agenda. Verifique o link.</p>';
     }
 }
 
-// Formulário para SALVAR novo evento no Google
+// Opcional: Formulário para enviar para o Google (caso o seu script aceite)
 document.getElementById('formAgenda').onsubmit = async function(e) {
     e.preventDefault();
     const btn = document.getElementById('btnSalvarAgenda');
-    btn.disabled = true;
-    btn.innerText = "Salvando no Google...";
+    btn.disabled = true; btn.innerText = "Salvando...";
 
     const dados = {
-        acao: "inserir", // Parâmetro que você pode checar lá no seu Apps Script
+        acao: "inserir", 
         data: document.getElementById('agendaData').value,
         evento: document.getElementById('agendaDesc').value,
         observacao: document.getElementById('agendaObs').value,
@@ -1109,49 +1124,37 @@ document.getElementById('formAgenda').onsubmit = async function(e) {
         await fetch(URL_GOOGLE_AGENDA, {
             method: 'POST',
             body: JSON.stringify(dados)
-            // Se der erro de CORS, você pode precisar usar: mode: 'no-cors'
         });
-        
-        alert("Evento salvo com sucesso!");
+        alert("Evento enviado para a agenda!");
         this.reset();
         await carregarAgendaGoogle();
         mudarSecao('agenda');
     } catch(e) {
-        alert("Erro ao salvar o evento.");
+        alert("Erro ao salvar o evento na planilha.");
     } finally {
-        btn.disabled = false;
-        btn.innerText = "Salvar Evento";
+        btn.disabled = false; btn.innerText = "Salvar Evento";
     }
 };
 
-// Se precisar excluir via Google
-async function deletarAgendaGoogle(index) {
-    if(confirm("Excluir este evento? (Requer que a função de exclusão esteja configurada no Google Script)")) {
-        try {
-            await fetch(URL_GOOGLE_AGENDA, {
-                method: 'POST',
-                body: JSON.stringify({ acao: "deletar", linha: index })
-            });
-            await carregarAgendaGoogle();
-        } catch(e) {
-            alert("Erro ao excluir.");
-        }
-    }
-}
-*/
 // ==========================================
 // MÓDULO: PEDIDOS DE ORAÇÃO (SUGESTÕES)
 // ==========================================
 async function carregarSugestoes() {
     mudarSecao('sugestoes');
     const corpo = document.getElementById('corpoSugestoes');
-    corpo.innerHTML = '<tr><td colspan="2">Carregando...</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="2" align="center">Buscando...</td></tr>';
+    
     const dados = await lerSupabase('sugestoes');
+    if (!Array.isArray(dados) || dados.length === 0) {
+        corpo.innerHTML = '<tr><td colspan="2" align="center">Nenhum pedido recebido.</td></tr>';
+        return;
+    }
+    
     corpo.innerHTML = dados.reverse().map(s => `
         <tr>
             <td style="width:100px;"><small>${s.data}</small></td>
             <td>${s.texto || s.mensagem}</td>
-        </tr>`).join('') || '<tr><td colspan="2" align="center">Nenhum pedido.</td></tr>';
+        </tr>`).join('');
 }
 
 // ==========================================
@@ -1161,9 +1164,10 @@ async function carregarRelatorios() {
     mudarSecao('relatorios');
     const lista = document.getElementById('listaRelatorios');
     lista.innerHTML = '<p style="text-align:center;">Buscando relatórios...</p>';
-    dadosRelatorios = await lerSupabase('relatorios'); 
     
-    // Atualiza o select de filtro baseado nas células que enviaram
+    dadosRelatorios = await lerSupabase('relatorios'); 
+    if(!Array.isArray(dadosRelatorios)) dadosRelatorios = [];
+
     const celulasUnicas = [...new Set(dadosRelatorios.map(r => r.celula))];
     document.getElementById('filtroRelCelula').innerHTML = '<option value="">Todas as Células</option>' + 
         celulasUnicas.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -1221,7 +1225,7 @@ async function carregarPalavras() {
     document.getElementById('listaPalavras').innerHTML = '<p align="center">Carregando palavras...</p>';
     dadosPalavras = await lerSupabase('palavras');
     
-    if(dadosPalavras.length === 0) {
+    if(!Array.isArray(dadosPalavras) || dadosPalavras.length === 0) {
         document.getElementById('listaPalavras').innerHTML = '<p align="center" style="color:#999;">Nenhuma palavra cadastrada.</p>';
         return;
     }
@@ -1275,9 +1279,8 @@ function fecharModal(e) {
     document.getElementById('modalPalavra').classList.add('hidden');
 }
 
-
 // ==========================================
-// BÍBLIA (GITHUB) & VERSÍCULO
+// BÍBLIA (GITHUB)
 // ==========================================
 const dadosBiblia = [
     { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
