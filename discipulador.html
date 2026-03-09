@@ -161,9 +161,12 @@
                 <span id="badge-total-membros" style="background: var(--primary); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem;">0</span>
               </h4>
           </div>
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="inputBusca" placeholder="🔍 Buscar nome..." onkeyup="filtrarMembros()" style="margin:0; flex:2;">
-            <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex:1;"><option value="">Todas</option></select>
+          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h4 style="margin:0; color: var(--text-light); display: flex; align-items: center; gap: 8px;">
+                Membros da Rede
+                <span id="badge-total-membros" style="background: var(--primary); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem;">0</span>
+              </h4>
+              <button onclick="abrirAdicionarMembro()" style="background: var(--success-text); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fas fa-plus"></i> Novo</button>
           </div>
         </div>
         <div id="gridMembros" class="member-grid"></div>
@@ -256,28 +259,27 @@
     </div>
     
 
-    <div id="modalEditarMembro" class="modal-overlay hidden" onclick="fecharModal('modalEditarMembro')">
+    <div id="modalAdicionarMembro" class="modal-overlay hidden" onclick="fecharModal('modalAdicionarMembro')">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="btn-close-modal" onclick="fecharModal('modalEditarMembro')">&times;</button>
-            <h3 style="color:var(--primary); margin-top:10px; margin-bottom:20px;">Editar Membro</h3>
-            <form id="formEditarMembro">
-                <input type="hidden" id="editMembroId">
-                <div class="form-group"><label>Nome</label><input type="text" id="editMembroNome" required></div>
+            <button class="btn-close-modal" onclick="fecharModal('modalAdicionarMembro')">&times;</button>
+            <h3 style="color:var(--success-text); margin-top:10px; margin-bottom:20px;">Adicionar Novo Membro</h3>
+            <form id="formAdicionarMembro">
+                <div class="form-group"><label>Nome</label><input type="text" id="addMembroNome" required></div>
                 <div style="display:flex; gap:10px;">
-                    <div class="form-group" style="flex:1;"><label>Nascimento</label><input type="date" id="editMembroNasc"></div>
-                    <div class="form-group" style="flex:1;"><label>WhatsApp</label><input type="tel" id="editMembroTel"></div>
+                    <div class="form-group" style="flex:1;"><label>Nascimento</label><input type="date" id="addMembroNasc"></div>
+                    <div class="form-group" style="flex:1;"><label>WhatsApp</label><input type="tel" id="addMembroTel" placeholder="Ex: 64999999999"></div>
                 </div>
-                <div class="form-group"><label>Célula</label><select id="editMembroCelula" required></select></div>
-                <div class="form-group"><label>Categoria</label><select id="editMembroCat"><option>Membro</option><option>Frequentador</option><option>Líder</option></select></div>
+                <div class="form-group"><label>Célula</label><select id="addMembroCelula" required></select></div>
+                <div class="form-group"><label>Categoria</label><select id="addMembroCat"><option>Frequentador</option><option>Membro</option><option>Líder</option></select></div>
                 
                 <label style="margin-top:15px; display:block; font-weight:bold; color:var(--text-light);">Passos de Fé</label>
                 <div class="check-grid">
-                    <label class="check-option"><input type="checkbox" id="editMembroBatizado"><span class="checkmark">Batismo</span></label>
-                    <label class="check-option"><input type="checkbox" id="editMembroCursao"><span class="checkmark">Cursão</span></label>
-                    <label class="check-option"><input type="checkbox" id="editMembroCtl"><span class="checkmark">CTL</span></label>
-                    <label class="check-option"><input type="checkbox" id="editMembroEncontro"><span class="checkmark">Encontro</span></label>
+                    <label class="check-option"><input type="checkbox" id="addMembroBatizado"><span class="checkmark">Batismo</span></label>
+                    <label class="check-option"><input type="checkbox" id="addMembroCursao"><span class="checkmark">Cursão</span></label>
+                    <label class="check-option"><input type="checkbox" id="addMembroCtl"><span class="checkmark">CTL</span></label>
+                    <label class="check-option"><input type="checkbox" id="addMembroEncontro"><span class="checkmark">Encontro</span></label>
                 </div>
-                <button type="submit" id="btnSalvarEdicaoMembro" class="btn-save">Salvar Alterações</button>
+                <button type="submit" id="btnSalvarNovoMembro" class="btn-save" style="background: var(--success-text);">Cadastrar Membro</button>
             </form>
         </div>
     </div>
@@ -351,6 +353,22 @@
           return await res.json();
       }
 
+// NOVO: Função para Inserir dados no Supabase via POST
+      async function inserirSupabase(tabela, dados) {
+          const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
+              method: 'POST',
+              headers: { 
+                  'apikey': SB_KEY, 
+                  'Authorization': `Bearer ${SB_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(dados)
+          });
+          if (!res.ok) throw new Error(`Erro ao inserir no Supabase.`);
+          return "Inserido com sucesso!";
+      }
+      
       // NOVO: Função para Atualizar dados no Supabase via PATCH
       async function atualizarSupabase(tabela, id, dados) {
           const res = await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
@@ -553,6 +571,45 @@
               carregarTudo();
           } catch(err) { alert("Erro ao atualizar membro."); }
           finally { btn.innerText = "Salvar Alterações"; btn.disabled = false; }
+      };
+
+      function abrirAdicionarMembro() {
+          document.getElementById('formAdicionarMembro').reset(); // Limpa o formulário
+          
+          // Preenche as opções de células disponíveis no select
+          const selectAdd = document.getElementById('addMembroCelula');
+          selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
+          dadosCelulas.forEach(c => {
+              if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+          });
+
+          document.getElementById('modalAdicionarMembro').classList.remove('hidden');
+      }
+
+      document.getElementById('formAdicionarMembro').onsubmit = async function(e) {
+          e.preventDefault();
+          const btn = document.getElementById('btnSalvarNovoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
+          
+          const dados = {
+              nome: document.getElementById('addMembroNome').value,
+              nascimento: document.getElementById('addMembroNasc').value,
+              telefone: document.getElementById('addMembroTel').value,
+              celula: document.getElementById('addMembroCelula').value,
+              tipo: document.getElementById('addMembroCat').value,
+              batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
+              cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
+              ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
+              encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
+              arquivado: "Não", // Entra ativo por padrão
+              status: "Ativo"
+          };
+
+          try {
+              await inserirSupabase('membros', dados);
+              fecharModal('modalAdicionarMembro');
+              carregarTudo(); // Recarrega a tela com o novo membro na lista
+          } catch(err) { alert("Erro ao cadastrar membro."); console.error(err); }
+          finally { btn.innerText = "Cadastrar Membro"; btn.disabled = false; }
       };
 
       // ==========================================
