@@ -352,7 +352,7 @@
 <div class="stat-card" id="card-versiculo">
         <span class="titulo-versiculo"><!--<i class="fas fa-star"></i>--> Versículo do Dia</span>
         
-        <div id="dailyVersesWrapper"></div>
+        <div id="texto-versiculo"></div>
         <script async defer src="https://dailyverses.net/get/verse.js?language=arc"></script>
         
       </div>
@@ -970,7 +970,7 @@ function renderizarAgenda(lista) {
           setTimeout(() => overlay.style.display = 'none', 300);
       }
 
-      async function carregarVersiculoAleatorio() {
+      /*async function carregarVersiculoAleatorio() {
           const livrosNT = dadosBiblia.slice(39);
           const livroAleatorio = livrosNT[Math.floor(Math.random() * livrosNT.length)];
           const capAleatorio = Math.floor(Math.random() * livroAleatorio.caps) + 1;
@@ -989,7 +989,7 @@ function renderizarAgenda(lista) {
               document.getElementById('texto-versiculo-dia').innerText = '"Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos."';
               document.getElementById('ref-versiculo-dia').innerText = "- Filipenses 4:4";
           }
-      }
+      }*/
 
       function iniciarBiblia() {
           const selectLivro = document.getElementById('biblia-livro');
