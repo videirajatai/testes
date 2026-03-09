@@ -820,121 +820,112 @@
           document.getElementById('modalPalavra').classList.remove('hidden');
       }
       
-      // ==========================================
-      // BÍBLIA
+            // ==========================================
+      // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
       const dadosBiblia = [
-          { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
-          { id: "deuteronomio", nome: "Deuteronômio", caps: 34 }, { id: "josue", nome: "Josué", caps: 24 }, { id: "juizes", nome: "Juízes", caps: 21 }, { id: "rute", nome: "Rute", caps: 4 }, 
-          { id: "1samuel", nome: "1 Samuel", caps: 31 }, { id: "2samuel", nome: "2 Samuel", caps: 24 }, { id: "1reis", nome: "1 Reis", caps: 22 }, { id: "2reis", nome: "2 Reis", caps: 25 }, 
-          { id: "1cronicas", nome: "1 Crônicas", caps: 29 }, { id: "2cronicas", nome: "2 Crônicas", caps: 36 }, { id: "esdras", nome: "Esdras", caps: 10 }, { id: "neemias", nome: "Neemias", caps: 13 }, 
-          { id: "ester", nome: "Ester", caps: 10 }, { id: "jo", nome: "Jó", caps: 42 }, { id: "salmos", nome: "Salmos", caps: 150 }, { id: "proverbios", nome: "Provérbios", caps: 31 }, 
-          { id: "eclesiastes", nome: "Eclesiastes", caps: 12 }, { id: "cantares", nome: "Cantares", caps: 8 }, { id: "isaias", nome: "Isaías", caps: 66 }, { id: "jeremias", nome: "Jeremias", caps: 52 }, 
-          { id: "lamentacoes", nome: "Lamentações", caps: 5 }, { id: "ezequiel", nome: "Ezequiel", caps: 48 }, { id: "daniel", nome: "Daniel", caps: 12 }, { id: "oseias", nome: "Oseias", caps: 14 }, 
-          { id: "joel", nome: "Joel", caps: 3 }, { id: "amos", nome: "Amós", caps: 9 }, { id: "obadias", nome: "Obadias", caps: 1 }, { id: "jonas", nome: "Jonas", caps: 4 }, 
-          { id: "miqueias", nome: "Miqueias", caps: 7 }, { id: "naum", nome: "Naum", caps: 3 }, { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
-          { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, { id: "malaquias", nome: "Malaquias", caps: 4 },
-          { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
-          { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, { id: "1corintios", nome: "1 Coríntios", caps: 16 }, { id: "2corintios", nome: "2 Coríntios", caps: 13 }, 
-          { id: "galatas", nome: "Gálatas", caps: 6 }, { id: "efesios", nome: "Efésios", caps: 6 }, { id: "filipenses", nome: "Filipenses", caps: 4 }, { id: "colossenses", nome: "Colossenses", caps: 4 }, 
-          { id: "1tessalonicenses", nome: "1 Tessalonicenses", caps: 5 }, { id: "2tessalonicenses", nome: "2 Tessalonicenses", caps: 3 }, { id: "1timoteo", nome: "1 Timóteo", caps: 6 }, { id: "2timoteo", nome: "2 Timóteo", caps: 4 }, 
-          { id: "tito", nome: "Tito", caps: 3 }, { id: "filemon", nome: "Filemom", caps: 1 }, { id: "hebreus", nome: "Hebreus", caps: 13 }, { id: "tiago", nome: "Tiago", caps: 5 }, 
-          { id: "1pedro", nome: "1 Pedro", caps: 5 }, { id: "2pedro", nome: "2 Pedro", caps: 3 }, { id: "1joao", nome: "1 João", caps: 5 }, { id: "2joao", nome: "2 João", caps: 1 }, 
-          { id: "3joao", nome: "3 João", caps: 1 }, { id: "judas", nome: "Judas", caps: 1 }, { id: "apocalipse", nome: "Apocalipse", caps: 22 }
+          { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
+          { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
+          { id: "deuteronomio", nome: "Deuteronômio", caps: 34 }, { id: "josue", nome: "Josué", caps: 24 }, 
+          { id: "juizes", nome: "Juízes", caps: 21 }, { id: "rute", nome: "Rute", caps: 4 }, 
+          { id: "1samuel", nome: "1 Samuel", caps: 31 }, { id: "2samuel", nome: "2 Samuel", caps: 24 }, 
+          { id: "1reis", nome: "1 Reis", caps: 22 }, { id: "2reis", nome: "2 Reis", caps: 25 }, 
+          { id: "1cronicas", nome: "1 Crônicas", caps: 29 }, { id: "2cronicas", nome: "2 Crônicas", caps: 36 }, 
+          { id: "esdras", nome: "Esdras", caps: 10 }, { id: "neemias", nome: "Neemias", caps: 13 }, 
+          { id: "ester", nome: "Ester", caps: 10 }, { id: "jo", nome: "Jó", caps: 42 }, 
+          { id: "salmos", nome: "Salmos", caps: 150 }, { id: "proverbios", nome: "Provérbios", caps: 31 }, 
+          { id: "eclesiastes", nome: "Eclesiastes", caps: 12 }, { id: "cantares", nome: "Cantares", caps: 8 }, 
+          { id: "isaias", nome: "Isaías", caps: 66 }, { id: "jeremias", nome: "Jeremias", caps: 52 }, 
+          { id: "lamentacoes", nome: "Lamentações", caps: 5 }, { id: "ezequiel", nome: "Ezequiel", caps: 48 }, 
+          { id: "daniel", nome: "Daniel", caps: 12 }, { id: "oseias", nome: "Oseias", caps: 14 }, 
+          { id: "joel", nome: "Joel", caps: 3 }, { id: "amos", nome: "Amós", caps: 9 }, 
+          { id: "obadias", nome: "Obadias", caps: 1 }, { id: "jonas", nome: "Jonas", caps: 4 }, 
+          { id: "miqueias", nome: "Miqueias", caps: 7 }, { id: "naum", nome: "Naum", caps: 3 }, 
+          { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
+          { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, 
+          { id: "malaquias", nome: "Malaquias", caps: 4 },
+          { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, 
+          { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
+          { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, 
+          { id: "1corintios", nome: "1 Coríntios", caps: 16 }, { id: "2corintios", nome: "2 Coríntios", caps: 13 }, 
+          { id: "galatas", nome: "Gálatas", caps: 6 }, { id: "efesios", nome: "Efésios", caps: 6 }, 
+          { id: "filipenses", nome: "Filipenses", caps: 4 }, { id: "colossenses", nome: "Colossenses", caps: 4 }, 
+          { id: "1tessalonicenses", nome: "1 Tessalonicenses", caps: 5 }, { id: "2tessalonicenses", nome: "2 Tessalonicenses", caps: 3 }, 
+          { id: "1timoteo", nome: "1 Timóteo", caps: 6 }, { id: "2timoteo", nome: "2 Timóteo", caps: 4 }, 
+          { id: "tito", nome: "Tito", caps: 3 }, { id: "filemon", nome: "Filemom", caps: 1 }, 
+          { id: "hebreus", nome: "Hebreus", caps: 13 }, { id: "tiago", nome: "Tiago", caps: 5 }, 
+          { id: "1pedro", nome: "1 Pedro", caps: 5 }, { id: "2pedro", nome: "2 Pedro", caps: 3 }, 
+          { id: "1joao", nome: "1 João", caps: 5 }, { id: "2joao", nome: "2 João", caps: 1 }, 
+          { id: "3joao", nome: "3 João", caps: 1 }, { id: "judas", nome: "Judas", caps: 1 }, 
+          { id: "apocalipse", nome: "Apocalipse", caps: 22 }
       ];
 
-      async function abrirBiblia() {
+      function abrirBiblia() {
           document.getElementById('painel-biblia').classList.add('aberto');
-          const overlay = document.getElementById('biblia-overlay'); 
-          overlay.style.display = 'block'; 
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.display = 'block';
           setTimeout(() => overlay.style.opacity = '1', 10);
-          
-          iniciarBiblia(); // Preenche a lista de livros
-
-          const conteudo = document.getElementById('biblia-conteudo');
-          // Se for a primeira vez que abre, engatilha Gênesis 1
-          if (conteudo.innerText.includes("começar a leitura") || conteudo.innerText.includes("Selecione")) {
-              const selectLivro = document.getElementById('biblia-livro');
-              const selectCapitulo = document.getElementById('biblia-capitulo');
-              
-              selectLivro.value = "genesis"; // Seleciona Gênesis
-              atualizarCapitulos();          // Cria os 50 capítulos
-              selectCapitulo.value = "1";    // <--- O SEGREDO TAVA AQUI: Faltava cravar o capítulo 1
-              
-              carregarCapitulo(); // Puxa o texto pra tela
-          }
+          iniciarBiblia(); 
       }
 
       function fecharBiblia() {
           document.getElementById('painel-biblia').classList.remove('aberto');
-          const overlay = document.getElementById('biblia-overlay'); overlay.style.opacity = '0'; setTimeout(() => overlay.style.display = 'none', 300);
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.opacity = '0';
+          setTimeout(() => overlay.style.display = 'none', 300);
       }
 
       function iniciarBiblia() {
-          const selectLivro = document.getElementById('biblia-livro'); 
-          if(selectLivro.options.length > 0) return; // Já preencheu antes
-
-          // Monta todos os livros de uma vez de forma simples
-          let htmlLivros = '';
+          const selectLivro = document.getElementById('biblia-livro');
+          selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
           dadosBiblia.forEach((livro, index) => {
-              let negrito = (index >= 39) ? 'font-weight: bold;' : ''; // Destaca o Novo Testamento
-              htmlLivros += `<option value="${livro.id}" style="${negrito}">${livro.nome}</option>`;
+              let option = document.createElement('option');
+              option.value = livro.id;
+              option.text = livro.nome;
+              if (index >= 39) option.style.fontWeight = "bold"; 
+              selectLivro.appendChild(option);
           });
-          
-          selectLivro.innerHTML = htmlLivros;
       }
 
-     function atualizarCapitulos() {
+      function atualizarCapitulos() {
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
-          
-          const livroSelecionado = dadosBiblia.find(l => l.id === selectLivro.value);
-          
-          if (livroSelecionado) {
-              let htmlCaps = '';
-              for (let i = 1; i <= livroSelecionado.caps; i++) {
-                  htmlCaps += `<option value="${i}">${i}</option>`;
-              }
-              selectCapitulo.innerHTML = htmlCaps;
-              selectCapitulo.disabled = false; // Destrava a caixinha de capítulos
+          selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
+          if (selectLivro.value === "") { selectCapitulo.disabled = true; return; }
+          const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
+          for (let i = 1; i <= livroEscolhido.caps; i++) {
+              let option = document.createElement('option');
+              option.value = i; option.text = i; selectCapitulo.appendChild(option);
           }
+          selectCapitulo.disabled = false;
       }
 
-      
       async function carregarCapitulo() {
           const selectLivro = document.getElementById('biblia-livro');
-          const selectCapitulo = document.getElementById('biblia-capitulo'); // Corrigido de input para select
+          const inputCapitulo = document.getElementById('biblia-capitulo');
           const conteudo = document.getElementById('biblia-conteudo');
           
-          const livro = selectLivro.value; 
-          const capitulo = selectCapitulo.value; 
-          
-          if (!livro || !capitulo) { 
-              alert("Por favor, selecione o livro e o capítulo."); 
-              return; 
-          }
-          
-          conteudo.innerHTML = "<p style='text-align:center; color:#94a3b8;'><i class='fas fa-spinner fa-spin'></i> Carregando do GitHub...</p>";
+          const livro = selectLivro.value; const capitulo = inputCapitulo.value; 
+          if (!livro || !capitulo) { alert("Por favor, selecione um livro e o capítulo."); return; }
+
+          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Lendo do GitHub...</p>";
           
           try {
-              // Mantendo a sua URL original do GitHub
-              const res = await fetch(`https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`);
-              if (!res.ok) throw new Error("Arquivo não encontrado no GitHub");
+              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`;
+              const resposta = await fetch(urlGithub);
+              if (!resposta.ok) throw new Error("Capítulo não encontrado");
               
-              const versiculos = await res.json();
-              
-              // Limpa o conteúdo e prepara o título
+              const versiculos = await resposta.json();
               conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
               
               versiculos.forEach(v => {
-                  let html = `<div style="margin-bottom: 15px;">`;
-                  if (v.title) html += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
-                  html += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>${v.content}</p></div>`;
-                  conteudo.innerHTML += html;
+                  let blocoHTML = `<div style="margin-bottom: 15px;">`;
+                  if (v.title) blocoHTML += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
+                  blocoHTML += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>${v.content}</p></div>`;
+                  conteudo.innerHTML += blocoHTML;
               });
-          } catch (e) { 
-              console.error("Erro ao carregar:", e);
-              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Não foi possível carregar este capítulo. Verifique sua conexão.</p>`; 
+          } catch (e) {
+              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar do GitHub.</p>`;
           }
       }
     </script>
