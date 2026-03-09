@@ -568,45 +568,68 @@
           finally { btn.innerText = "Salvar Alterações"; btn.disabled = false; }
       };
 
-      function abrirAdicionarMembro() {
-          document.getElementById('formAdicionarMembro').reset(); // Limpa o formulário
-          
-          // Preenche as opções de células disponíveis no select
-          const selectAdd = document.getElementById('addMembroCelula');
-          selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
-          dadosCelulas.forEach(c => {
-              if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-          });
-
-          document.getElementById('modalAdicionarMembro').classList.remove('hidden');
-      }
-
-      document.getElementById('formAdicionarMembro').onsubmit = async function(e) {
-          e.preventDefault();
-          const btn = document.getElementById('btnSalvarNovoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
-          
-          const dados = {
-              nome: document.getElementById('addMembroNome').value,
-              nascimento: document.getElementById('addMembroNasc').value,
-              telefone: document.getElementById('addMembroTel').value,
-              celula: document.getElementById('addMembroCelula').value,
-              tipo: document.getElementById('addMembroCat').value,
-              batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
-              cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
-              ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
-              encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
-              arquivado: "Não", // Entra ativo por padrão
-              status: "Ativo"
-          };
-
-          try {
-              await inserirSupabase('membros', dados);
-              fecharModal('modalAdicionarMembro');
-              carregarTudo(); // Recarrega a tela com o novo membro na lista
-          } catch(err) { alert("Erro ao cadastrar membro."); console.error(err); }
-          finally { btn.innerText = "Cadastrar Membro"; btn.disabled = false; }
-      };
-
+              function abrirAdicionarMembro() {
+            const form = document.getElementById('formAdicionarMembro');
+            if(form) form.reset(); // Limpa o formulário
+            
+            // Preenche as opções de células disponíveis no select
+            const selectAdd = document.getElementById('addMembroCelula');
+            if(selectAdd){
+                selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
+                dadosCelulas.forEach(c => {
+                    if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+                });
+            }
+        
+            const modal = document.getElementById('modalAdicionarMembro');
+            if(modal) modal.classList.remove('hidden');
+        }
+        
+        
+        // Proteção para não quebrar o JS se o form não existir
+        const formAdicionar = document.getElementById('formAdicionarMembro');
+        
+        if(formAdicionar){
+        formAdicionar.onsubmit = async function(e) {
+            e.preventDefault();
+        
+            const btn = document.getElementById('btnSalvarNovoMembro');
+            if(btn){
+                btn.innerText = "Salvando...";
+                btn.disabled = true;
+            }
+        
+            const dados = {
+                nome: document.getElementById('addMembroNome')?.value || "",
+                nascimento: document.getElementById('addMembroNasc')?.value || "",
+                telefone: document.getElementById('addMembroTel')?.value || "",
+                celula: document.getElementById('addMembroCelula')?.value || "",
+                tipo: document.getElementById('addMembroCat')?.value || "",
+                batizado: document.getElementById('addMembroBatizado')?.checked ? "Sim" : "Não",
+                cursao: document.getElementById('addMembroCursao')?.checked ? "Sim" : "Não",
+                ctl: document.getElementById('addMembroCtl')?.checked ? "Sim" : "Não",
+                encontro: document.getElementById('addMembroEncontro')?.checked ? "Sim" : "Não",
+                arquivado: "Não",
+                status: "Ativo"
+            };
+        
+            try {
+                await inserirSupabase('membros', dados);
+                fecharModal('modalAdicionarMembro');
+                carregarTudo();
+            } 
+            catch(err){
+                alert("Erro ao cadastrar membro.");
+                console.error(err);
+            } 
+            finally {
+                if(btn){
+                    btn.innerText = "Cadastrar Membro";
+                    btn.disabled = false;
+                }
+            }
+        };
+        }
       // ==========================================
       // CÉLULAS (Listagem e Edição)
       // ==========================================
