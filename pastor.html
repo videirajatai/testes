@@ -875,83 +875,181 @@ function filtrarTabela(idTabela) {
     });
 }
 
-// ==========================================
-// MÓDULO: CÉLULAS
-// ==========================================
-function atualizarSelectCelulas() {
-    if (!Array.isArray(dadosCelulas)) return;
-    const html = '<option value="">Selecione a Célula</option>' + 
-                 dadosCelulas.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
-    const s1 = document.getElementById('filtroCelula');
-    const s2 = document.getElementById('selectCelulas');
-    if(s1) s1.innerHTML = '<option value="">Todas as Células</option>' + html;
-    if(s2) s2.innerHTML = html;
-}
+ // ==========================================
+      // CÉLULAS (Listagem e Edição)
+      // ==========================================
 
-function renderizarCelulas() {
-    const corpo = document.getElementById('corpoCelulas');
-    corpo.innerHTML = '';
-    if (!Array.isArray(dadosCelulas)) return;
-    
-    corpo.innerHTML = dadosCelulas.map(c => `
-        <tr>
-            <td><b>${c.nome}</b><br><small>${c.endereco||''}</small></td>
-            <td>${c.lider || '-'}</td>
-            <td>${c.dia_horario || '-'}</td>          
-            <td>${c.endereco || '-'}</td>
-                <button onclick="editarCelula('${c.id}')" class="btn-card" style="margin-bottom:5px;"><i class="fas fa-edit"></i></button>
-                <button onclick="deletarCelula('${c.id}')" class="btn-card" style="color:red"><i class="fas fa-trash"></i></button>
-            </td>
-        </tr>`).join('');
-}
+      function renderizarCelulas(lista) {
+         const tb = document.getElementById('corpoCelulas'); tb.innerHTML = '';
+         if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="4" style="text-align:center;">Nenhuma célula.</td></tr>'; return; }
+         lista.forEach(c => {
+            tb.innerHTML += `<tr>
+               <td>
+                   <div style="font-weight:700;">${c.nome || ''}</div>
+                   <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">
+                      <i class="fas fa-map-marker-alt"></i> ${c.endereco || ''}
+                   </div>
+                </td>
+                <td>${c.lider || ''}</td>
+                <td>${c.dia_horario || ''}</td>
+                <td style="text-align:center;">
+                    <button onclick="abrirEditarCelula('${c.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
+                </td>
+            </tr>`;
+         });
+      }
 
-function novaCelula() {
-    document.getElementById('formCelula').reset();
-    document.getElementById('nomeOriginalCelula').value = ""; 
-    document.getElementById('tituloFormCelula').innerText = "Nova Célula";
-    mudarSecao('form-celula');
-}
+      function preencherSelects(celulas) {
+         const s1 = document.getElementById('filtroCelula'); const s2 = document.getElementById('filtroRelCelula');
+         const s3 = document.getElementById('editMembroCelula'); // Preenche também o select do Modal de Edição
+         
+         s1.innerHTML='<option value="">Todas</option>'; s2.innerHTML='<option value="">Todas as Células</option>';
+         if(s3) s3.innerHTML='';
+         
+         if(!celulas) return;
+         celulas.forEach(c => {
+            if(c.nome) {
+                let opt = `<option value="${c.nome}">${c.nome}</option>`;
+                s1.innerHTML += opt; s2.innerHTML += opt; if(s3) s3.innerHTML += opt;
+            }
+         });
+      }
 
-function editarCelula(id) {
-    const c = dadosCelulas.find(x => x.id == id);
-    if(!c) return;
-    document.getElementById('nomeOriginalCelula').value = c.id;
-    document.getElementById('tituloFormCelula').innerText = "Editar Célula";
-    document.getElementById('celNome').value = c.nome || '';
-    
-    const selLider = document.getElementById('celLider');
-    selLider.innerHTML = '<option value="">Selecione o Líder</option>' + 
-                         (Array.isArray(dadosMembros) ? dadosMembros.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('') : '');
-                         
-    document.getElementById('celLider').value = c.lider || '';
-    document.getElementById('celDia').value = c.dia_horario || '';
-    document.getElementById('celEndereco').value = c.endereco || '';
-    mudarSecao('form-celula');
-}
+      function abrirEditarCelula(id) {
+          const c = dadosCelulas.find(x => String(x.id) === String(id));
+          if(!c) {
+              alert("Erro ao puxar dados da célula. ID não encontrado.");
+              return;
+          }
+          
+          document.getElementById('editCelulaId').value = c.id;
+          document.getElementById('editCelulaNome').value = c.nome || '';
+          document.getElementById('editCelulaLider').value = c.lider || '';
+          document.getElementById('editCelulaDia').value = c.dia_horario || '';
+          document.getElementById('editCelulaEnd').value = c.endereco || ''; // Puxando o endereço da base
 
-document.getElementById('formCelula').onsubmit = async function(e) {
-    e.preventDefault();
-    const id = document.getElementById('nomeOriginalCelula').value; 
-    const dados = {
-        nome: document.getElementById('celNome').value,
-        lider: document.getElementById('celLider').value,
-        dia_horario: document.getElementById('celDia').value,
-        endereco: document.getElementById('celEndereco').value
-    };
-    id ? await atualizarSupabase('celulas', id, dados) : await inserirSupabase('celulas', dados);
-    dadosCelulas = await lerSupabase('celulas');
-    renderizarCelulas();
-    atualizarSelectCelulas();
-    mudarSecao('celulas');
-};
+          document.getElementById('modalEditarCelula').classList.remove('hidden');
+      }
 
-async function deletarCelula(id) {
-    if(confirm("Excluir esta célula?")) {
-        await deletarSupabase('celulas', id);
-        dadosCelulas = await lerSupabase('celulas');
-        renderizarCelulas();
-    }
-}
+      document.getElementById('formEditarCelula').onsubmit = async function(e) {
+          e.preventDefault();
+          const btn = document.getElementById('btnSalvarEdicaoCelula'); btn.innerText = "Salvando..."; btn.disabled = true;
+          const id = document.getElementById('editCelulaId').value;
+          
+          const dados = {
+              nome: document.getElementById('editCelulaNome').value,
+              lider: document.getElementById('editCelulaLider').value,
+              dia_horario: document.getElementById('editCelulaDia').value,
+              endereco: document.getElementById('editCelulaEnd').value // Salvando o endereço
+          };
+
+          try {
+              await atualizarSupabase('celulas', id, dados);
+              fecharModal('modalEditarCelula');
+              carregarTudo(); // Recarrega para atualizar a tabela
+          } catch(err) { 
+              alert("Erro ao atualizar célula."); 
+              console.error(err);
+          }
+          finally { btn.innerText = "Salvar Célula"; btn.disabled = false; }
+      };
+
+      // ==========================================
+      // RELATÓRIOS (Listagem e Modal de Detalhe)
+      // ==========================================
+
+      function filtrarRelatorios() {
+          const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '';
+          const celulaFiltro = document.getElementById('filtroRelCelula').value.toLowerCase();
+          
+          if(!dadosRelatorios || dadosRelatorios.length === 0) {
+              divLista.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">Nenhum relatório na base.</div>';
+              return;
+          }
+
+          const listaFiltrada = dadosRelatorios.filter(r => (celulaFiltro === "" || String(r.celula||'').toLowerCase().includes(celulaFiltro)));
+
+          if(listaFiltrada.length === 0) {
+              divLista.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório para esta célula.</p>';
+              return;
+          }
+
+          // Ordenar por ID ou data descrescente (Mais recentes primeiro)
+          listaFiltrada.sort((a,b) => b.id - a.id);
+
+          listaFiltrada.forEach(r => {
+              let dataF = r.data || '';
+              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+              divLista.innerHTML += `
+                  <div class="report-list-item" onclick="abrirDetalheRelatorio('${r.id}')">
+                      <div>
+                          <strong style="color:var(--primary); font-size:1.1rem;">${r.celula || '-'}</strong>
+                          <div style="font-size:0.85rem; color:#666; margin-top:5px;"><i class="far fa-calendar-alt"></i> ${dataF}</div>
+                          <div style="font-size:0.85rem; color:#444; margin-top:3px; font-weight:600;"><i class="fas fa-users"></i> ${r.presentes ? r.presentes.split('(Total:')[0].trim() : '0'} presentes</div>
+                      </div>
+                      <i class="fas fa-chevron-right" style="color:#ccc; font-size:1.2rem;"></i>
+                  </div>
+              `;
+          });
+      }
+
+      function abrirDetalheRelatorio(id) {
+          const r = dadosRelatorios.find(x => String(x.id) === String(id));
+          if(!r) return;
+
+          let dataF = r.data || '';
+          try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+
+          document.getElementById('detalheRelCelula').innerText = r.celula || 'Célula';
+          document.getElementById('detalheRelData').innerText = dataF;
+          document.getElementById('detalheRelPresentes').innerText = r.presentes || 'Nenhum listado';
+          document.getElementById('detalheRelQuebra').innerText = r.quebra_gelo || '-';
+          document.getElementById('detalheRelPalavra').innerText = r.palavra || '-';
+          document.getElementById('detalheRelLouvor').innerText = r.louvor || '-';
+          document.getElementById('detalheRelLanche').innerText = r.lanche || '-';
+          document.getElementById('detalheRelObs').innerText = r.observacoes || 'Nenhuma observação.';
+
+          document.getElementById('modalRelatorio').classList.remove('hidden');
+      }
+
+      // ==========================================
+      // AGENDA
+      // ==========================================
+      function renderizarAgenda(lista) {
+         const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+         if(!lista || lista.length === 0) {
+             div.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento na agenda.</p>'; return;
+         }
+         lista.sort((a, b) => {
+             const parseDate = (d) => {
+                 if(!d) return 0;
+                 if(d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                 if(d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                 return new Date(d).getTime();
+             };
+             return parseDate(a[0]) - parseDate(b[0]);
+         });
+         
+         lista.forEach((a) => {
+             let dataF = a[0] || ''; try { if(a[0] && a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+             let corCategoria = '#555';
+             if(a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3'; else if(a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)'; else if(a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
+             let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+
+             div.innerHTML += `
+             <div class="member-card">
+                 <div class="card-header"><h4 class="card-name" style="color: var(--text-main); font-size: 1rem;"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                     <span class="cat-badge" style="background:${corCategoria}; color:white; border:none;">${a[4]||'Sem Categoria'}</span></div>
+                 <div style="font-size: 1rem; font-weight: 700; color: #333; margin-top: 5px;">${a[1]||''}</div>
+                 <div style="font-size: 0.85rem; color: #666; margin-top: 5px; min-height: 20px;">${a[2]||''}</div>
+                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                     <span style="font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: #f9f9f9; color: ${corTipo}; font-weight: bold; border: 1px solid #ddd;">
+                         <i class="fas fa-info-circle"></i> -> ${a[3]||''}</span>
+                 </div>
+             </div>`;
+         });
+      }
 
 // ==========================================
 // MÓDULO: FINANCEIRO
@@ -1064,77 +1162,7 @@ async function deletarFinanceiro(id) {
     }
 }
 
-// ==========================================
-// MÓDULO: AGENDA (VIA GOOGLE SCRIPT)
-// ==========================================
-async function carregarAgendaGoogle() {
-    const grid = document.getElementById('listaAgenda');
-    if(!grid) return;
-    grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin"></i> Carregando agenda...</p>';
 
-    if(!URL_GOOGLE_AGENDA || URL_GOOGLE_AGENDA === 'COLE_AQUI_A_URL_DO_SEU_GOOGLE_SCRIPT_DA_AGENDA') {
-        grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1 / -1;">Você precisa colar a URL do Google Script no início do código!</p>';
-        return;
-    }
-
-    try {
-        const res = await fetch(URL_GOOGLE_AGENDA);
-        const dados = await res.json();
-
-        if(!Array.isArray(dados) || dados.length === 0) {
-            grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento agendado.</p>';
-            return;
-        }
-
-        grid.innerHTML = dados.map(a => `
-            <div class="member-card">
-                <div style="display:flex; justify-content:space-between;">
-                    <b style="color:var(--primary);">${a.evento || a.descricao || 'Sem título'}</b>
-                    <span class="cat-badge">${a.data || ''}</span>
-                </div>
-                <p style="font-size:0.85rem; margin:8px 0;"><i class="fas fa-info-circle"></i> ${a.observacao || a.detalhes || '-'}</p>
-                <div class="status-row">
-                    <span class="status-pill">${a.categoria || 'Geral'}</span>
-                    <span class="status-pill ${a.tipo === 'Gratuito' ? 'active' : ''}">${a.tipo || '-'}</span>
-                </div>
-            </div>`).join('');
-            
-    } catch(e) {
-        console.error("Erro ao puxar agenda do Google:", e);
-        grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1 / -1;">Erro ao carregar a agenda. Verifique o link.</p>';
-    }
-}
-
-// Opcional: Formulário para enviar para o Google (caso o seu script aceite)
-document.getElementById('formAgenda').onsubmit = async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnSalvarAgenda');
-    btn.disabled = true; btn.innerText = "Salvando...";
-
-    const dados = {
-        acao: "inserir", 
-        data: document.getElementById('agendaData').value,
-        evento: document.getElementById('agendaDesc').value,
-        observacao: document.getElementById('agendaObs').value,
-        tipo: document.getElementById('agendaTipo').value,
-        categoria: document.getElementById('agendaCat').value
-    };
-
-    try {
-        await fetch(URL_GOOGLE_AGENDA, {
-            method: 'POST',
-            body: JSON.stringify(dados)
-        });
-        alert("Evento enviado para a agenda!");
-        this.reset();
-        await carregarAgendaGoogle();
-        mudarSecao('agenda');
-    } catch(e) {
-        alert("Erro ao salvar o evento na planilha.");
-    } finally {
-        btn.disabled = false; btn.innerText = "Salvar Evento";
-    }
-};
 
 // ==========================================
 // MÓDULO: PEDIDOS DE ORAÇÃO (SUGESTÕES)
@@ -1279,133 +1307,139 @@ function fecharModal(e) {
     document.getElementById('modalPalavra').classList.add('hidden');
 }
 
-// ==========================================
-// BÍBLIA (GITHUB)
-// ==========================================
-const dadosBiblia = [
-    { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
-    { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
-    { id: "deuteronomio", nome: "Deuteronômio", caps: 34 }, { id: "josue", nome: "Josué", caps: 24 }, 
-    { id: "juizes", nome: "Juízes", caps: 21 }, { id: "rute", nome: "Rute", caps: 4 }, 
-    { id: "1samuel", nome: "1 Samuel", caps: 31 }, { id: "2samuel", nome: "2 Samuel", caps: 24 }, 
-    { id: "1reis", nome: "1 Reis", caps: 22 }, { id: "2reis", nome: "2 Reis", caps: 25 }, 
-    { id: "1cronicas", nome: "1 Crônicas", caps: 29 }, { id: "2cronicas", nome: "2 Crônicas", caps: 36 }, 
-    { id: "esdras", nome: "Esdras", caps: 10 }, { id: "neemias", nome: "Neemias", caps: 13 }, 
-    { id: "ester", nome: "Ester", caps: 10 }, { id: "jo", nome: "Jó", caps: 42 }, 
-    { id: "salmos", nome: "Salmos", caps: 150 }, { id: "proverbios", nome: "Provérbios", caps: 31 }, 
-    { id: "eclesiastes", nome: "Eclesiastes", caps: 12 }, { id: "cantares", nome: "Cantares", caps: 8 }, 
-    { id: "isaias", nome: "Isaías", caps: 66 }, { id: "jeremias", nome: "Jeremias", caps: 52 }, 
-    { id: "lamentacoes", nome: "Lamentações", caps: 5 }, { id: "ezequiel", nome: "Ezequiel", caps: 48 }, 
-    { id: "daniel", nome: "Daniel", caps: 12 }, { id: "oseias", nome: "Oseias", caps: 14 }, 
-    { id: "joel", nome: "Joel", caps: 3 }, { id: "amos", nome: "Amós", caps: 9 }, 
-    { id: "obadias", nome: "Obadias", caps: 1 }, { id: "jonas", nome: "Jonas", caps: 4 }, 
-    { id: "miqueias", nome: "Miqueias", caps: 7 }, { id: "naum", nome: "Naum", caps: 3 }, 
-    { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
-    { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, 
-    { id: "malaquias", nome: "Malaquias", caps: 4 },
-    { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, 
-    { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
-    { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, 
-    { id: "1corintios", nome: "1 Coríntios", caps: 16 }, { id: "2corintios", nome: "2 Coríntios", caps: 13 }, 
-    { id: "galatas", nome: "Gálatas", caps: 6 }, { id: "efesios", nome: "Efésios", caps: 6 }, 
-    { id: "filipenses", nome: "Filipenses", caps: 4 }, { id: "colossenses", nome: "Colossenses", caps: 4 }, 
-    { id: "1tessalonicenses", nome: "1 Tessalonicenses", caps: 5 }, { id: "2tessalonicenses", nome: "2 Tessalonicenses", caps: 3 }, 
-    { id: "1timoteo", nome: "1 Timóteo", caps: 6 }, { id: "2timoteo", nome: "2 Timóteo", caps: 4 }, 
-    { id: "tito", nome: "Tito", caps: 3 }, { id: "filemon", nome: "Filemom", caps: 1 }, 
-    { id: "hebreus", nome: "Hebreus", caps: 13 }, { id: "tiago", nome: "Tiago", caps: 5 }, 
-    { id: "1pedro", nome: "1 Pedro", caps: 5 }, { id: "2pedro", nome: "2 Pedro", caps: 3 }, 
-    { id: "1joao", nome: "1 João", caps: 5 }, { id: "2joao", nome: "2 João", caps: 1 }, 
-    { id: "3joao", nome: "3 João", caps: 1 }, { id: "judas", nome: "Judas", caps: 1 }, 
-    { id: "apocalipse", nome: "Apocalipse", caps: 22 }
-];
+       // ==========================================
+      // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
+      // ==========================================
+      // Variável para carregar Gênesis sozinho na primeira vez
+      let bibliaIniciada = false;
 
-function iniciarBiblia() {
-    const selectLivro = document.getElementById('biblia-livro');
-    if(!selectLivro) return;
-    selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
-    dadosBiblia.forEach((livro, index) => {
-        let option = document.createElement('option');
-        option.value = livro.id;
-        option.text = livro.nome;
-        if (index >= 39) option.style.fontWeight = "bold"; 
-        selectLivro.appendChild(option);
-    });
-}
+      const dadosBiblia = [
+          { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, 
+          { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 }, 
+          { id: "deuteronomio", nome: "Deuteronômio", caps: 34 }, { id: "josue", nome: "Josué", caps: 24 }, 
+          { id: "juizes", nome: "Juízes", caps: 21 }, { id: "rute", nome: "Rute", caps: 4 }, 
+          { id: "1samuel", nome: "1 Samuel", caps: 31 }, { id: "2samuel", nome: "2 Samuel", caps: 24 }, 
+          { id: "1reis", nome: "1 Reis", caps: 22 }, { id: "2reis", nome: "2 Reis", caps: 25 }, 
+          { id: "1cronicas", nome: "1 Crônicas", caps: 29 }, { id: "2cronicas", nome: "2 Crônicas", caps: 36 }, 
+          { id: "esdras", nome: "Esdras", caps: 10 }, { id: "neemias", nome: "Neemias", caps: 13 }, 
+          { id: "ester", nome: "Ester", caps: 10 }, { id: "jo", nome: "Jó", caps: 42 }, 
+          { id: "salmos", nome: "Salmos", caps: 150 }, { id: "proverbios", nome: "Provérbios", caps: 31 }, 
+          { id: "eclesiastes", nome: "Eclesiastes", caps: 12 }, { id: "cantares", nome: "Cantares", caps: 8 }, 
+          { id: "isaias", nome: "Isaías", caps: 66 }, { id: "jeremias", nome: "Jeremias", caps: 52 }, 
+          { id: "lamentacoes", nome: "Lamentações", caps: 5 }, { id: "ezequiel", nome: "Ezequiel", caps: 48 }, 
+          { id: "daniel", nome: "Daniel", caps: 12 }, { id: "oseias", nome: "Oseias", caps: 14 }, 
+          { id: "joel", nome: "Joel", caps: 3 }, { id: "amos", nome: "Amós", caps: 9 }, 
+          { id: "obadias", nome: "Obadias", caps: 1 }, { id: "jonas", nome: "Jonas", caps: 4 }, 
+          { id: "miqueias", nome: "Miqueias", caps: 7 }, { id: "naum", nome: "Naum", caps: 3 }, 
+          { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 }, 
+          { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, 
+          { id: "malaquias", nome: "Malaquias", caps: 4 },
+          { id: "mateus", nome: "Mateus", caps: 28 }, { id: "marcos", nome: "Marcos", caps: 16 }, 
+          { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, 
+          { id: "atos", nome: "Atos", caps: 28 }, { id: "romanos", nome: "Romanos", caps: 16 }, 
+          { id: "1corintios", nome: "1 Coríntios", caps: 16 }, { id: "2corintios", nome: "2 Coríntios", caps: 13 }, 
+          { id: "galatas", nome: "Gálatas", caps: 6 }, { id: "efesios", nome: "Efésios", caps: 6 }, 
+          { id: "filipenses", nome: "Filipenses", caps: 4 }, { id: "colossenses", nome: "Colossenses", caps: 4 }, 
+          { id: "1tessalonicenses", nome: "1 Tessalonicenses", caps: 5 }, { id: "2tessalonicenses", nome: "2 Tessalonicenses", caps: 3 }, 
+          { id: "1timoteo", nome: "1 Timóteo", caps: 6 }, { id: "2timoteo", nome: "2 Timóteo", caps: 4 }, 
+          { id: "tito", nome: "Tito", caps: 3 }, { id: "filemon", nome: "Filemom", caps: 1 }, 
+          { id: "hebreus", nome: "Hebreus", caps: 13 }, { id: "tiago", nome: "Tiago", caps: 5 }, 
+          { id: "1pedro", nome: "1 Pedro", caps: 5 }, { id: "2pedro", nome: "2 Pedro", caps: 3 }, 
+          { id: "1joao", nome: "1 João", caps: 5 }, { id: "2joao", nome: "2 João", caps: 1 }, 
+          { id: "3joao", nome: "3 João", caps: 1 }, { id: "judas", nome: "Judas", caps: 1 }, 
+          { id: "apocalipse", nome: "Apocalipse", caps: 22 }
+      ];
 
-function abrirBiblia() {
-    document.getElementById('painel-biblia').classList.add('aberto');
-    const overlay = document.getElementById('biblia-overlay');
-    overlay.style.display = 'block';
-    setTimeout(() => overlay.style.opacity = '1', 10);
-}
+      function abrirBiblia() {
+          document.getElementById('painel-biblia').classList.add('aberto');
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.display = 'block';
+          setTimeout(() => overlay.style.opacity = '1', 10);
+          
+          if (!bibliaIniciada) {
+              iniciarLivros(); 
+              buscarTextoBiblia("genesis", 1, "Gênesis"); 
+              bibliaIniciada = true;
+          }
+      }
 
-function fecharBiblia() {
-    document.getElementById('painel-biblia').classList.remove('aberto');
-    const overlay = document.getElementById('biblia-overlay');
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.style.display = 'none', 300);
-}
+      function fecharBiblia() {
+          document.getElementById('painel-biblia').classList.remove('aberto');
+          const overlay = document.getElementById('biblia-overlay');
+          overlay.style.opacity = '0';
+          setTimeout(() => overlay.style.display = 'none', 300);
+      }
 
-function atualizarCapitulos() {
-    const selectLivro = document.getElementById('biblia-livro');
-    const selectCapitulo = document.getElementById('biblia-capitulo');
-    
-    selectCapitulo.innerHTML = '<option value="">Capítulo</option>';
-    if (selectLivro.value === "") {
-        selectCapitulo.disabled = true;
-        return;
-    }
+      function iniciarLivros() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const selectCapitulo = document.getElementById('biblia-capitulo');
+          
+          // Forçando a injeção do HTML direto para não ter erro no Discipulador
+          let htmlLivros = '';
+          dadosBiblia.forEach((livro, index) => {
+              let negrito = index >= 39 ? 'font-weight: bold;' : '';
+              htmlLivros += `<option value="${livro.id}" style="${negrito}">${livro.nome}</option>`;
+          });
+          selectLivro.innerHTML = htmlLivros;
+          selectLivro.value = "genesis"; 
+          
+          let htmlCaps = '';
+          for (let i = 1; i <= 50; i++) { 
+              htmlCaps += `<option value="${i}">${i}</option>`;
+          }
+          selectCapitulo.innerHTML = htmlCaps;
+          selectCapitulo.value = "1"; 
+          selectCapitulo.disabled = false;
+      }
 
-    const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
-    for (let i = 1; i <= livroEscolhido.caps; i++) {
-        let option = document.createElement('option');
-        option.value = i;
-        option.text = i;
-        selectCapitulo.appendChild(option);
-    }
-    selectCapitulo.disabled = false;
-}
+      function atualizarCapitulos() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const selectCapitulo = document.getElementById('biblia-capitulo');
+          
+          const livro = dadosBiblia.find(l => l.id === selectLivro.value);
+          if (livro) {
+              let htmlCaps = '';
+              for (let i = 1; i <= livro.caps; i++) {
+                  htmlCaps += `<option value="${i}">${i}</option>`;
+              }
+              selectCapitulo.innerHTML = htmlCaps;
+              selectCapitulo.disabled = false;
+          }
+      }
 
-async function carregarCapitulo() {
-    const selectLivro = document.getElementById('biblia-livro');
-    const inputCapitulo = document.getElementById('biblia-capitulo');
-    const conteudo = document.getElementById('biblia-conteudo');
-    
-    const livro = selectLivro.value; 
-    const capitulo = inputCapitulo.value; 
+      function carregarCapitulo() {
+          const selectLivro = document.getElementById('biblia-livro');
+          const inputCapitulo = document.getElementById('biblia-capitulo');
+          
+          if (!selectLivro.value || !inputCapitulo.value) { alert("Selecione um livro e capítulo."); return; }
+          
+          const nomeLivro = selectLivro.options[selectLivro.selectedIndex].text;
+          buscarTextoBiblia(selectLivro.value, inputCapitulo.value, nomeLivro);
+      }
 
-    if (!livro || !capitulo) {
-        alert("Por favor, selecione um livro e o capítulo.");
-        return;
-    }
-
-    conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Lendo do GitHub...</p>";
-    
-    try {
-        const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livro}/${capitulo}.json`;
-        const resposta = await fetch(urlGithub);
-        if (!resposta.ok) throw new Error("Capítulo não encontrado");
-        
-        const versiculos = await resposta.json();
-        
-        conteudo.innerHTML = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${selectLivro.options[selectLivro.selectedIndex].text} ${capitulo}</h3>`;
-        
-        versiculos.forEach(v => {
-            let blocoHTML = `<div style="margin-bottom: 15px;">`;
-            if (v.title) {
-                blocoHTML += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
-            }
-            blocoHTML += `<p style="margin: 0; text-align: justify;">
-                            <sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>
-                            ${v.content}
-                          </p></div>`;
-            conteudo.innerHTML += blocoHTML;
-        });
-
-    } catch (e) {
-        conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar do GitHub. Verifique a conexão ou se o arquivo existe no repositório.</p>`;
-    }
-}
+      async function buscarTextoBiblia(livroId, capitulo, nomeLivro) {
+          const conteudo = document.getElementById('biblia-conteudo');
+          conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando texto...</p>";
+          
+          try {
+              const urlGithub = `https://raw.githubusercontent.com/videirajatai/testes/main/biblia/${livroId}/${capitulo}.json`;
+              const resposta = await fetch(urlGithub);
+              if (!resposta.ok) throw new Error("Capítulo não encontrado");
+              
+              const versiculos = await resposta.json();
+              let htmlText = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px; text-transform: capitalize;">${nomeLivro} ${capitulo}</h3>`;
+              
+              versiculos.forEach(v => {
+                  htmlText += `<div style="margin-bottom: 15px;">`;
+                  if (v.title) htmlText += `<h4 style="color: #475569; font-size: 0.95rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase;">${v.title}</h4>`;
+                  htmlText += `<p style="margin: 0; text-align: justify;"><sup style="color: var(--ouro-videira); font-weight: bold; margin-right: 4px;">${v.number}</sup>${v.content}</p></div>`;
+              });
+              conteudo.innerHTML = htmlText;
+              
+          } catch (e) {
+              conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar o capítulo.</p>`;
+          }
+      }
     </script>
   </body>
 </html>
