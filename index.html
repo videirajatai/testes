@@ -149,6 +149,7 @@
                     
                     if (categoria === 'administrador') {
                         paginas = [
+                            { nome: "Painel Admin", url: "admin" },
                             { nome: "Painel do Pastor", url: "pastor" },
                             { nome: "Painel Discipulador", url: "discipulador" },
                             { nome: "Painel do Líder", url: "lider" },
@@ -157,8 +158,8 @@
                     } else if (categoria === 'pastor') {
                         paginas = [
                             { nome: "Painel do Pastor", url: "pastor" },
-                            { nome: "Painel Discipulador", url: "discipulador" },
-                            { nome: "Painel do Líder", url: "lider" }
+                            { nome: "Painel Admin", url: "admin" }
+                            
                         ];
                     } else if (categoria === 'discipulador') {
                         paginas = [
@@ -167,7 +168,8 @@
                         ];
                     } else if (categoria === 'tesoureiro') {
                         paginas = [
-                            { nome: "Painel Financeiro", url: "financeiro" } // Ajuste o nome do arquivo se necessário
+                            { nome: "Painel Financeiro", url: "financeiro" },
+                            { nome: "Painel do Líder", url: "lider" }// Ajuste o nome do arquivo se necessário
                         ];
                     } else {
                         // lider ou qualquer outra coisa cai aqui
@@ -255,4 +257,5 @@
     </script>
 </body>
 </html>
+
 
