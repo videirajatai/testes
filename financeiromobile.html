@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Financeiro Mobile - Videira</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
+
+        /* HEADER */
+        .header { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 12px 15px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 15px; border-left: 5px solid var(--primary); }
+        .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1rem; }
+
+        /* NAV MENU MOBILE - 2 colunas */
+        .nav-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
+        .nav-btn { padding: 10px; border: none; border-radius: 10px; background: white; color: var(--text-light); font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; box-shadow: var(--shadow); font-size: 0.75rem; }
+        .nav-btn.active { background: var(--primary); color: white; }
+        .nav-btn i { font-size: 1.1rem; }
+
+        /* FINANCEIRO DASHBOARD MOBILE */
+        .fin-dashboard { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px; }
+        .fin-card { padding: 15px; border-radius: var(--radius); color: white; text-align: center; }
+        .fin-card.blue { background: linear-gradient(135deg, #0056b3, #003d80); }
+        .fin-card.green { background: linear-gradient(135deg, #1e8e3e, #135c27); }
+        .fin-card.red { background: linear-gradient(135deg, #c5221f, #8a1513); }
+        .fin-val { font-size: 1.2rem; font-weight: 800; }
+
+        /* ESTILOS DA BÍBLIA (OFFCANVAS) */
+        .biblia-offcanvas { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: #fff; z-index: 2000; transition: 0.4s; display: flex; flex-direction: column; }
+        .biblia-offcanvas.aberto { right: 0; }
+        .biblia-header { background: #D4AF37; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .biblia-controles { padding: 10px; background: #f8fafc; display: flex; gap: 5px; }
+        .biblia-controles select { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd; }
+        .biblia-texto-area { padding: 15px; overflow-y: auto; flex: 1; line-height: 1.7; }
+
+        /* AUXILIARES */
+        .hidden { display: none !important; }
+        .member-grid { display: flex; flex-direction: column; gap: 10px; }
+        .member-card { background: white; padding: 15px; border-radius: 12px; box-shadow: var(--shadow); border-left: 4px solid #ddd; }
+        .status-pill { font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; background: #eee; color: #999; font-weight: bold; }
+        .status-pill.active { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 40px;">
+                <h3>Financeiro Mobile</h3>
+            </div>
+            <button onclick="carregarTudo()" style="background:none; border:none; color:var(--text-light);"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+        </div>
+
+        <div class="nav-menu">
+            <button onclick="mudarSecao('financeiro')" class="nav-btn active" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button>
+            <button onclick="mudarSecao('lista')" class="nav-btn" id="btn-lista"><i class="fas fa-users"></i> Membros</button>
+            <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
+            <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
+            <button onclick="carregarPalavras()" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Estudos</button>
+            <button onclick="abrirBiblia()" class="nav-btn"><i class="fas fa-bible"></i> Bíblia</button>
+        </div>
+
+        <div id="secao-financeiro">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <input type="month" id="filtroMesFin" onchange="recalcularFinanceiro()" style="padding:8px; border-radius:8px; border:1px solid #ddd; width:100%;">
+            </div>
+            <div class="fin-dashboard">
+                <div class="fin-card blue"><small>SALDO</small><div class="fin-val" id="finSaldo">R$ 0,00</div></div>
+                <div class="fin-card green"><small>ENTRADAS</small><div class="fin-val" id="finEntrada">R$ 0,00</div></div>
+                <div class="fin-card red"><small>SAÍDAS</small><div class="fin-val" id="finSaida">R$ 0,00</div></div>
+            </div>
+            
+            <div class="form-box">
+                <form id="formFinanceiro">
+                    <label>Tipo</label>
+                    <select name="tipo" id="finTipo" onchange="atualizarCategorias()" required>
+                        <option value="Entrada">Entrada (+)</option>
+                        <option value="Saída">Saída (-)</option>
+                    </select>
+                    <label>Categoria</label>
+                    <select name="categoria" id="finCategoria" onchange="atualizarCampos()" required>
+                        <option value="Dízimo">Dízimo</option>
+                        <option value="Oferta">Oferta</option>
+                    </select>
+                    <label id="lblDescricao">Membro / Descrição</label>
+                    <select name="membro" id="finMembroSelect"></select>
+                    <input type="text" name="descricao" id="finDescricaoInput" class="hidden" placeholder="Ex: Aluguel, Luz...">
+                    <label>Valor (R$)</label>
+                    <input type="number" step="0.01" name="valor" required placeholder="0.00">
+                    <label>Data</label>
+                    <input type="date" name="data" id="finData" required>
+                    <button type="submit" id="btnSalvarFin" class="btn-save" style="background:var(--success-text);">Lançar Valor</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="secao-lista" class="hidden">
+            <div style="display:flex; gap:8px; margin-bottom:15px;">
+                <input type="text" id="inputBusca" placeholder="Buscar..." onkeyup="filtrarMembros()" style="flex:1; margin:0;">
+                <button onclick="novoCadastro()" class="btn-add-member" style="height:45px;">+ Novo</button>
+            </div>
+            <div id="gridMembros" class="member-grid"></div>
+        </div>
+
+        <div id="secao-celulas" class="hidden">
+            <button onclick="novaCelula()" class="btn-save" style="margin-bottom:15px; background:var(--ouro-videira);">+ Nova Célula</button>
+            <div id="gridCelulas" class="member-grid"></div>
+        </div>
+
+        <div id="secao-palavras" class="hidden">
+            <div id="listaPalavras" class="member-grid"></div>
+        </div>
+
+        <div id="secao-agenda" class="hidden">
+            <div id="listaAgenda" class="member-grid"></div>
+        </div>
+
+        <div id="secao-cadastro" class="form-box hidden">
+            <h3 style="color:var(--primary); margin-top:0;">Cadastro de Membro</h3>
+            <form id="formMembro">
+                <input type="hidden" name="idMembro" id="idMembro">
+                <label>Nome</label><input type="text" name="nome" id="campoNome" required>
+                <label>WhatsApp</label><input type="tel" name="telefone" id="campoTel">
+                <label>Célula</label><select name="celula" id="selectCelulas"></select>
+                <label>Categoria</label>
+                <select name="categoria" id="campoCategoria">
+                    <option>Membro</option><option>Frequentador</option><option>Líder</option><option>Pastor</option>
+                </select>
+                <label>Batismo</label><label class="switch"><input type="checkbox" name="batizado" id="checkBat"><span class="slider"></span></label>
+                <label>Encontro</label><label class="switch"><input type="checkbox" name="encontro" id="checkDiz"><span class="slider"></span></label>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button type="button" onclick="mudarSecao('lista')" style="flex:1; background:#eee; border:none; border-radius:8px;">Voltar</button>
+                    <button type="submit" id="btnSalvar" class="btn-save" style="flex:2;">Salvar</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="secao-form-celula" class="form-box hidden">
+            <h3 style="color:var(--primary); margin-top:0;">Nova Célula</h3>
+            <form id="formCelula">
+                <input type="hidden" name="nomeOriginal" id="nomeOriginalCelula">
+                <label>Nome</label><input type="text" name="nome" id="celNome" required>
+                <label>Líder</label><select name="lider" id="celLider" required></select>
+                <label>Dia</label><select name="dia" id="celDia"><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option></select>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" onclick="mudarSecao('celulas')" style="flex:1; background:#eee; border:none; border-radius:8px;">Voltar</button>
+                    <button type="submit" id="btnSalvarCelula" class="btn-save" style="flex:2;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="painel-biblia" class="biblia-offcanvas">
+        <div class="biblia-header">
+            <h3>A Mensagem</h3>
+            <button onclick="fecharBiblia()" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button>
+        </div>
+        <div class="biblia-controles">
+            <select id="biblia-livro" onchange="atualizarCapitulos()"></select>
+            <select id="biblia-capitulo" onchange="carregarCapitulo()"></select>
+        </div>
+        <div id="biblia-conteudo" class="biblia-texto-area"></div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
+        const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        const API_URL = sessionStorage.getItem('urlApi'); 
+        let dadosMembros = [], dadosCelulas = [], dadosFinanceiros = [], listaPalavras = [], listaAgenda = [];
+
+        window.onload = function() {
+            const hoje = new Date();
+            document.getElementById('finData').valueAsDate = hoje;
+            document.getElementById('filtroMesFin').value = hoje.toISOString().slice(0, 7);
+            carregarTudo();
+        };
+
+        async function carregarTudo() {
+            const icon = document.getElementById('iconRefresh'); icon.classList.add('fa-spin');
+            try {
+                const { data: memData } = await supabaseClient.from('membros').select('*').or('arquivado.eq.Não,arquivado.is.null').order('nome');
+                const { data: celData } = await supabaseClient.from('celulas').select('*');
+                const { data: finData } = await supabaseClient.from('financeiro').select('*');
+
+                dadosMembros = memData || [];
+                dadosCelulas = celData || [];
+                dadosFinanceiros = finData || [];
+
+                renderizarCards();
+                renderizarCelulas();
+                recalcularFinanceiro();
+                preencherSelects();
+                
+                // Agenda e Estudos
+                carregarAgenda();
+            } catch(e) { console.error(e); } finally { icon.classList.remove('fa-spin'); }
+        }
+
+        function mudarSecao(s) {
+            ['lista','celulas','financeiro','cadastro','form-celula','palavras','agenda'].forEach(id => {
+                document.getElementById('secao-'+id).classList.add('hidden');
+            });
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('secao-'+s).classList.remove('hidden');
+            if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
+        }
+
+        // FINANCEIRO LÓGICA
+        function recalcularFinanceiro() {
+            const mes = document.getElementById('filtroMesFin').value;
+            let ent = 0, sai = 0;
+            dadosFinanceiros.forEach(f => {
+                if(f.data.startsWith(mes)) {
+                    let v = parseFloat(f.valor);
+                    if(f.tipo === 'Entrada') ent += v; else sai += v;
+                }
+            });
+            const fmt = (v) => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            document.getElementById('finSaldo').innerText = fmt(ent - sai);
+            document.getElementById('finEntrada').innerText = fmt(ent);
+            document.getElementById('finSaida').innerText = fmt(sai);
+        }
+
+        document.getElementById('formFinanceiro').onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarFin'); btn.disabled = true;
+            let desc = (this.tipo.value === 'Entrada' && this.categoria.value === 'Dízimo') ? this.membro.value : this.descricao.value;
+            const dados = { tipo: this.tipo.value, categoria: this.categoria.value, descricao: desc, valor: this.valor.value, data: this.data.value, metodo: 'Mobile' };
+            await supabaseClient.from('financeiro').insert([dados]);
+            alert("Lançado!");
+            this.reset();
+            carregarTudo();
+            btn.disabled = false;
+        };
+
+        function atualizarCategorias() {
+            const t = document.getElementById('finTipo').value;
+            const c = document.getElementById('finCategoria');
+            c.innerHTML = t === 'Saída' ? '<option value="Despesa">Despesa</option><option value="Outros">Outros</option>' : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>';
+            atualizarCampos();
+        }
+
+        function atualizarCampos() {
+            const t = document.getElementById('finTipo').value, c = document.getElementById('finCategoria').value;
+            if(t==='Entrada' && c==='Dízimo'){
+                document.getElementById('finMembroSelect').classList.remove('hidden');
+                document.getElementById('finDescricaoInput').classList.add('hidden');
+            } else {
+                document.getElementById('finMembroSelect').classList.add('hidden');
+                document.getElementById('finDescricaoInput').classList.remove('hidden');
+            }
+        }
+
+        // MEMBROS LÓGICA
+        function renderizarCards() {
+            const grid = document.getElementById('gridMembros'); grid.innerHTML = '';
+            dadosMembros.forEach(m => {
+                const bat = m.batizado === 'Sim' ? 'active' : '';
+                const enc = m.encontro === 'Sim' ? 'active' : '';
+                grid.innerHTML += `
+                    <div class="member-card">
+                        <div style="display:flex; justify-content:space-between;">
+                            <strong>${m.nome}</strong>
+                            <small>${m.tipo}</small>
+                        </div>
+                        <div style="font-size:0.8rem; color:#666;">Célula: ${m.celula}</div>
+                        <div style="margin-top:8px; display:flex; gap:5px;">
+                            <span class="status-pill ${bat}">Batismo</span>
+                            <span class="status-pill ${enc}">Encontro</span>
+                        </div>
+                        <div style="margin-top:10px; display:flex; gap:5px;">
+                            <a href="https://wa.me/55${m.telefone}" class="btn-card" style="background:#e8f5e9; border:none; flex:1; text-align:center; text-decoration:none; color:#2e7d32; padding:5px; border-radius:5px; font-size:0.75rem;">WhatsApp</a>
+                            <button onclick="editarMembro(${m.id})" class="btn-card" style="flex:1; border:1px solid #ddd; background:white; font-size:0.75rem;">Editar</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function preencherSelects() {
+            const sCel = document.getElementById('selectCelulas');
+            const sLider = document.getElementById('celLider');
+            const sMem = document.getElementById('finMembroSelect');
+            sCel.innerHTML = ''; sLider.innerHTML = ''; sMem.innerHTML = '<option value="">Selecione...</option>';
+            dadosCelulas.forEach(c => sCel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+            dadosMembros.forEach(m => {
+                if(m.tipo === 'Líder' || m.tipo === 'Pastor') sLider.innerHTML += `<option value="${m.nome}">${m.nome}</option>`;
+                sMem.innerHTML += `<option value="${m.nome}">${m.nome}</option>`;
+            });
+        }
+
+        // REUTLIZAÇÃO DE CÓDIGO BÍBLIA/PALAVRA DO PASTOR (IGUAL)
+        async function carregarPalavras() {
+            mudarSecao('palavras');
+            const { data } = await supabaseClient.from('palavras').select('*').order('id', {ascending:false});
+            const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+            data.forEach(p => {
+                div.innerHTML += `<div class="member-card" style="border-left-color:var(--ouro-videira)">
+                    <strong>${p.tema}</strong><br><small>${p.data}</small>
+                    <p style="font-size:0.85rem; margin-top:8px;">${p.texto.substring(0, 100)}...</p>
+                </div>`;
+            });
+        }
+
+        async function carregarAgenda() {
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'buscarAgenda' }) });
+                const json = await res.json();
+                const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+                if(json.dados) {
+                    json.dados.forEach(a => {
+                        div.innerHTML += `<div class="member-card" style="border-left-color:var(--primary)">
+                            <div style="color:var(--primary); font-weight:bold;">${a[0]}</div>
+                            <strong>${a[1]}</strong><br><small>${a[2]}</small>
+                        </div>`;
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // BÍBLIA MANTIDA
+        function abrirBiblia() { document.getElementById('painel-biblia').classList.add('aberto'); if(document.getElementById('biblia-livro').innerHTML==="") iniciarLivros(); }
+        function fecharBiblia() { document.getElementById('painel-biblia').classList.remove('aberto'); }
+        // ... (Funções de busca biblia git iguais ao pastor) ...
+    </script>
+</body>
+</html>
