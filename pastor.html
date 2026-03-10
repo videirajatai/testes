@@ -630,7 +630,7 @@
             const { data: memData, error: memError } = await supabaseClient
                 .from('membros')
                 .select('*')
-                .or('arquivado.eq.Não,arquivado.eq.nao,arquivado.eq.Nao,arquivado.is.null');
+                .or('arquivado.eq.Não,arquivado.eq.nao,arquivado.eq.Nao,arquivado.is.null')
                 .order('nome', { ascending: true });
                 
             if (memError) console.error("Erro ao carregar membros:", memError);
@@ -736,7 +736,7 @@
          const div = document.getElementById('listaPalavras'); div.innerHTML = '<p style="text-align:center;">Carregando...</p>';
          try { 
              const { data } = await supabaseClient.from('palavras').select('*').order('id', { ascending: false });
-             listaPalavras = data ? data.map(p => [p.data, p.tema, p.texto, p.link]) : []; 
+             listaPalavras = data ? data.map(p => [p.data, p.tema, p.texto, p.link_youtube]) : []; 
              renderizarPalavras(listaPalavras); 
          } catch(e){}
       }
@@ -762,7 +762,7 @@
       document.getElementById('formPalavra').onsubmit = async function(e) {
           e.preventDefault(); const btn = document.getElementById('btnSalvarPalavra'); btn.disabled = true; btn.innerText = "Salvando...";
           try {
-              const dados = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link: this.link.value };
+              const dados = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link_youtube: this.link.value };
               await supabaseClient.from('palavras').insert([dados]);
               alert("Publicado com sucesso!"); carregarPalavras();
           } finally { btn.disabled = false; btn.innerText = "Publicar"; }
