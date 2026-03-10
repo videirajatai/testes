@@ -319,26 +319,54 @@ window.onload = function() {
 // ==========================================
 // CARREGAR DADOS DO SUPABASE
 // ==========================================
+// ==========================================
+// CARREGAR DADOS DO SUPABASE (COM TRADUÇÃO)
+// ==========================================
 async function carregarTudo() {
     try {
         // Busca os dados do Financeiro e Membros simultaneamente
-        const [ { data: finData }, { data: memData } ] = await Promise.all([
+        const [ { data: finData, error: errFin }, { data: memData, error: errMem } ] = await Promise.all([
             supabaseClient.from('financeiro').select('*').order('data', { ascending: false }),
             supabaseClient.from('membros').select('*').order('nome', { ascending: true })
         ]);
 
-        dadosFinanceiros = finData || [];
-        dadosMembros = memData || [];
+        if (errFin) throw errFin;
+        if (errMem) throw errMem;
 
-        // Atualiza a interface
-        renderizarFinanceiro(dadosFinanceiros);
-        // Se a sua tela tiver a função de preencher selects ou tabelas de dizimistas:
+        // 1. TRADUÇÃO DO FINANCEIRO: Transforma os objetos em Arrays (igual era no Google Sheets)
+        dadosFinanceiros = finData ? finData.map(f => [
+            f.data || '', 
+            f.tipo || '', 
+            f.categoria || '', 
+            f.descricao || '', 
+            f.valor || 0, 
+            f.metodo || '', 
+            f.id // Posição 6: Deixamos o ID do Supabase aqui pro caso de precisar excluir
+        ]) : [];
+
+        // 2. TRADUÇÃO DOS MEMBROS: Transforma os objetos em Arrays (igual era no Google Sheets)
+        dadosMembros = memData ? memData.map(m => [
+            m.id, 
+            m.nome || 'Sem Nome', 
+            m.tipo || 'Membro', 
+            m.celula || '', 
+            m.telefone || '', 
+            '', 
+            m.batizado || 'Não',
+            m.cursao || 'Não',  
+            m.ctl || 'Não',     
+            m.dizimista || 'Não', // Posição 9: Dizimista
+            m.nascimento || ''    // Posição 10: Nascimento
+        ]) : [];
+
+        // Chama as funções da sua interface que já estão prontas!
+        if(typeof renderizarFinanceiro === 'function') renderizarFinanceiro(dadosFinanceiros);
         if(typeof preencherSelects === 'function') preencherSelects(dadosMembros);
         if(typeof atualizarGraficos === 'function') atualizarGraficos(dadosFinanceiros);
         if(typeof renderizarDizimistas === 'function') renderizarDizimistas(dadosMembros);
 
     } catch(e) {
-        console.error("Erro ao carregar dados do Supabase:", e);
+        console.error("Erro interno ao carregar:", e);
         alert("Erro ao carregar os dados financeiros.");
     }
 }
