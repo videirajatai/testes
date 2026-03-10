@@ -650,7 +650,7 @@
                 m.nascimento || ''  
             ]) : [];
 
-            dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia, c.endereco]) : [];
+            dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia_horario, c.endereco]) : [];
             lideres = memData ? memData.filter(m => ['Líder', 'Pastor'].includes(m.categoria)).map(m => m.nome) : [];
 
             document.getElementById('totalMembros').innerText = dadosMembros.length;
@@ -869,7 +869,7 @@
       document.getElementById('formCelula').onsubmit = async function(e) { 
           e.preventDefault(); const btn = document.getElementById('btnSalvarCelula'); btn.disabled=true; btn.innerText="Salvando...";
           const nomeOrig = this.nomeOriginal.value;
-          const dados = { nome: this.nome.value, lider: this.lider.value, dia: this.dia.value, endereco: this.endereco.value }; 
+          const dados = { nome: this.nome.value, lider: this.lider.value, dia_horario: this.dia_horario.value, endereco: this.endereco.value }; 
           try { 
               if (nomeOrig) await supabaseClient.from('celulas').update(dados).eq('nome', nomeOrig);
               else await supabaseClient.from('celulas').insert([dados]);
