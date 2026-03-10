@@ -631,6 +631,7 @@
                 .from('membros')
                 .select('*')
                 .or('arquivado.eq.Não,arquivado.eq.nao,arquivado.eq.Nao,arquivado.is.null');
+                .order('nome', { ascending: true });
                 
             if (memError) console.error("Erro ao carregar membros:", memError);
 
