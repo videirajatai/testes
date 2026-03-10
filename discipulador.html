@@ -335,9 +335,25 @@
       window.onload = carregarTudo;
 
       // ==========================================
-      // MOTORES DE COMUNICAÇÃO
+      // MOTORES DE COMUNICAÇÃO (COM LOG AUTOMÁTICO)
       // ==========================================
       
+      // 1. O MOTOR SILENCIOSO DE LOG
+      async function registrarLogAcao(acaoRealizada) {
+          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+
+          try {
+              await fetch(`${SB_URL}/rest/v1/log`, {
+                  method: 'POST',
+                  headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                  body: JSON.stringify({ datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada })
+              });
+          } catch (e) { console.error("Erro no log:", e); }
+      }
+
+      // 2. MOTOR GOOGLE SCRIPT (Agenda)
       async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
           try {
@@ -346,11 +362,15 @@
                   body: JSON.stringify({ action: action, payload: payload })
               });
               let json = await res.json();
-              if (json.status === "sucesso") return json.dados || json.mensagem;
+              if (json.status === "sucesso") {
+                  if (action === 'salvarAgenda') registrarLogAcao(`Cadastrou evento na agenda: ${payload.descricao}`);
+                  return json.dados || json.mensagem;
+              }
               else throw new Error(json.mensagem);
           } catch(e) { throw e; }
       }
 
+      // 3. MOTORES SUPABASE (Para o Resto)
       async function lerSupabase(tabela) {
           const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
               method: 'GET',
@@ -360,7 +380,6 @@
           return await res.json();
       }
 
-// NOVO: Função para Inserir dados no Supabase via POST
       async function inserirSupabase(tabela, dados) {
           const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
               method: 'POST',
@@ -373,10 +392,14 @@
               body: JSON.stringify(dados)
           });
           if (!res.ok) throw new Error(`Erro ao inserir no Supabase.`);
+          
+          // Rastreador de Novos Cadastros
+          let identificador = dados.nome || dados.celula || dados.tema || 'Registro';
+          registrarLogAcao(`Criou novo item na aba ${tabela}: ${identificador}`);
+          
           return "Inserido com sucesso!";
       }
       
-      // NOVO: Função para Atualizar dados no Supabase via PATCH
       async function atualizarSupabase(tabela, id, dados) {
           const res = await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
               method: 'PATCH',
@@ -389,6 +412,12 @@
               body: JSON.stringify(dados)
           });
           if (!res.ok) throw new Error(`Erro ao atualizar no Supabase.`);
+          
+          // Rastreador de Edições e Arquivamentos
+          let identificador = dados.nome || dados.celula || 'ID ' + id;
+          let extra = dados.arquivado ? `(Status Arquivado: ${dados.arquivado})` : 'Edição dos dados';
+          registrarLogAcao(`Modificou item na aba ${tabela}: ${identificador} - ${extra}`);
+          
           return "Atualizado com sucesso!";
       }
 
@@ -1014,32 +1043,6 @@
           }
       }
 
-      // FUNÇÃO DE LOG GLOBAL PARA OS PAINÉIS
-      async function registrarLogAcao(acaoRealizada) {
-          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
-          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
-          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
-          
-          const dadosLog = {
-              datahora: dataHoraAtual,
-              usuario: user,
-              nomelider: nomeReal,
-              acao: acaoRealizada
-          };
-
-          try {
-              await fetch(`${SB_URL}/rest/v1/log`, {
-                  method: 'POST',
-                  headers: {
-                      'apikey': SB_KEY,
-                      'Authorization': `Bearer ${SB_KEY}`,
-                      'Content-Type': 'application/json',
-                      'Prefer': 'return=minimal'
-                  },
-                  body: JSON.stringify(dadosLog)
-              });
-          } catch (e) { console.error("Erro no log:", e); }
-      }
     </script>
   </body>
 </html>
