@@ -151,9 +151,49 @@
         <button onclick="mudarSecao('relatorios')" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>       
         <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
         <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
-        <button onclick="abrirBiblia()" class="nav-btn"><i class="fas fa-bible"></i>Bíblia A Mensagem</button>
+        <button onclick="abrirBiblia()" class="nav-btn"><i class="fas fa-bible"></i>A Mensagem</button>
       </div>
 
+<div id="secao-financeiro" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h4 style="margin:0; color:var(--primary);">Dashboard Financeiro</h4>
+          <input type="month" id="filtroMesFin" onchange="recalcularFinanceiro()" style="width:auto; margin:0; background:white;">
+        </div>
+        <div class="fin-dashboard">
+          <div class="fin-card blue"><small>SALDO</small><div class="fin-val" id="finSaldo">R$ 0,00</div></div>
+          <div class="fin-card green"><small>ENTRADAS</small><div class="fin-val" id="finEntrada">R$ 0,00</div></div>
+          <div class="fin-card red"><small>SAÍDAS</small><div class="fin-val" id="finSaida">R$ 0,00</div></div>
+        </div>
+        <div class="nav-menu" style="justify-content:center; margin-bottom:15px;">
+          <button class="nav-btn active" onclick="mudarTabFin('lancamento', this)" style="flex:0 0 140px;">Lançar</button>
+          <button class="nav-btn" onclick="mudarTabFin('extrato', this)" style="flex:0 0 140px;">Extrato</button>
+        </div>
+        <div id="tab-lancamento" class="form-box" style="max-width:600px; margin:0 auto;">
+          <form id="formFinanceiro">
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label>Tipo</label><select name="tipo" id="finTipo" onchange="atualizarCategorias()" required><option value="Entrada">Entrada</option><option value="Saída">Saída</option></select></div>
+              <div style="flex:1;"><label>Categoria</label><select name="categoria" id="finCategoria" onchange="atualizarCampos()" required><option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option></select></div>
+            </div>
+            <label id="lblDescricao">Descrição / Membro</label>
+            <select name="membro" id="finMembroSelect"></select>
+            <input type="text" name="descricao" id="finDescricaoInput" class="hidden" placeholder="Descreva a movimentação...">
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label>Valor (R$)</label><input type="number" step="0.01" name="valor" required placeholder="0,00"></div>
+              <div style="flex:1;"><label>Data</label><input type="date" name="data" id="finData" required></div>
+            </div>
+            <label>Método de Pagamento</label>
+            <select name="metodo"><option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option><option value="Boleto">Boleto</option></select>
+            <button type="submit" id="btnSalvarFin" class="btn-save">Registrar Movimentação</button>
+          </form>
+        </div>
+        <div id="tab-extrato" class="hidden"><table class="table-clean"><thead><tr><th>Dia</th><th>Descrição</th><th>Valor</th></tr></thead><tbody id="corpoFin"></tbody></table></div>
+      </div>
+
+
+
+      
+
+      
       <div id="secao-lista">
         <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
           <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
