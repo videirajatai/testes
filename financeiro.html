@@ -301,216 +301,262 @@
   </div>
 
   <script>
+<script>
     // ==========================================
-// CONFIGURAÇÃO SUPABASE
-// ==========================================
-const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
-const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // CONFIGURAÇÃO SUPABASE
+    // ==========================================
+    const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
+    const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-let dadosFinanceiros = [];
-let dadosMembros = [];
+    let dadosFinanceiros = [];
+    let dadosMembros = [];
 
-// Função de Inicialização
-window.onload = function() {
-    carregarTudo();
-};
-
-// ==========================================
-// CARREGAR DADOS DO SUPABASE
-// ==========================================
-// ==========================================
-// CARREGAR DADOS DO SUPABASE (COM TRADUÇÃO)
-// ==========================================
-async function carregarTudo() {
-    try {
-        // Busca os dados do Financeiro e Membros simultaneamente
-        const [ { data: finData, error: errFin }, { data: memData, error: errMem } ] = await Promise.all([
-            supabaseClient.from('financeiro').select('*').order('data', { ascending: false }),
-            supabaseClient.from('membros').select('*').order('nome', { ascending: true })
-        ]);
-
-        if (errFin) throw errFin;
-        if (errMem) throw errMem;
-
-        // 1. TRADUÇÃO DO FINANCEIRO: Transforma os objetos em Arrays (igual era no Google Sheets)
-        dadosFinanceiros = finData ? finData.map(f => [
-            f.data || '', 
-            f.tipo || '', 
-            f.categoria || '', 
-            f.descricao || '', 
-            f.valor || 0, 
-            f.metodo || '', 
-            f.id // Posição 6: Deixamos o ID do Supabase aqui pro caso de precisar excluir
-        ]) : [];
-
-        // 2. TRADUÇÃO DOS MEMBROS: Transforma os objetos em Arrays (igual era no Google Sheets)
-        dadosMembros = memData ? memData.map(m => [
-            m.id, 
-            m.nome || 'Sem Nome', 
-            m.tipo || 'Membro', 
-            m.celula || '', 
-            m.telefone || '', 
-            '', 
-            m.batizado || 'Não',
-            m.cursao || 'Não',  
-            m.ctl || 'Não',     
-            m.dizimista || 'Não', // Posição 9: Dizimista
-            m.nascimento || ''    // Posição 10: Nascimento
-        ]) : [];
-
-        // Chama as funções da sua interface que já estão prontas!
-        if(typeof renderizarFinanceiro === 'function') renderizarFinanceiro(dadosFinanceiros);
-        if(typeof preencherSelects === 'function') preencherSelects(dadosMembros);
-        if(typeof atualizarGraficos === 'function') atualizarGraficos(dadosFinanceiros);
-        if(typeof renderizarDizimistas === 'function') renderizarDizimistas(dadosMembros);
-
-    } catch(e) {
-        console.error("Erro interno ao carregar:", e);
-        alert("Erro ao carregar os dados financeiros.");
-    }
-}
-
-// ==========================================
-// SALVAR LANÇAMENTO FINANCEIRO
-// ==========================================
-// Adapte o ID do formulário caso no seu HTML seja diferente (ex: formLancamento)
-const formFin = document.getElementById('formFinanceiro') || document.getElementById('formLancamento');
-if (formFin) {
-    formFin.onsubmit = async function(e) {
-        e.preventDefault();
-        const btn = this.querySelector('button[type="submit"]'); 
-        btn.disabled = true; btn.innerText = "Salvando...";
-
-        // Lógica para pegar os campos do form (ajuste os nomes dos inputs se necessário)
-        const idLancamento = this.idLancamento ? this.idLancamento.value : null;
-        const dados = {
-            tipo: this.tipo.value,
-            categoria: this.categoria.value,
-            descricao: this.descricao ? this.descricao.value : this.membro.value, // Se for dízimo pega o membro
-            valor: parseFloat(this.valor.value.replace(',', '.')),
-            data: this.data.value,
-            metodo: this.metodo.value
-        };
-
-        try {
-            if (idLancamento) {
-                await supabaseClient.from('financeiro').update(dados).eq('id', idLancamento);
-                registrarLogAcao(`Editou lançamento financeiro: ${dados.descricao} - R$ ${dados.valor}`);
-            } else {
-                await supabaseClient.from('financeiro').insert([dados]);
-                registrarLogAcao(`Adicionou lançamento financeiro (${dados.tipo}): ${dados.descricao} - R$ ${dados.valor}`);
-            }
-            alert("Lançamento salvo com sucesso!");
-            this.reset();
-            carregarTudo(); // Atualiza a tela
-        } catch(error) {
-            console.error(error);
-            alert("Erro ao salvar lançamento.");
-        } finally {
-            btn.disabled = false; btn.innerText = "Salvar";
-        }
-    };
-}
-
-// ==========================================
-// EXCLUIR LANÇAMENTO FINANCEIRO
-// ==========================================
-async function excluirFinanceiro(id, descricao) {
-    if(confirm(`Tem certeza que deseja excluir o lançamento '${descricao}'?`)) {
-        try {
-            await supabaseClient.from('financeiro').delete().eq('id', id);
-            registrarLogAcao(`Excluiu lançamento financeiro: ${descricao}`);
-            alert("Lançamento excluído com sucesso!");
-            carregarTudo();
-        } catch(e) {
-            console.error(e);
-            alert("Erro ao excluir o lançamento.");
-        }
-    }
-}
-
-// ==========================================
-// SALVAR MEMBRO (DIZIMISTA) A PARTIR DO FINANCEIRO
-// ==========================================
-const formMembro = document.getElementById('formMembroCompleto');
-if (formMembro) {
-    formMembro.onsubmit = async function(e) { 
-        e.preventDefault(); 
-        const btn = document.getElementById('btnSalvarMembro'); 
-        btn.innerText = "Salvando..."; btn.disabled = true;
+    // Inicia a página com a data de hoje e carrega os dados
+    window.onload = function() {
+        const hoje = new Date();
+        const campoData = document.getElementById('finData'); 
+        if(campoData) campoData.valueAsDate = hoje;
         
-        const dados = {
-            nome: this.nome.value, 
-            nascimento: this.nascimento.value || null, 
-            telefone: this.telefone.value, 
-            celula: this.celula.value, 
-            categoria: this.categoria.value, 
-            batizado: this.batizado && this.batizado.checked ? "Sim" : "Não", 
-            dizimista: this.dizimista && this.dizimista.checked ? "Sim" : "Não", 
-            cursao: "Não", 
-            ctl: "Não",
-            arquivado: "Não"
-        }; 
+        const filtroMes = document.getElementById('filtroMesFin'); 
+        if(filtroMes) filtroMes.value = hoje.toISOString().slice(0, 7);
 
-        try { 
-            await supabaseClient.from('membros').insert([dados]);
-            registrarLogAcao(`Cadastrou novo membro/dizimista via Financeiro: ${dados.nome}`);
-            alert("Membro salvo com sucesso!"); 
-            this.reset();
-            carregarTudo();
-        } catch(err) {
-            console.error(err);
-            alert("Erro ao salvar membro.");
-        } finally {
-            btn.innerText = "Salvar"; btn.disabled = false;
-        }
+        carregarTudo();
     };
-}
 
-// ==========================================
-// FUNÇÕES DE INTERFACE (MODAIS, FILTROS)
-// ==========================================
-function abrirModalVisual(id) { document.getElementById('modalVisualDizimista').classList.remove('hidden'); }
-function fecharModalVisual(e) { if(e===null || e.target.id==='modalVisualDizimista') document.getElementById('modalVisualDizimista').classList.add('hidden'); }
-
-function filtrarDizimistas() { 
-    let t = document.getElementById('buscaDizimista').value.toLowerCase(); 
-    let trs = document.getElementById('tbDizimistas').getElementsByTagName('tr'); 
-    for(let tr of trs) { 
-        let n = tr.getAttribute('data-nome'); 
-        if(n && n.toLowerCase().includes(t)) tr.style.display = ''; 
-        else tr.style.display = 'none'; 
+    // ==========================================
+    // NAVEGAÇÃO DAS ABAS (O ERRO ESTAVA AQUI)
+    // ==========================================
+    function nav(secao) {
+        // Esconde todas as abas
+        document.getElementById('tab-lancamento').classList.add('hidden');
+        document.getElementById('tab-extrato').classList.add('hidden');
+        document.getElementById('tab-dizimistas').classList.add('hidden');
+        
+        // Remove a cor escura dos botões
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        
+        // Mostra a aba clicada e pinta o botão
+        document.getElementById('tab-' + secao).classList.remove('hidden');
+        document.getElementById('btn-' + secao).classList.add('active');
     }
-}
 
-function filtrarHistorico() { 
-    let t = document.getElementById('buscaHist').value.toLowerCase(); 
-    let trs = document.getElementById('tbHistorico').getElementsByTagName('tr'); 
-    for(let tr of trs) {
-        tr.style.display = tr.innerText.toLowerCase().includes(t) ? '' : 'none'; 
+    // ==========================================
+    // CARREGAR DADOS E "TRADUZIR" PARA A TELA
+    // ==========================================
+    async function carregarTudo() {
+        try {
+            const [ { data: finData }, { data: memData } ] = await Promise.all([
+                supabaseClient.from('financeiro').select('*').order('data', { ascending: false }),
+                supabaseClient.from('membros').select('*').order('nome', { ascending: true })
+            ]);
+
+            // TRADUÇÃO: Transforma o objeto do Supabase num Array para a tela conseguir ler
+            dadosFinanceiros = finData ? finData.map(f => [
+                f.data || '', f.tipo || '', f.categoria || '', f.descricao || '', f.valor || 0, f.metodo || '', f.id
+            ]) : [];
+
+            dadosMembros = memData ? memData.map(m => [
+                m.id, m.nome || 'Sem Nome', m.tipo || 'Membro', m.celula || '', m.telefone || '', '', m.batizado || 'Não', m.cursao || 'Não', m.ctl || 'Não', m.dizimista || 'Não', m.nascimento || ''
+            ]) : [];
+
+            // Dispara as funções para desenhar na tela
+            renderizarFinanceiro();
+            preencherSelects(dadosMembros);
+            renderizarDizimistas(dadosMembros);
+
+        } catch(e) {
+            console.error("Erro ao carregar:", e);
+        }
     }
-}
 
-// ==========================================
-// REGISTRO DE LOGS (AUDITORIA)
-// ==========================================
-async function registrarLogAcao(acaoRealizada) {
-    const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
-    const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
-    const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+    // ==========================================
+    // RENDERIZAR TABELA E GRÁFICOS (DASHBOARD)
+    // ==========================================
+    function renderizarFinanceiro() {
+        const corpo = document.getElementById('tbHistorico') || document.getElementById('corpoFin'); 
+        if(corpo) corpo.innerHTML = ''; 
+        
+        let ent = 0, sai = 0;
+        const inputMes = document.getElementById('filtroMesFin');
+        const mesFiltro = inputMes ? inputMes.value : new Date().toISOString().slice(0, 7);
+        const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); 
+
+        dadosFinanceiros.forEach(l => { 
+            // Somatório para o Dashboard (apenas do mês selecionado)
+            if(l[0].startsWith(mesFiltro)) {
+                let v = parseFloat(l[4] || 0); 
+                if(l[1] === 'Entrada') ent += v; else sai += v; 
+            }
+
+            // Monta as linhas da tabela Extrato
+            if(corpo && l[0].startsWith(mesFiltro)) {
+                let cor = l[1] === 'Entrada' ? 'var(--success-text)' : 'var(--danger-text)'; 
+                let dataBr = l[0] ? l[0].split('-').reverse().join('/') : '';
+                corpo.innerHTML += `
+                <tr>
+                    <td>${dataBr}</td>
+                    <td><strong>${l[3]}</strong><br><small style="color:#777;">${l[2]}</small></td>
+                    <td style="font-weight:bold; color:${cor};">${fmt(l[4])}</td>
+                    <td align="center">
+                        <button onclick="excluirFinanceiro('${l[6]}', '${l[3]}')" style="background:none;border:none;color:var(--danger-text);cursor:pointer;font-size:1.1rem;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>`; 
+            }
+        }); 
+
+        // Pinta os valores nos Cards
+        const saldo = ent - sai;
+        if(document.getElementById('finSaldo')) document.getElementById('finSaldo').innerText = fmt(saldo); 
+        if(document.getElementById('finEntrada')) document.getElementById('finEntrada').innerText = fmt(ent); 
+        if(document.getElementById('finSaida')) document.getElementById('finSaida').innerText = fmt(sai); 
+    }
+
+    // Atualiza a tabela quando o usuário muda o mês no filtro
+    if(document.getElementById('filtroMesFin')) {
+        document.getElementById('filtroMesFin').addEventListener('change', renderizarFinanceiro);
+    }
+
+    // ==========================================
+    // LÓGICA DO FORMULÁRIO E SELECTS
+    // ==========================================
+    function atualizarCategorias() { 
+        const t = document.getElementById('finTipo').value; 
+        const c = document.getElementById('finCategoria'); 
+        if(c) {
+            c.innerHTML = t === 'Saída' 
+                ? '<option value="Despesa Fixa">Despesa Fixa</option><option value="Eventual">Eventual</option><option value="Manutenção">Manutenção</option>' 
+                : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>'; 
+            atualizarCampos(); 
+        }
+    }
     
-    try {
-        await supabaseClient.from('log').insert([{ 
-            datahora: dataHoraAtual, 
-            usuario: user, 
-            nomelider: nomeReal, 
-            acao: acaoRealizada 
-        }]);
-    } catch (e) { 
-        console.error("Erro ao salvar o log:", e); 
+    function atualizarCampos() { 
+        const t = document.getElementById('finTipo').value;
+        const c = document.getElementById('finCategoria').value;
+        const m = document.getElementById('finMembroSelect');
+        const d = document.getElementById('finDescricaoInput'); 
+        
+        if(t === 'Entrada' && c === 'Dízimo') { 
+            if(m) m.classList.remove('hidden'); 
+            if(d) d.classList.add('hidden'); 
+        } else { 
+            if(m) m.classList.add('hidden'); 
+            if(d) d.classList.remove('hidden'); 
+        } 
     }
-}
-  </script>
+
+    function preencherSelects(lista) {
+        const s = document.getElementById('finMembroSelect'); 
+        if(!s) return;
+        s.innerHTML = '<option value="">Selecione o Membro...</option>'; 
+        let nomes = lista.map(i => i[1]).sort((a,b)=>a.localeCompare(b));
+        nomes.forEach(n => s.innerHTML += `<option value="${n}">${n}</option>`); 
+    }
+
+    // ==========================================
+    // RENDERIZAR TABELA DIZIMISTAS
+    // ==========================================
+    function renderizarDizimistas(lista) {
+        const corpo = document.getElementById('tbDizimistas');
+        if(!corpo) return;
+        corpo.innerHTML = '';
+        
+        lista.forEach(m => {
+            let isDizimista = (m[9] === 'Sim' || m[9] === 'sim');
+            let badge = isDizimista ? `<span style="background:var(--success-bg);color:var(--success-text);padding:3px 6px;border-radius:4px;font-size:0.7rem;font-weight:bold;">Dizimista Ativo</span>` : `<span style="background:#eee;color:#888;padding:3px 6px;border-radius:4px;font-size:0.7rem;">Não Dizimista</span>`;
+            
+            corpo.innerHTML += `
+            <tr data-nome="${m[1].toLowerCase()}">
+                <td><strong>${m[1]}</strong><br>${badge}</td>
+                <td>${m[3] || 'Sem Célula'}</td>
+                <td align="center">
+                    <button onclick="alert('Função de editar no painel Pastoral')" style="background:#f0f4f8;border:1px solid #cce5ff;color:#0056b3;padding:5px 10px;border-radius:5px;cursor:pointer;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function filtrarDizimistas() { 
+        let t = document.getElementById('buscaDizimista').value.toLowerCase(); 
+        let trs = document.getElementById('tbDizimistas').getElementsByTagName('tr'); 
+        for(let tr of trs) { 
+            let n = tr.getAttribute('data-nome'); 
+            tr.style.display = (n && n.includes(t)) ? '' : 'none'; 
+        }
+    }
+
+    // ==========================================
+    // SALVAR LANÇAMENTO FINANCEIRO
+    // ==========================================
+    const formFin = document.getElementById('formFinanceiro') || document.getElementById('formLancamento');
+    if (formFin) {
+        formFin.onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarFin') || this.querySelector('button[type="submit"]'); 
+            btn.disabled = true; btn.innerText = "Salvando...";
+
+            let desc = (this.tipo.value === 'Entrada' && this.categoria.value === 'Dízimo') ? this.membro.value : this.descricao.value; 
+            const dados = {
+                tipo: this.tipo.value,
+                categoria: this.categoria.value,
+                descricao: desc,
+                valor: parseFloat(this.valor.value.replace(',', '.')),
+                data: this.data.value,
+                metodo: this.metodo.value
+            };
+
+            try {
+                await supabaseClient.from('financeiro').insert([dados]);
+                registrarLogAcao(`Lançou ${dados.tipo} (${dados.categoria}): ${dados.descricao} - R$ ${dados.valor}`);
+                alert("Lançamento salvo com sucesso!");
+                this.reset();
+                document.getElementById('finData').valueAsDate = new Date();
+                atualizarCategorias();
+                carregarTudo(); 
+            } catch(error) {
+                console.error(error);
+                alert("Erro ao salvar lançamento.");
+            } finally {
+                btn.disabled = false; btn.innerText = "Registrar Movimentação";
+            }
+        };
+    }
+
+    // ==========================================
+    // EXCLUIR LANÇAMENTO
+    // ==========================================
+    async function excluirFinanceiro(id, descricao) {
+        if(confirm(`Tem certeza que deseja excluir o lançamento '${descricao}'?`)) {
+            try {
+                await supabaseClient.from('financeiro').delete().eq('id', id);
+                registrarLogAcao(`Excluiu lançamento financeiro: ${descricao}`);
+                carregarTudo();
+            } catch(e) { console.error(e); }
+        }
+    }
+
+    // ==========================================
+    // REGISTRO DE LOGS (AUDITORIA)
+    // ==========================================
+    async function registrarLogAcao(acaoRealizada) {
+        const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+        const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+        const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+        
+        try {
+            await supabaseClient.from('log').insert([{ 
+                datahora: dataHoraAtual, 
+                usuario: user, 
+                nomelider: nomeReal, 
+                acao: acaoRealizada 
+            }]);
+        } catch (e) { console.error("Erro ao salvar o log:", e); }
+    }
+</script>
 </body>
 </html>
