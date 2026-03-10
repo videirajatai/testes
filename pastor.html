@@ -636,22 +636,41 @@
 
             const { data: celData } = await supabaseClient.from('celulas').select('*');
 
-            dadosMembros = memData ? memData.map(m => [
-                m.id, 
-                m.nome || 'Sem Nome', 
-                m.tipo || 'Membro', 
-                m.celula || 'Sem Célula', 
-                m.telefone || '', 
-                m.tipo || '',       
-                m.batizado || 'Não',
-                m.cursao || 'Não',  
-                m.ctl || 'Não',     
-                m.encontro || 'Não',
-                m.nascimento || ''  
-            ]) : [];
+           // Mapeamento com "Tradução Automática" para arrumar os acentos da planilha antiga
+            dadosMembros = memData ? memData.map(m => {
+                // Pega o que tá no banco e tira espaços em branco sobrando
+                let tipoBanco = m.tipo ? m.tipo.trim().toLowerCase() : 'membro';
+                let tipoCorreto = 'Membro';
 
-            dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia_horario, c.endereco]) : [];
-            lideres = memData ? memData.filter(m => ['Líder', 'Pastor'].includes(m.categoria)).map(m => m.nome) : [];
+                // Arruma a nomenclatura para o CSS colorir as etiquetas certinho
+                if (tipoBanco === 'lider' || tipoBanco === 'líder') tipoCorreto = 'Líder';
+                else if (tipoBanco === 'pastor') tipoCorreto = 'Pastor';
+                else if (tipoBanco === 'discipulador') tipoCorreto = 'Discipulador';
+                else if (tipoBanco === 'frequentador') tipoCorreto = 'Frequentador';
+                else tipoCorreto = m.tipo; // Mantém o original se for algo diferente
+
+                return [
+                    m.id, 
+                    m.nome || 'Sem Nome', 
+                    tipoCorreto,        // <-- AQUI: Vai para a tela já formatado (Ex: "Líder")
+                    m.celula || 'Sem Célula', 
+                    m.telefone || '', 
+                    '',                 // Posição 5 vazia
+                    m.batizado || 'Não',
+                    m.cursao || 'Não',  
+                    m.ctl || 'Não',     
+                    m.encontro || 'Não',
+                    m.nascimento || ''  
+                ];
+            }) : [];
+
+            dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia_horario || '-', c.endereco]) : [];
+            
+            // Como agora nós arrumamos o nome para "Líder" no bloco acima, fica fácil listar:
+            // Ele vai olhar direto para a posição [2] (tipoCorreto) e para a posição [1] (nome)
+            lideres = dadosMembros
+                .filter(m => ['Líder', 'Pastor', 'Discipulador'].includes(m[2]))
+                .map(m => m[1]);
 
             document.getElementById('totalMembros').innerText = dadosMembros.length;
             renderizarCards(dadosMembros); 
