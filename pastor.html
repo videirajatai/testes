@@ -787,7 +787,7 @@
         dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c[0]}">${c[0]}</option>`);
         try { 
             const { data } = await supabaseClient.from('relatorios').select('*').order('id', { ascending: false });
-            dadosRelatorios = data ? data.map(r => [r.data, r.celula, r.lista, r.gelo, r.palavra, '', r.lanche, r.louvor, r.obs]) : [];
+            dadosRelatorios = data ? data.map(r => [r.data, r.celula, r.presentes, r.quebra_gelo, r.palavra, '', r.lanche, r.louvor, r.observacoes]) : [];
             filtrarRelatorios(); 
         } catch(e){}
       }
