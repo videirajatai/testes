@@ -75,10 +75,15 @@
                     <label>Usuário</label>
                     <input type="text" id="usuario-input" placeholder="Usuário" onkeypress="verificarEnter(event)" autocomplete="off">
                 </div>
-                <div class="input-group">
-                    <label>Senha</label>
-                    <input type="password" id="senha-input" placeholder="••••••••" onkeypress="verificarEnter(event)">
-                </div>
+                    <div class="input-group">
+                        <label>Senha</label>
+                        <input type="password" 
+                           id="senha-input" 
+                           inputmode="numeric" 
+                           pattern="[0-9]*" 
+                           placeholder="••••" 
+                           onkeypress="verificarEnter(event)">
+                    </div>
                 
                 <button id="btn-entrar" onclick="verificarLogin()">Entrar no Sistema</button>
                 <p id="mensagem-erro">⚠️ Usuário ou senha incorretos.</p>
@@ -294,6 +299,7 @@
     </script>
 </body>
 </html>
+
 
 
 
