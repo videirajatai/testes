@@ -530,6 +530,10 @@
           let ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
           let arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
 
+ativos.sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
+arquivados.sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
+        
+        
           document.getElementById('badge-total-membros').innerText = ativos.length;
 
           const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
