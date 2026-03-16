@@ -71,11 +71,11 @@
         <div id="area-inputs">
             <div class="input-group">
                 <label>Nova Senha</label>
-                <input type="password" id="senha1" placeholder="Mínimo 4 caracteres">
+                <input type="password" id="senha1" placeholder="Mínimo 4 caracteres" inputmode="numeric" pattern="[0-9]*">                                  
             </div>
             <div class="input-group">
                 <label>Confirme a Senha</label>
-                <input type="password" id="senha2" placeholder="Repita a nova senha">
+                <input type="password" id="senha2" placeholder="Repita a nova senha" inputmode="numeric" pattern="[0-9]*">
             </div>
             
             <button id="btn-salvar" onclick="salvarNovaSenha()">Salvar Nova Senha</button>
