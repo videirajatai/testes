@@ -378,6 +378,7 @@
         }
 
         // ================= NOVAS FUNÇÕES: CADASTRO =================
+        // ================= NOVAS FUNÇÕES: CADASTRO =================
         async function cadastrarMembro() {
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim();
@@ -398,16 +399,45 @@
             btn.disabled = true;
             erro.style.display = 'none';
 
-            const novoUsuario = {
-                nome: nome,
-                email: email,
-                whatsapp: whatsapp,
-                usuario: usuario,
-                senha: senha,
-                categoria: 'membro' // Define automaticamente
-            };
-
             try {
+                // 1. VALIDAÇÃO: VERIFICA SE O USUÁRIO JÁ EXISTE NO BANCO
+                const resBuscaUser = await fetch(`${SB_URL}/rest/v1/usuarios?usuario=eq.${encodeURIComponent(usuario)}&select=id`, {
+                    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+                });
+                const userExistente = await resBuscaUser.json();
+
+                if (userExistente && userExistente.length > 0) {
+                    erro.innerText = "⚠️ Este Nome de Usuário já está em uso. Escolha outro.";
+                    erro.style.display = 'block';
+                    btn.innerText = "Finalizar Cadastro";
+                    btn.disabled = false;
+                    return; // Bloqueia e para por aqui
+                }
+
+                // 2. VALIDAÇÃO: VERIFICA SE O E-MAIL JÁ EXISTE NO BANCO
+                const resBuscaEmail = await fetch(`${SB_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=id`, {
+                    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+                });
+                const emailExistente = await resBuscaEmail.json();
+
+                if (emailExistente && emailExistente.length > 0) {
+                    erro.innerText = "⚠️ Este E-mail já possui um cadastro no sistema.";
+                    erro.style.display = 'block';
+                    btn.innerText = "Finalizar Cadastro";
+                    btn.disabled = false;
+                    return; // Bloqueia e para por aqui
+                }
+
+                // 3. SE PASSOU NAS VALIDAÇÕES, FAZ O CADASTRO NORMALMENTE
+                const novoUsuario = {
+                    nome: nome,
+                    email: email,
+                    whatsapp: whatsapp,
+                    usuario: usuario,
+                    senha: senha,
+                    categoria: 'membro' // Define automaticamente
+                };
+
                 const resposta = await fetch(`${SB_URL}/rest/v1/usuarios`, {
                     method: 'POST',
                     headers: {
@@ -432,7 +462,7 @@
                     mudarTela('bloco-login');
                 } else {
                     const data = await resposta.json();
-                    erro.innerText = "⚠️ Erro ao cadastrar. O usuário já existe?";
+                    erro.innerText = "⚠️ Erro ao salvar os dados no servidor.";
                     erro.style.display = 'block';
                     console.error(data);
                 }
