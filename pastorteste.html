@@ -12,8 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-         <!-- ==========================================LOGO NAV=============================================================-->
-  <link rel="icon" type="image/png" href="logo.png">
+         <link rel="icon" type="image/png" href="logo.png">
   <link rel="shortcut icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
 
@@ -23,8 +22,6 @@
   <meta name="apple-mobile-web-app-title" content="Sistema Videira">
   <meta name="theme-color" content="#0f172a"> 
     <link rel="manifest" href="manifest.json">
-    <!-- ==========================================LOGO NAV =============================================================-->
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -339,7 +336,7 @@
         <button onclick="mudarSecao('financeiro')" class="nav-btn" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button>
          <button onclick="carregarArquivados()" class="nav-btn" id="btn-arquivo"><i class="fas fa-archive"></i> Arquivos</button>
         <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos </button>
-        <button onclick="carregarRelatorios()" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>       
+        <button onclick="carregarRelatorios()" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>        
         <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
         <button onclick="carregarPalavras()" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
         <button onclick="abrirBiblia()" class="nav-btn"><i class="fas fa-bible"></i>A Mensagem</button>
@@ -622,14 +619,12 @@
 
     <script>
       // ==========================================
-      // CONFIGURAÇÃO supabaseClient
+      // CONFIGURAÇÃO SUPABASE
       // ==========================================
-      // Insira as credenciais do seu projeto supabaseClient aqui
       const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
       const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
       const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-      // Apenas para as funções que não poderiam ser alteradas (ex: Agenda)
       const API_URL = sessionStorage.getItem('urlApi'); 
       let dadosMembros = [], dadosCelulas = [], dadosFinanceiros = [], lideres = [], dadosRelatorios = [], listaPalavras = [], listaAgenda = [];
       
@@ -640,7 +635,6 @@
           carregarTudo();
       }
 
-      // Função original mantida estritamente para a Agenda/Integrações não modificadas
       async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
           try {
@@ -656,12 +650,9 @@
           }
       }
 
-      // --- CARREGAMENTO INICIAL COM supabaseClient ---
-      // --- CARREGAMENTO INICIAL COM SUPABASE ---
       async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
         try {
-            // Buscando quem tem "Não", "nao", "Nao" ou vazio (null)
             const { data: memData, error: memError } = await supabaseClient
                 .from('membros')
                 .select('*')
@@ -672,26 +663,23 @@
 
             const { data: celData } = await supabaseClient.from('celulas').select('*');
 
-           // Mapeamento com "Tradução Automática" para arrumar os acentos da planilha antiga
-            dadosMembros = memData ? memData.map(m => {
-                // Pega o que tá no banco e tira espaços em branco sobrando
+           dadosMembros = memData ? memData.map(m => {
                 let tipoBanco = m.tipo ? m.tipo.trim().toLowerCase() : 'membro';
                 let tipoCorreto = 'Membro';
 
-                // Arruma a nomenclatura para o CSS colorir as etiquetas certinho
                 if (tipoBanco === 'lider' || tipoBanco === 'líder') tipoCorreto = 'Líder';
                 else if (tipoBanco === 'pastor') tipoCorreto = 'Pastor';
                 else if (tipoBanco === 'discipulador') tipoCorreto = 'Discipulador';
                 else if (tipoBanco === 'frequentador') tipoCorreto = 'Frequentador';
-                else tipoCorreto = m.tipo; // Mantém o original se for algo diferente
+                else tipoCorreto = m.tipo; 
 
                 return [
                     m.id, 
                     m.nome || 'Sem Nome', 
-                    tipoCorreto,        // <-- AQUI: Vai para a tela já formatado (Ex: "Líder")
+                    tipoCorreto,        
                     m.celula || 'Sem Célula', 
                     m.telefone || '', 
-                    '',                 // Posição 5 vazia
+                    '',                 
                     m.batizado || 'Não',
                     m.cursao || 'Não',  
                     m.ctl || 'Não',     
@@ -700,10 +688,31 @@
                 ];
             }) : [];
 
+            // ==========================================
+            // ORDENAÇÃO HIERÁRQUICA + ALFABÉTICA
+            // ==========================================
+            const pesoCargos = {
+                "Pastor": 1,
+                "Discipulador": 2,
+                "Líder": 3,
+                "Membro": 4,
+                "Frequentador": 5
+            };
+
+            dadosMembros.sort((a, b) => {
+                let pesoA = pesoCargos[a[2]] || 99; 
+                let pesoB = pesoCargos[b[2]] || 99;
+
+                if (pesoA !== pesoB) {
+                    return pesoA - pesoB; 
+                } else {
+                    return a[1].localeCompare(b[1]);
+                }
+            });
+            // ==========================================
+
             dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia_horario || '-', c.endereco]) : [];
             
-            // Como agora nós arrumamos o nome para "Líder" no bloco acima, fica fácil listar:
-            // Ele vai olhar direto para a posição [2] (tipoCorreto) e para a posição [1] (nome)
             lideres = dadosMembros
                 .filter(m => ['Líder', 'Pastor', 'Discipulador'].includes(m[2]))
                 .map(m => m[1]);
@@ -765,7 +774,6 @@
         else { document.getElementById('secao-'+s).classList.remove('hidden'); const btn = document.getElementById('btn-'+s); if(btn) btn.classList.add('active'); }
       }
 
-      // --- PALAVRAS (supabaseClient) ---
       async function carregarPalavras() {
          mudarSecao('palavras');
          const div = document.getElementById('listaPalavras'); div.innerHTML = '<p style="text-align:center;">Carregando...</p>';
@@ -805,13 +813,11 @@
           try {
               const dados = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link_youtube: this.link.value };
               await supabaseClient.from('palavras').insert([dados]);
-              registrarLogAcao(`Publicou a palavra/estudo: ${dados.tema}`); // LOG
+              registrarLogAcao(`Publicou a palavra/estudo: ${dados.tema}`);
               alert("Publicado com sucesso!"); carregarPalavras();
           } finally { btn.disabled = false; btn.innerText = "Publicar"; }
       };
 
-      
-      // --- SUGESTOES (supabaseClient) ---
       async function carregarSugestoes() {
         mudarSecao('sugestoes'); const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="2" align="center">Carregando...</td></tr>';
         try {
@@ -822,7 +828,6 @@
         } catch(e){} 
       }
 
-      // --- RELATÓRIOS (supabaseClient) ---
       async function carregarRelatorios() {
         mudarSecao('relatorios'); const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '<p align="center">Carregando...</p>';
         const sel = document.getElementById('filtroRelCelula'); sel.innerHTML = '<option value="">Todas as Células</option>';
@@ -854,14 +859,12 @@
          document.getElementById('relObs').innerText = item[8] || "Sem observações."; mudarSecao('modal-ver-relatorio');
       }
 
-      // --- ARQUIVO (supabaseClient) ---
       async function carregarArquivados() { 
         mudarSecao('arquivo'); 
         const grid = document.getElementById('gridArquivo'); 
         grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Carregando arquivo...</p>';
         
         try {
-            // Busca membros com status Sim ou sim no arquivado
             const { data, error } = await supabaseClient
                 .from('membros')
                 .select('*')
@@ -902,7 +905,7 @@
             grid.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar.</p>';
         }
       }
-      // --- FINANCEIRO BÁSICO (supabaseClient) ---
+
       async function carregarFinanceiro() { 
         try { 
             const { data } = await supabaseClient.from('financeiro').select('*').order('id', { ascending: false });
@@ -930,13 +933,12 @@
           const d = { tipo: this.tipo.value, categoria: this.categoria.value, descricao: desc, valor: this.valor.value, data: this.data.value, metodo: this.metodo.value }; 
           try {
               await supabaseClient.from('financeiro').insert([d]);
-              registrarLogAcao(`Lançou ${this.tipo.value} no financeiro: ${desc} (R$ ${this.valor.value})`); // LOG
+              registrarLogAcao(`Lançou ${this.tipo.value} no financeiro: ${desc} (R$ ${this.valor.value})`);
               alert("Registrado!"); this.reset(); document.getElementById('finData').valueAsDate = new Date(); 
               carregarFinanceiro(); atualizarCategorias(); 
           } finally { btn.disabled=false; btn.innerText="Registrar Movimentação"; }
       }
 
-      // --- UTILITÁRIOS E SUBMITS (supabaseClient) ---
       function filtrarMembros() { const b = document.getElementById('inputBusca').value.toLowerCase(), c = document.getElementById('filtroCelula').value.toLowerCase(); document.querySelectorAll('.member-card').forEach(card => { const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c)); card.style.display = match ? 'flex' : 'none'; }); }
       function preencherSelects(celulas) { const s1 = document.getElementById('selectCelulas'), s2 = document.getElementById('filtroCelula'), s3 = document.getElementById('celLider'); s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Todas</option>'; s3.innerHTML='<option value="">Selecione...</option>'; celulas.forEach(c => { s1.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; s2.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; }); lideres.forEach(l => s3.innerHTML += `<option value="${l}">${l}</option>`); }
       function editarMembro(id) { const m = dadosMembros.find(i => i[0] == id); if(!m) return; document.getElementById('idMembro').value = m[0]; document.getElementById('campoNome').value = m[1]; document.getElementById('campoNasc').value = m[10]; document.getElementById('campoTel').value = m[4]; document.getElementById('selectCelulas').value = m[3]; document.getElementById('campoCategoria').value = m[2]; document.getElementById('checkBat').checked = (m[6]==='Sim'); document.getElementById('checkCur').checked = (m[7]==='Sim'); document.getElementById('checkCtl').checked = (m[8]==='Sim'); document.getElementById('checkDiz').checked = (m[9]==='Sim'); mudarSecao('cadastro'); }
@@ -956,44 +958,44 @@
           try { 
               if(id) {
                   await supabaseClient.from('membros').update(d).eq('id', id);
-                  registrarLogAcao(`Editou o membro: ${d.nome}`); // LOG
+                  registrarLogAcao(`Editou o membro: ${d.nome}`);
               } else {
                   await supabaseClient.from('membros').insert([d]);
-                  registrarLogAcao(`Cadastrou novo membro: ${d.nome}`); // LOG
+                  registrarLogAcao(`Cadastrou novo membro: ${d.nome}`);
               }
               mudarSecao('lista'); carregarTudo(); 
           } finally { btn.disabled=false; btn.innerText="Salvar"; }
       };
       
       function renderizarCelulas(l) { 
-    const corpo = document.getElementById('corpoCelulas'); 
-    corpo.innerHTML = ''; 
-    
-    if (!l || l.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="4" align="center">Nenhuma célula encontrada</td></tr>';
-        return;
-    }
+          const corpo = document.getElementById('corpoCelulas'); 
+          corpo.innerHTML = ''; 
+          
+          if (!l || l.length === 0) {
+              corpo.innerHTML = '<tr><td colspan="4" align="center">Nenhuma célula encontrada</td></tr>';
+              return;
+          }
 
-    l.forEach((i, x) => {
-        // i[0] = Nome, i[1] = Líder, i[2] = Dia/Horário, i[3] = Endereço
-        corpo.innerHTML += `
-        <tr>
-            <td>
-                <div style="font-weight: 700; color: #333;">${i[0]}</div>
-                <div style="font-size: 0.75rem; color: #888; margin-top: 2px;">
-                    <i class="fas fa-map-marker-alt" style="color: #64748b;"></i> ${i[3] || 'Rua não informada'}
-                </div>
-            </td>
-            <td style="color: #444;">${i[1]}</td>
-            <td style="color: #444;">${i[2]}</td>
-            <td align="center">
-                <button onclick="editarCelula(${x})" style="background:#f8f9fa; border:1px solid #ddd; color:#666; cursor:pointer; padding: 5px 8px; border-radius: 4px;">
-                    <i class="fas fa-edit"></i>
-                </button>
-            </td>
-        </tr>`;
-    }); 
-}
+          l.forEach((i, x) => {
+              corpo.innerHTML += `
+              <tr>
+                  <td>
+                      <div style="font-weight: 700; color: #333;">${i[0]}</div>
+                      <div style="font-size: 0.75rem; color: #888; margin-top: 2px;">
+                          <i class="fas fa-map-marker-alt" style="color: #64748b;"></i> ${i[3] || 'Rua não informada'}
+                      </div>
+                  </td>
+                  <td style="color: #444;">${i[1]}</td>
+                  <td style="color: #444;">${i[2]}</td>
+                  <td align="center">
+                      <button onclick="editarCelula(${x})" style="background:#f8f9fa; border:1px solid #ddd; color:#666; cursor:pointer; padding: 5px 8px; border-radius: 4px;">
+                          <i class="fas fa-edit"></i>
+                      </button>
+                  </td>
+              </tr>`;
+          }); 
+      }
+
       function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('nomeOriginalCelula').value = ""; document.getElementById('tituloFormCelula').innerText = "Nova Célula"; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => s.innerHTML += `<option value="${l}">${l}</option>`); mudarSecao('form-celula'); }
       function editarCelula(index) { const c = dadosCelulas[index]; if(!c) return; document.getElementById('nomeOriginalCelula').value = c[0]; document.getElementById('celNome').value = c[0]; document.getElementById('celDia').value = c[2]; document.getElementById('celEndereco').value = c[3]; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => { let opt = document.createElement('option'); opt.value = l; opt.text = l; if(l === c[1]) opt.selected = true; s.appendChild(opt); }); document.getElementById('tituloFormCelula').innerText = "Editar Célula"; mudarSecao('form-celula'); }
       
@@ -1009,21 +1011,21 @@
           try { 
               if (nomeOrig) {
                   await supabaseClient.from('celulas').update(dados).eq('nome', nomeOrig);
-                  registrarLogAcao(`Editou a célula: ${dados.nome}`); // LOG
+                  registrarLogAcao(`Editou a célula: ${dados.nome}`);
               } else {
                   await supabaseClient.from('celulas').insert([dados]);
-                  registrarLogAcao(`Cadastrou nova célula: ${dados.nome}`); // LOG
+                  registrarLogAcao(`Cadastrou nova célula: ${dados.nome}`);
               }
               alert("Salvo com sucesso!"); mudarSecao('celulas'); carregarTudo(); 
           } catch(err) { console.error(err); alert("Erro ao salvar a célula: " + err.message); } 
           finally { btn.disabled = false; btn.innerText = "Salvar"; }
       };
       
-     async function arquivar(id, n) { 
+      async function arquivar(id, n) { 
           if(confirm(`Arquivar ${n}?`)) { 
               try{ 
                   await supabaseClient.from('membros').update({arquivado: 'Sim'}).eq('id', id); 
-                  registrarLogAcao(`Arquivou o membro: ${n}`); // LOG
+                  registrarLogAcao(`Arquivou o membro: ${n}`);
                   carregarTudo(); 
               } catch(e){} 
           } 
@@ -1032,20 +1034,13 @@
           if(confirm("Restaurar?")) { 
               try{ 
                   await supabaseClient.from('membros').update({arquivado: 'Não'}).eq('id', id); 
-                  registrarLogAcao(`Restaurou membro ID: ${id}`); // LOG
+                  registrarLogAcao(`Restaurou membro ID: ${id}`);
                   mudarSecao('lista'); carregarTudo(); 
               } catch(e){} 
           } 
       }
       function filtrarTabela(id) { const b = document.getElementById('inputBuscaArquivo').value.toLowerCase(); const rows = document.getElementById('corpoArquivo').getElementsByTagName('tr'); for(let r of rows) r.style.display = r.innerText.toLowerCase().includes(b)?'':'none'; }
 
-
-
-
-      
-      // ========================================== NAO MEXER A BAIXO =====================================================================
-      // AGENDA
-      // ==========================================
       function renderizarAgenda(lista) {
          const div = document.getElementById('listaAgenda'); div.innerHTML = '';
          if(!lista || lista.length === 0) {
@@ -1080,10 +1075,7 @@
              </div>`;
          });
       }
-      // ==========================================
-      // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
-      // ==========================================
-      // Variável para carregar Gênesis sozinho na primeira vez
+
       let bibliaIniciada = false;
 
       const dadosBiblia = [
@@ -1147,7 +1139,6 @@
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
           
-          // Forçando a injeção do HTML direto para não ter erro no Discipulador
           let htmlLivros = '';
           dadosBiblia.forEach((livro, index) => {
               let negrito = index >= 39 ? 'font-weight: bold;' : '';
@@ -1178,7 +1169,6 @@
               selectCapitulo.innerHTML = htmlCaps;
               selectCapitulo.disabled = false;
               
-              // Carrega o capítulo 1 automaticamente ao trocar de livro
               carregarCapitulo();
           }
       }
@@ -1217,8 +1207,6 @@
           }
       }
 
-      // FUNÇÃO DE LOG GLOBAL PARA OS PAINÉIS
-      // FUNÇÃO DE LOG GLOBAL (CORRIGIDA PARA O PAINEL PASTORAL)
       async function registrarLogAcao(acaoRealizada) {
           const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
           const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
@@ -1238,64 +1226,58 @@
           } catch (e) { console.error("Erro no log:", e); }
       }
 
-      // ==========================================
-// FUNÇÕES DE EXPORTAÇÃO
-// ==========================================
+      function exportarExcel() {
+          if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
 
-function exportarExcel() {
-    if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
+          const dadosFormatados = dadosMembros.map(m => ({
+              "Nome": m[1],
+              "Categoria": m[2],
+              "Célula": m[3],
+              "WhatsApp": m[4],
+              "Batismo": m[6],
+              "Cursão": m[7],
+              "CTL": m[8],
+              "Encontro": m[9],
+              "Nascimento": m[10]
+          }));
 
-    // Mapeia os dados para um formato amigável com cabeçalhos
-    const dadosFormatados = dadosMembros.map(m => ({
-        "Nome": m[1],
-        "Categoria": m[2],
-        "Célula": m[3],
-        "WhatsApp": m[4],
-        "Batismo": m[6],
-        "Cursão": m[7],
-        "CTL": m[8],
-        "Encontro": m[9],
-        "Nascimento": m[10]
-    }));
+          const worksheet = XLSX.utils.json_to_sheet(dadosFormatados);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Membros");
+          
+          XLSX.writeFile(workbook, `Membros_Videira_Jatai_${new Date().toLocaleDateString()}.xlsx`);
+          registrarLogAcao("Exportou lista de membros para Excel");
+      }
 
-    const worksheet = XLSX.utils.json_to_sheet(dadosFormatados);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Membros");
-    
-    // Gera o arquivo e inicia o download
-    XLSX.writeFile(workbook, `Membros_Videira_Jatai_${new Date().toLocaleDateString()}.xlsx`);
-    registrarLogAcao("Exportou lista de membros para Excel");
-}
+      async function exportarPDF() {
+          if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
 
-async function exportarPDF() {
-    if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF('l', 'mm', 'a4');
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' para landscape (paisagem) para caber tudo
+          doc.setFontSize(16);
+          doc.text("Relatório Geral de Membros - Videira Jataí", 14, 15);
+          doc.setFontSize(10);
+          doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 22);
 
-    doc.setFontSize(16);
-    doc.text("Relatório Geral de Membros - Videira Jataí", 14, 15);
-    doc.setFontSize(10);
-    doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 22);
+          const cabecalho = [["Nome", "Categoria", "Célula", "WhatsApp", "Bat.", "Cur.", "CTL", "Enc.", "Nasc."]];
+          
+          const corpo = dadosMembros.map(m => [
+              m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[10]
+          ]);
 
-    const cabecalho = [["Nome", "Categoria", "Célula", "WhatsApp", "Bat.", "Cur.", "CTL", "Enc.", "Nasc."]];
-    
-    const corpo = dadosMembros.map(m => [
-        m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[10]
-    ]);
+          doc.autoTable({
+              head: cabecalho,
+              body: corpo,
+              startY: 25,
+              theme: 'grid',
+              headStyles: { fillColor: [128, 0, 32] },
+              styles: { fontSize: 8 }
+          });
 
-    doc.autoTable({
-        head: cabecalho,
-        body: corpo,
-        startY: 25,
-        theme: 'grid',
-        headStyles: { fillColor: [128, 0, 32] }, // Cor bordô da Videira
-        styles: { fontSize: 8 }
-    });
-
-    doc.save(`Membros_Videira_Jatai_${new Date().toLocaleDateString()}.pdf`);
-    registrarLogAcao("Exportou lista de membros para PDF");
-}
+          doc.save(`Membros_Videira_Jatai_${new Date().toLocaleDateString()}.pdf`);
+          registrarLogAcao("Exportou lista de membros para PDF");
+      }
       
     </script>
   </body>
