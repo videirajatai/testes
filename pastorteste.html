@@ -343,26 +343,28 @@
       </div>
 
       <div id="secao-lista">
-       <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px;">
-          <h4 style="margin:0; color: var(--text-light); flex-grow: 1;"><span id="totalMembros">0</span> Membros</h4>
+        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
           
-          <div style="display:flex; gap: 8px;">
-            <button onclick="exportarExcel()" class="btn-add-member" style="background: #166534; color: white;" title="Exportar Excel">
-              <i class="fas fa-file-excel"></i>
-            </button>
-            <button onclick="exportarPDF()" class="btn-add-member" style="background: #991b1b; color: white;" title="Exportar PDF">
-              <i class="fas fa-file-pdf"></i>
-            </button>
-            <button onclick="novoCadastro()" class="btn-add-member"><i class="fas fa-plus"></i> Novo</button>
+          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px;">
+            <h4 style="margin:0; color: var(--text-light); flex-grow: 1;"><span id="totalMembros">0</span> Membros</h4>
+            
+            <div style="display:flex; gap: 8px;">
+              <button onclick="exportarExcel()" class="btn-add-member" style="background: #166534; color: white;" title="Exportar Excel">
+                <i class="fas fa-file-excel"></i>
+              </button>
+              <button onclick="exportarPDF()" class="btn-add-member" style="background: #991b1b; color: white;" title="Exportar PDF">
+                <i class="fas fa-file-pdf"></i>
+              </button>
+              <button onclick="novoCadastro()" class="btn-add-member"><i class="fas fa-plus"></i> Novo</button>
+            </div>
           </div>
-        </div>
+
           <div style="display:flex; gap:10px;">
             <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()" style="margin:0; flex:2;">
             <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex:1;"><option value="">Todas</option></select>
           </div>
-        </div>
-        <div id="gridMembros" class="member-grid"></div>
-      </div>
+          
+        </div> <div id="gridMembros" class="member-grid"></div>
 
       <div id="secao-celulas" class="hidden">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
