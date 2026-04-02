@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
          <!-- ==========================================LOGO NAV=============================================================-->
   <link rel="icon" type="image/png" href="logo.png">
@@ -343,11 +346,19 @@
       </div>
 
       <div id="secao-lista">
-        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
-          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h4 style="margin:0; color: var(--text-light);"><span id="totalMembros">0</span> Membros</h4>
+       <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px;">
+          <h4 style="margin:0; color: var(--text-light); flex-grow: 1;"><span id="totalMembros">0</span> Membros</h4>
+          
+          <div style="display:flex; gap: 8px;">
+            <button onclick="exportarExcel()" class="btn-add-member" style="background: #166534; color: white;" title="Exportar Excel">
+              <i class="fas fa-file-excel"></i>
+            </button>
+            <button onclick="exportarPDF()" class="btn-add-member" style="background: #991b1b; color: white;" title="Exportar PDF">
+              <i class="fas fa-file-pdf"></i>
+            </button>
             <button onclick="novoCadastro()" class="btn-add-member"><i class="fas fa-plus"></i> Novo</button>
           </div>
+        </div>
           <div style="display:flex; gap:10px;">
             <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()" style="margin:0; flex:2;">
             <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex:1;"><option value="">Todas</option></select>
@@ -1226,6 +1237,66 @@
               });
           } catch (e) { console.error("Erro no log:", e); }
       }
+
+      // ==========================================
+// FUNÇÕES DE EXPORTAÇÃO
+// ==========================================
+
+function exportarExcel() {
+    if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
+
+    // Mapeia os dados para um formato amigável com cabeçalhos
+    const dadosFormatados = dadosMembros.map(m => ({
+        "Nome": m[1],
+        "Categoria": m[2],
+        "Célula": m[3],
+        "WhatsApp": m[4],
+        "Batismo": m[6],
+        "Cursão": m[7],
+        "CTL": m[8],
+        "Encontro": m[9],
+        "Nascimento": m[10]
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dadosFormatados);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Membros");
+    
+    // Gera o arquivo e inicia o download
+    XLSX.writeFile(workbook, `Membros_Videira_Jatai_${new Date().toLocaleDateString()}.xlsx`);
+    registrarLogAcao("Exportou lista de membros para Excel");
+}
+
+async function exportarPDF() {
+    if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' para landscape (paisagem) para caber tudo
+
+    doc.setFontSize(16);
+    doc.text("Relatório Geral de Membros - Videira Jataí", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 22);
+
+    const cabecalho = [["Nome", "Categoria", "Célula", "WhatsApp", "Bat.", "Cur.", "CTL", "Enc.", "Nasc."]];
+    
+    const corpo = dadosMembros.map(m => [
+        m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[10]
+    ]);
+
+    doc.autoTable({
+        head: cabecalho,
+        body: corpo,
+        startY: 25,
+        theme: 'grid',
+        headStyles: { fillColor: [128, 0, 32] }, // Cor bordô da Videira
+        styles: { fontSize: 8 }
+    });
+
+    doc.save(`Membros_Videira_Jatai_${new Date().toLocaleDateString()}.pdf`);
+    registrarLogAcao("Exportou lista de membros para PDF");
+}
+      
     </script>
   </body>
 </html>
