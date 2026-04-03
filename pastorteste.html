@@ -359,12 +359,36 @@
             </div>
           </div>
 
-         <div style="display:flex; gap:10px; flex-wrap: wrap; margin-bottom: 10px;">
-            <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()" style="margin:0; flex: 1 1 200px;">
-            <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex: 1 1 120px;">
+        <style>
+            .filtros-grid { 
+                display: grid; 
+                grid-template-columns: 2fr 1fr 1fr 1fr; 
+                gap: 8px; 
+                margin-bottom: 15px; 
+            }
+            .filtros-grid input, .filtros-grid select { 
+                margin: 0 !important; 
+                padding: 6px 10px !important; /* Deixa o campo mais fino */
+                font-size: 0.85rem !important; /* Fonte menor */
+                height: 36px !important; /* Altura fixa menor */
+                border-radius: 6px !important;
+            }
+            /* No celular, a busca fica inteira em cima, e os filtros dividem o espaço embaixo */
+            @media (max-width: 650px) {
+                .filtros-grid { grid-template-columns: 1fr 1fr; }
+                #inputBusca { grid-column: 1 / -1; } /* Ocupa a linha toda */
+                #filtroTag { grid-column: 1 / -1; } /* Ocupa a linha toda pra não ficar sobrando espaço torto */
+            }
+          </style>
+
+          <div class="filtros-grid">
+            <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()">
+            
+            <select id="filtroCelula" onchange="filtrarMembros()">
                 <option value="">Célula: Todas</option>
             </select>
-            <select id="filtroCategoria" onchange="filtrarMembros()" style="margin:0; flex: 1 1 120px;">
+            
+            <select id="filtroCategoria" onchange="filtrarMembros()">
                 <option value="">Categoria: Todas</option>
                 <option value="pastor">Pastor</option>
                 <option value="discipulador">Discipulador</option>
@@ -372,7 +396,8 @@
                 <option value="membro">Membro</option>
                 <option value="frequentador">Frequentador</option>
             </select>
-            <select id="filtroTag" onchange="filtrarMembros()" style="margin:0; flex: 1 1 120px;">
+            
+            <select id="filtroTag" onchange="filtrarMembros()">
                 <option value="">Status: Todos</option>
                 <option value="batizado">Batizado</option>
                 <option value="cursão">Cursão</option>
@@ -381,8 +406,7 @@
                 <option value="seminário">Seminário</option>
                 <option value="dizimista">Dizimista</option>
             </select>
-          </div>
-          
+          </div>          
         </div> <div id="gridMembros" class="member-grid"></div>
       </div>
 
