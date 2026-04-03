@@ -1237,9 +1237,20 @@
       }
 
       function exportarExcel() {
-          if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
+          // Pega os valores dos filtros
+          const termoBusca = document.getElementById('inputBusca').value.toLowerCase();
+          const celulaFiltro = document.getElementById('filtroCelula').value.toLowerCase();
 
-          const dadosFormatados = dadosMembros.map(m => ({
+          // Filtra a lista original usando a mesma regra da tela
+          const listaFiltrada = dadosMembros.filter(m => {
+              const nome = m[1].toLowerCase();
+              const celula = (m[3] || '').toLowerCase();
+              return nome.includes(termoBusca) && (celulaFiltro === "" || celula.includes(celulaFiltro));
+          });
+
+          if (listaFiltrada.length === 0) return alert("Nenhum dado na tela para exportar");
+
+          const dadosFormatados = listaFiltrada.map(m => ({
               "Nome": m[1],
               "Categoria": m[2],
               "Célula": m[3],
@@ -1258,37 +1269,55 @@
           XLSX.utils.book_append_sheet(workbook, worksheet, "Membros");
           
           XLSX.writeFile(workbook, `Membros_Videira_Jatai_${new Date().toLocaleDateString()}.xlsx`);
-          registrarLogAcao("Exportou lista de membros para Excel");
+          registrarLogAcao("Exportou lista de membros filtrada para Excel");
       }
 
       async function exportarPDF() {
-          if (dadosMembros.length === 0) return alert("Nenhum dado para exportar");
+          // Pega os valores dos filtros
+          const termoBusca = document.getElementById('inputBusca').value.toLowerCase();
+          const celulaFiltro = document.getElementById('filtroCelula').value.toLowerCase();
+
+          // Filtra a lista original usando a mesma regra da tela
+          const listaFiltrada = dadosMembros.filter(m => {
+              const nome = m[1].toLowerCase();
+              const celula = (m[3] || '').toLowerCase();
+              return nome.includes(termoBusca) && (celulaFiltro === "" || celula.includes(celulaFiltro));
+          });
+
+          if (listaFiltrada.length === 0) return alert("Nenhum dado na tela para exportar");
 
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF('l', 'mm', 'a4');
 
           doc.setFontSize(16);
-          doc.text("Relatório Geral de Membros - Videira Jataí", 14, 15);
+          doc.text("Relatório de Membros - Videira Jataí", 14, 15);
           doc.setFontSize(10);
-          doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 22);
+          
+          // Adiciona no cabeçalho do PDF o filtro que foi usado
+          let textoFiltro = `Gerado em: ${new Date().toLocaleString()}`;
+          const selectCelula = document.getElementById('filtroCelula');
+          if (celulaFiltro !== "") textoFiltro += ` | Filtro: Célula ${selectCelula.options[selectCelula.selectedIndex].text}`;
+          if (termoBusca !== "") textoFiltro += ` | Busca: "${termoBusca}"`;
+          
+          doc.text(textoFiltro, 14, 22);
 
           const cabecalho = [["Nome", "Categoria", "Célula", "WhatsApp", "Bat.", "Cur.", "CTL", "Enc.", "Sem.", "Diz.", "Nasc."]];
           
-          const corpo = dadosMembros.map(m => [
+          const corpo = listaFiltrada.map(m => [
               m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[11], m[12], m[10]
           ]);
 
           doc.autoTable({
               head: cabecalho,
               body: corpo,
-              startY: 25,
+              startY: 26,
               theme: 'grid',
               headStyles: { fillColor: [128, 0, 32] },
               styles: { fontSize: 8 }
           });
 
           doc.save(`Membros_Videira_Jatai_${new Date().toLocaleDateString()}.pdf`);
-          registrarLogAcao("Exportou lista de membros para PDF");
+          registrarLogAcao("Exportou lista de membros filtrada para PDF");
       }
       
     </script>
