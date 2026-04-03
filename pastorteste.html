@@ -360,52 +360,77 @@
           </div>
 
         <style>
-            .filtros-grid { 
-                display: grid; 
-                grid-template-columns: 2fr 1fr 1fr 1fr; 
-                gap: 8px; 
-                margin-bottom: 15px; 
+            .filtros-box {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 12px;
             }
-            .filtros-grid input, .filtros-grid select { 
+            .filtros-box input, .filtros-box select {
                 margin: 0 !important; 
-                padding: 6px 10px !important; /* Deixa o campo mais fino */
-                font-size: 0.85rem !important; /* Fonte menor */
-                height: 36px !important; /* Altura fixa menor */
+                padding: 6px 4px !important; /* Padding menor para caber melhor */
+                font-size: 0.8rem !important; 
+                height: 36px !important; 
                 border-radius: 6px !important;
+                border: 1px solid #ddd !important;
+                outline: none;
+                box-sizing: border-box;
             }
-            /* No celular, a busca fica inteira em cima, e os filtros dividem o espaço embaixo */
-            @media (max-width: 650px) {
-                .filtros-grid { grid-template-columns: 1fr 1fr; }
-                #inputBusca { grid-column: 1 / -1; } /* Ocupa a linha toda */
-                #filtroTag { grid-column: 1 / -1; } /* Ocupa a linha toda pra não ficar sobrando espaço torto */
+            .busca-wrapper {
+                flex: 1; /* Ocupa o espaço necessário */
+            }
+            .busca-wrapper input {
+                width: 100%;
+            }
+            .selects-wrapper {
+                display: flex;
+                gap: 8px;
+                flex: 2; /* Ocupa o resto do espaço */
+            }
+            .selects-wrapper select {
+                flex: 1; /* Divide o espaço igualmente em 3 */
+                min-width: 0; /* Mágica pro CSS não quebrar a linha se o texto for grande */
+            }
+
+            /* No celular: Busca em cima, 3 selects juntos e alinhados na mesma linha embaixo */
+            @media (max-width: 700px) {
+                .filtros-box {
+                    flex-direction: column;
+                }
+                .selects-wrapper {
+                    width: 100%;
+                }
             }
           </style>
 
-          <div class="filtros-grid">
-            <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()">
-            
-            <select id="filtroCelula" onchange="filtrarMembros()">
-                <option value="">Célula: Todas</option>
-            </select>
-            
-            <select id="filtroCategoria" onchange="filtrarMembros()">
-                <option value="">Categoria: Todas</option>
-                <option value="pastor">Pastor</option>
-                <option value="discipulador">Discipulador</option>
-                <option value="líder">Líder</option>
-                <option value="membro">Membro</option>
-                <option value="frequentador">Frequentador</option>
-            </select>
-            
-            <select id="filtroTag" onchange="filtrarMembros()">
-                <option value="">Status: Todos</option>
-                <option value="batizado">Batizado</option>
-                <option value="cursão">Cursão</option>
-                <option value="ctl">CTL</option>
-                <option value="encontro">Encontro</option>
-                <option value="seminário">Seminário</option>
-                <option value="dizimista">Dizimista</option>
-            </select>
+          <div class="filtros-box">
+              <div class="busca-wrapper">
+                  <input type="text" id="inputBusca" placeholder="🔍 Buscar..." onkeyup="filtrarMembros()">
+              </div>
+              
+              <div class="selects-wrapper">
+                  <select id="filtroCelula" onchange="filtrarMembros()">
+                      <option value="">Células</option>
+                  </select>
+                  
+                  <select id="filtroCategoria" onchange="filtrarMembros()">
+                      <option value="">Cargos</option>
+                      <option value="pastor">Pastor</option>
+                      <option value="discipulador">Discipul.</option>
+                      <option value="líder">Líder</option>
+                      <option value="membro">Membro</option>
+                      <option value="frequentador">Freq.</option>
+                  </select>
+                  
+                  <select id="filtroTag" onchange="filtrarMembros()">
+                      <option value="">Status</option>
+                      <option value="batizado">Batizado</option>
+                      <option value="cursão">Cursão</option>
+                      <option value="ctl">CTL</option>
+                      <option value="encontro">Encontro</option>
+                      <option value="seminário">Seminário</option>
+                      <option value="dizimista">Dizimista</option>
+                  </select>
+              </div>
           </div>          
         </div> <div id="gridMembros" class="member-grid"></div>
       </div>
