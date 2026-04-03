@@ -327,7 +327,10 @@
           <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 110px;">
           <h3>Mobile Financeiro</h3>
         </div>
-        <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+        <div style="display:flex; align-items:center; gap: 15px;">
+          <button onclick="carregarTudo()" class="btn-refresh" title="Atualizar Dados"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+          <button onclick="fazerLogout()" class="btn-refresh" style="color: #991b1b;" title="Sair do Sistema"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
       </div>
 
       <div class="nav-menu">      
@@ -1236,6 +1239,14 @@
               });
           } catch (e) { console.error("Erro no log:", e); }
       }
+
+function fazerLogout() {
+          if (confirm("Tem certeza que deseja sair do sistema?")) {
+              sessionStorage.clear(); // Limpa todos os dados de login
+              window.location.href = "index.html"; // Redireciona para a tela de login
+          }
+      }
+      
     </script>
   </body>
 </html>
