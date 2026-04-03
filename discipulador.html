@@ -547,8 +547,21 @@
           let ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
           let arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
 
-ativos.sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
-arquivados.sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
+          // ORDENAÇÃO HIERÁRQUICA + ALFABÉTICA
+          const pesoCargos = { "Pastor": 1, "Discipulador": 2, "Líder": 3, "Membro": 4, "Frequentador": 5 };
+          const ordenarPorCargoENome = (a, b) => {
+              let tipoA = a.tipo || "Frequentador"; if (tipoA.toLowerCase() === 'líder') tipoA = 'Líder';
+              let tipoB = b.tipo || "Frequentador"; if (tipoB.toLowerCase() === 'líder') tipoB = 'Líder';
+              
+              let pesoA = pesoCargos[tipoA] || 99;
+              let pesoB = pesoCargos[tipoB] || 99;
+
+              if (pesoA !== pesoB) return pesoA - pesoB;
+              return (a.nome || "").localeCompare(b.nome || "");
+          };
+
+          ativos.sort(ordenarPorCargoENome);
+          arquivados.sort(ordenarPorCargoENome);
         
         
           document.getElementById('badge-total-membros').innerText = ativos.length;
