@@ -155,7 +155,10 @@
           <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 110px;">
           <h3>Painel Discipulador</h3>
         </div>
-        <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+        <div style="display:flex; align-items:center; gap: 15px;">
+          <button onclick="carregarTudo()" class="btn-refresh" title="Atualizar Dados"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+          <button onclick="fazerLogout()" class="btn-refresh" style="color: #991b1b;" title="Sair do Sistema"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
       </div>
 
       <div class="stat-card" id="card-versiculo">
@@ -1108,6 +1111,13 @@
               
           } catch (e) {
               conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar o capítulo.</p>`;
+          }
+      }
+
+      function fazerLogout() {
+          if (confirm("Tem certeza que deseja sair do sistema?")) {
+              sessionStorage.clear(); // Limpa todos os dados de login
+              window.location.href = "index.html"; // Redireciona para a tela de login
           }
       }
 
