@@ -359,11 +359,79 @@
             </div>
           </div>
 
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="inputBusca" placeholder="🔍 Buscar membro..." onkeyup="filtrarMembros()" style="margin:0; flex:2;">
-            <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex:1;"><option value="">Todas</option></select>
-          </div>
-          
+        <style>
+            .filtros-box {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .filtros-box input, .filtros-box select {
+                margin: 0 !important; 
+                padding: 6px 4px !important; /* Padding menor para caber melhor */
+                font-size: 0.8rem !important; 
+                height: 36px !important; 
+                border-radius: 6px !important;
+                border: 1px solid #ddd !important;
+                outline: none;
+                box-sizing: border-box;
+            }
+            .busca-wrapper {
+                flex: 1; /* Ocupa o espaço necessário */
+            }
+            .busca-wrapper input {
+                width: 100%;
+            }
+            .selects-wrapper {
+                display: flex;
+                gap: 8px;
+                flex: 2; /* Ocupa o resto do espaço */
+            }
+            .selects-wrapper select {
+                flex: 1; /* Divide o espaço igualmente em 3 */
+                min-width: 0; /* Mágica pro CSS não quebrar a linha se o texto for grande */
+            }
+
+            /* No celular: Busca em cima, 3 selects juntos e alinhados na mesma linha embaixo */
+            @media (max-width: 700px) {
+                .filtros-box {
+                    flex-direction: column;
+                }
+                .selects-wrapper {
+                    width: 100%;
+                }
+            }
+          </style>
+
+          <div class="filtros-box">
+              <div class="busca-wrapper">
+                  <input type="text" id="inputBusca" placeholder="🔍 Buscar..." onkeyup="filtrarMembros()">
+              </div>
+              
+              <div class="selects-wrapper">
+                  <select id="filtroCelula" onchange="filtrarMembros()">
+                      <option value="">Células</option>
+                  </select>
+                  
+                  <select id="filtroCategoria" onchange="filtrarMembros()">
+                      <option value="">Cargos</option>
+                      <option value="pastor">Pastor</option>
+                      <option value="discipulador">Discipul.</option>
+                      <option value="líder">Líder</option>
+                      <option value="membro">Membro</option>
+                      <option value="frequentador">Freq.</option>
+                  </select>
+                  
+                  <select id="filtroTag" onchange="filtrarMembros()">
+                      <option value="">Status</option>
+                      <option value="batizado">Batizado</option>
+                      <option value="cursão">Cursão</option>
+                      <option value="ctl">CTL</option>
+                      <option value="encontro">Encontro</option>
+                      <option value="seminário">Seminário</option>
+                      <option value="dizimista">Dizimista</option>
+                  </select>
+              </div>
+          </div>          
         </div> <div id="gridMembros" class="member-grid"></div>
       </div>
 
@@ -752,8 +820,18 @@
           let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
           let nasc = m[10] ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m[10])}</span>` : '';
 
+          // Agrupando as tags para o filtro funcionar
+          let tagsArr = [];
+          if(m[6] === 'Sim') tagsArr.push('batizado');
+          if(m[7] === 'Sim') tagsArr.push('cursão');
+          if(m[8] === 'Sim') tagsArr.push('ctl');
+          if(m[9] === 'Sim') tagsArr.push('encontro');
+          if(m[11] === 'Sim') tagsArr.push('seminário');
+          if(m[12] === 'Sim') tagsArr.push('dizimista');
+          let tagsStr = tagsArr.join(' ');
+
           grid.innerHTML += `
-            <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+            <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}" data-categoria="${categoria.toLowerCase()}" data-tags="${tagsStr}">
                <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge ${categoria}">${categoria}</span></div>
                <div class="card-info"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${nasc}</div>
                <div class="status-row">
@@ -948,8 +1026,23 @@
           } finally { btn.disabled=false; btn.innerText="Registrar Movimentação"; }
       }
 
-      function filtrarMembros() { const b = document.getElementById('inputBusca').value.toLowerCase(), c = document.getElementById('filtroCelula').value.toLowerCase(); document.querySelectorAll('.member-card').forEach(card => { const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c)); card.style.display = match ? 'flex' : 'none'; }); }
-      function preencherSelects(celulas) { const s1 = document.getElementById('selectCelulas'), s2 = document.getElementById('filtroCelula'), s3 = document.getElementById('celLider'); s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Todas</option>'; s3.innerHTML='<option value="">Selecione...</option>'; celulas.forEach(c => { s1.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; s2.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; }); lideres.forEach(l => s3.innerHTML += `<option value="${l}">${l}</option>`); }
+      function filtrarMembros() { 
+          const b = document.getElementById('inputBusca').value.toLowerCase();
+          const c = document.getElementById('filtroCelula').value.toLowerCase();
+          const cat = document.getElementById('filtroCategoria').value.toLowerCase();
+          const tag = document.getElementById('filtroTag').value.toLowerCase();
+
+          document.querySelectorAll('.member-card').forEach(card => { 
+              const matchBusca = card.getAttribute('data-nome').includes(b);
+              const matchCelula = (c === "" || card.getAttribute('data-celula').includes(c));
+              const matchCat = (cat === "" || card.getAttribute('data-categoria') === cat);
+              const matchTag = (tag === "" || card.getAttribute('data-tags').includes(tag));
+              
+              card.style.display = (matchBusca && matchCelula && matchCat && matchTag) ? 'flex' : 'none'; 
+          }); 
+      }
+      
+      function preencherSelects(celulas) { const s1 = document.getElementById('selectCelulas'), s2 = document.getElementById('filtroCelula'), s3 = document.getElementById('celLider'); s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Células</option>'; s3.innerHTML='<option value="">Selecione...</option>'; celulas.forEach(c => { s1.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; s2.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; }); lideres.forEach(l => s3.innerHTML += `<option value="${l}">${l}</option>`); }
       function editarMembro(id) { const m = dadosMembros.find(i => i[0] == id); if(!m) return; document.getElementById('idMembro').value = m[0]; document.getElementById('campoNome').value = m[1]; document.getElementById('campoNasc').value = m[10]; document.getElementById('campoTel').value = m[4]; document.getElementById('selectCelulas').value = m[3]; document.getElementById('campoCategoria').value = m[2]; document.getElementById('checkBat').checked = (m[6]==='Sim'); document.getElementById('checkCur').checked = (m[7]==='Sim'); document.getElementById('checkCtl').checked = (m[8]==='Sim'); document.getElementById('checkDiz').checked = (m[9]==='Sim'); document.getElementById('checkSem').checked = (m[11]==='Sim'); document.getElementById('checkDizi').checked = (m[12]==='Sim'); mudarSecao('cadastro'); }
       function novoCadastro() { document.getElementById('formMembro').reset(); document.getElementById('idMembro').value=''; mudarSecao('cadastro'); }
       
@@ -1237,15 +1330,29 @@
       }
 
       function exportarExcel() {
-          // Pega os valores dos filtros
           const termoBusca = document.getElementById('inputBusca').value.toLowerCase();
           const celulaFiltro = document.getElementById('filtroCelula').value.toLowerCase();
+          const catFiltro = document.getElementById('filtroCategoria').value.toLowerCase();
+          const tagFiltro = document.getElementById('filtroTag').value.toLowerCase();
 
-          // Filtra a lista original usando a mesma regra da tela
           const listaFiltrada = dadosMembros.filter(m => {
               const nome = m[1].toLowerCase();
               const celula = (m[3] || '').toLowerCase();
-              return nome.includes(termoBusca) && (celulaFiltro === "" || celula.includes(celulaFiltro));
+              const categoria = (m[2] || '').toLowerCase();
+              
+              let tagsArr = [];
+              if(m[6] === 'Sim') tagsArr.push('batizado');
+              if(m[7] === 'Sim') tagsArr.push('cursão');
+              if(m[8] === 'Sim') tagsArr.push('ctl');
+              if(m[9] === 'Sim') tagsArr.push('encontro');
+              if(m[11] === 'Sim') tagsArr.push('seminário');
+              if(m[12] === 'Sim') tagsArr.push('dizimista');
+              let tagsStr = tagsArr.join(' ');
+
+              return nome.includes(termoBusca) && 
+                     (celulaFiltro === "" || celula.includes(celulaFiltro)) &&
+                     (catFiltro === "" || categoria === catFiltro) &&
+                     (tagFiltro === "" || tagsStr.includes(tagFiltro));
           });
 
           if (listaFiltrada.length === 0) return alert("Nenhum dado na tela para exportar");
@@ -1273,15 +1380,29 @@
       }
 
       async function exportarPDF() {
-          // Pega os valores dos filtros
           const termoBusca = document.getElementById('inputBusca').value.toLowerCase();
           const celulaFiltro = document.getElementById('filtroCelula').value.toLowerCase();
+          const catFiltro = document.getElementById('filtroCategoria').value.toLowerCase();
+          const tagFiltro = document.getElementById('filtroTag').value.toLowerCase();
 
-          // Filtra a lista original usando a mesma regra da tela
           const listaFiltrada = dadosMembros.filter(m => {
               const nome = m[1].toLowerCase();
               const celula = (m[3] || '').toLowerCase();
-              return nome.includes(termoBusca) && (celulaFiltro === "" || celula.includes(celulaFiltro));
+              const categoria = (m[2] || '').toLowerCase();
+              
+              let tagsArr = [];
+              if(m[6] === 'Sim') tagsArr.push('batizado');
+              if(m[7] === 'Sim') tagsArr.push('cursão');
+              if(m[8] === 'Sim') tagsArr.push('ctl');
+              if(m[9] === 'Sim') tagsArr.push('encontro');
+              if(m[11] === 'Sim') tagsArr.push('seminário');
+              if(m[12] === 'Sim') tagsArr.push('dizimista');
+              let tagsStr = tagsArr.join(' ');
+
+              return nome.includes(termoBusca) && 
+                     (celulaFiltro === "" || celula.includes(celulaFiltro)) &&
+                     (catFiltro === "" || categoria === catFiltro) &&
+                     (tagFiltro === "" || tagsStr.includes(tagFiltro));
           });
 
           if (listaFiltrada.length === 0) return alert("Nenhum dado na tela para exportar");
@@ -1293,10 +1414,14 @@
           doc.text("Relatório de Membros - Videira Jataí", 14, 15);
           doc.setFontSize(10);
           
-          // Adiciona no cabeçalho do PDF o filtro que foi usado
           let textoFiltro = `Gerado em: ${new Date().toLocaleString()}`;
           const selectCelula = document.getElementById('filtroCelula');
-          if (celulaFiltro !== "") textoFiltro += ` | Filtro: Célula ${selectCelula.options[selectCelula.selectedIndex].text}`;
+          const selectCat = document.getElementById('filtroCategoria');
+          const selectTag = document.getElementById('filtroTag');
+          
+          if (celulaFiltro !== "") textoFiltro += ` | Célula: ${selectCelula.options[selectCelula.selectedIndex].text}`;
+          if (catFiltro !== "") textoFiltro += ` | Cat: ${selectCat.options[selectCat.selectedIndex].text}`;
+          if (tagFiltro !== "") textoFiltro += ` | Status: ${selectTag.options[selectTag.selectedIndex].text}`;
           if (termoBusca !== "") textoFiltro += ` | Busca: "${termoBusca}"`;
           
           doc.text(textoFiltro, 14, 22);
