@@ -575,7 +575,7 @@
              let tel = String(m.telefone || ''); let telClean = tel.replace(/\D/g, '');
              let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap" style="margin-top:10px;"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
              let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
-             //let bDiz = (String(m.dizimista).toLowerCase() === 'sim' || m.dizimista === true) ? `<span style="font-size:0.7rem; margin-left:5px; color:#166534; background:#dcfce7; padding:2px 6px; border-radius:4px;">Dizimista</span>` : '';
+             let bDiz = (String(m.dizimista).toLowerCase() === 'sim' || m.dizimista === true) ? `<span style="font-size:0.7rem; margin-left:5px; color:#166534; background:#dcfce7; padding:2px 6px; border-radius:4px;">Dizimista</span>` : '';
 
              let acoesHTML = isArquivado 
                 ? `<button onclick="restaurarMembro('${m.id}')" class="btn-icon" title="Restaurar"><i class="fas fa-undo"></i></button>`
