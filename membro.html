@@ -93,7 +93,7 @@
             background: none;
             border: none;
             color: var(--text-light);
-            font-size: 0.75rem;
+            font-size: 0.70rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
@@ -101,7 +101,7 @@
             padding: 8px 0;
             gap: 4px;
         }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
         .nav-item.active { color: var(--primary); }
 
         .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; }
@@ -133,9 +133,48 @@
         .btn-youtube.hidden { display: none !important; }
 
         /* HEADER SAUDACAO */
-        .saudacao-header { margin-bottom: 20px; }
+        .saudacao-header { margin-bottom: 20px; text-align: center; }
         .saudacao-header h2 { margin: 0; color: var(--primary); font-size: 1.3rem; }
         .saudacao-header p { margin: 5px 0 0 0; color: var(--text-light); font-size: 0.9rem; }
+
+        /* ESTILOS DA ABA OFERTAS (NOVOS) */
+        .pix-copy-box {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .pix-copy-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #334155;
+            font-weight: bold;
+            outline: none;
+            text-align: center;
+        }
+        .pix-copy-box button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        .pix-copy-box button:active {
+            background: #059669;
+        }
     </style>
 </head>
 <body>
@@ -186,6 +225,39 @@
             </div>
         </div>
         
+        <div id="aba-ofertas" class="tab-content">
+            <h4 style="color: var(--primary); margin-top: 0; margin-bottom: 15px;"><i class="fas fa-hand-holding-heart"></i> Dízimos e Ofertas</h4>
+            
+            <div class="member-card" style="text-align: center; border-top: 4px solid #10b981;">
+                <h3 style="margin-top:0; color:#10b981;"><i class="fa-brands fa-pix"></i> Pagamento via PIX</h3>
+                <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px;">Escaneie o QR Code com o app do seu banco:</p>
+                
+                <div style="background:#f8fafc; padding:15px; border-radius:12px; display:inline-block; margin: 10px 0; border: 1px dashed #cbd5e1;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=27105498000103" alt="QR Code PIX" style="width:150px; height:150px; border-radius:8px;">
+                </div>
+                
+                <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px; margin-top: 10px;">Ou copie a chave PIX (CNPJ):</p>
+                <div class="pix-copy-box">
+                    <input type="text" id="chavePix" value="27.105.498/0001-03" readonly>
+                    <button onclick="copiarPix()" id="btnCopiarPix">
+                        <i class="far fa-copy"></i> Copiar
+                    </button>
+                </div>
+            </div>
+
+            <div class="member-card" style="text-align: center; margin-top: 15px; border-top: 4px solid #009ee3; opacity: 0.8;">
+                <h3 style="margin-top:0; color:#009ee3;"><i class="fas fa-credit-card"></i> Cartão / Mercado Pago</h3>
+                <p style="font-size: 0.9rem; color:var(--text-light);">Em breve você poderá ofertar usando seu cartão de crédito diretamente por aqui de forma segura.</p>
+                <button disabled style="background:#cbd5e1; color:#64748b; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:not-allowed; margin-top:10px; width: 100%;">
+                    <i class="fas fa-lock"></i> Disponível em Breve
+                </button>
+            </div>
+            
+            <p style="text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 20px;">
+                "Cada um dê conforme determinou em seu coração..." <br> 2 Coríntios 9:7
+            </p>
+        </div>
+
     </div>
 
     <nav class="bottom-nav">
@@ -200,6 +272,10 @@
         <button class="nav-item" onclick="mudarAba('aba-palavras', this)">
             <i class="fas fa-comment-dots"></i>
             Palavras
+        </button>
+        <button class="nav-item" onclick="mudarAba('aba-ofertas', this)">
+            <i class="fas fa-hand-holding-heart"></i>
+            Ofertar
         </button>
     </nav>
 
@@ -249,6 +325,33 @@
             
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             elementoBtn.classList.add('active');
+        }
+
+        // ================= FUNÇÃO COPIAR PIX (NOVA) =================
+        function copiarPix() {
+            const input = document.getElementById('chavePix');
+            
+            // Seleciona o texto de forma compatível com celular
+            input.select();
+            input.setSelectionRange(0, 99999); 
+            
+            // Copia para a área de transferência
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('btnCopiarPix');
+                const htmlOriginal = btn.innerHTML;
+                
+                // Feedback Visual
+                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                btn.style.background = '#059669'; // Fica um verde mais escuro
+                
+                // Volta ao normal depois de 2 segundos
+                setTimeout(() => {
+                    btn.innerHTML = htmlOriginal;
+                    btn.style.background = '#10b981';
+                }, 2000);
+            }).catch(err => {
+                alert("Erro ao copiar. Copie manualmente!");
+            });
         }
 
         // ================= CARREGAMENTO DE DADOS INICIAL =================
