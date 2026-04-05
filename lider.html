@@ -9,8 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
-         <!-- ==========================================LOGO NAV=============================================================-->
-  <link rel="icon" type="image/png" href="logo.png">
+         <link rel="icon" type="image/png" href="logo.png">
   <link rel="shortcut icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
 
@@ -20,8 +19,6 @@
   <meta name="apple-mobile-web-app-title" content="Sistema Videira">
   <meta name="theme-color" content="#0f172a"> 
     <link rel="manifest" href="manifest.json">
-    <!-- ==========================================LOGO NAV =============================================================-->
-    
     <style>
       /* --- ESTILOS ESPECÍFICOS DO PAINEL DO LÍDER --- */
       
@@ -138,6 +135,45 @@
       .btn-ler-ouro:hover { background-color: var(--ouro-escuro); }
       .biblia-texto-area { padding: 25px 20px; overflow-y: auto; flex: 1; line-height: 1.8; font-size: 1rem; color: #334155; }
       .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 50px; }
+
+      /* ESTILOS DA ABA OFERTAS (COPIAR PIX) */
+      .pix-copy-box {
+          display: flex;
+          align-items: center;
+          background: #f1f5f9;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-top: 5px;
+      }
+      .pix-copy-box input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          padding: 12px;
+          font-family: monospace;
+          font-size: 0.95rem;
+          color: #334155;
+          font-weight: bold;
+          outline: none;
+          text-align: center;
+      }
+      .pix-copy-box button {
+          background: #10b981;
+          color: white;
+          border: none;
+          padding: 12px 15px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 0.9rem;
+      }
+      .pix-copy-box button:active {
+          background: #059669;
+      }
     </style>
   </head>
   <body>
@@ -163,7 +199,7 @@
       </div>
 
       <div class="stat-card" id="card-versiculo">
-        <span class="titulo-versiculo"><!--<i class="fas fa-star"></i>--> Versículo do Dia</span>
+        <span class="titulo-versiculo">Versículo do Dia</span>
         <div id="dailyVersesWrapper"></div>
         <script async defer src="https://dailyverses.net/get/verse.js?language=arc"></script>
       </div>
@@ -178,7 +214,7 @@
         <button onclick="mudarSecao('relatorio')" class="nav-btn" id="btn-relatorio"><i class="fas fa-clipboard-list"></i> Relatório</button>
         <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
         <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
-        <button onclick="mudarSecao('sugestao')" class="nav-btn" id="btn-sugestao"><i class="fa-solid fa-hands-praying"></i> Ped. Oração</button>
+        <button onclick="mudarSecao('sugestao')" class="nav-btn" id="btn-sugestao"><i class="fas fa-hand-holding-heart"></i> Oferta</button>
       </div>
 
       <div id="secao-lista">
@@ -276,8 +312,7 @@
       <div id="secao-agenda" class="hidden">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h4 style="margin:0; color: var(--text-light);"><i class="far fa-calendar-alt"></i> Próximos Eventos</h4>
-            <!-- <button onclick="mudarSecao('cadastro-agenda')" class="btn-add-member" style="background: var(--primary);"><i class="fas fa-plus"></i> Novo Evento</button> -->
-        </div> 
+            </div> 
         <div id="listaAgenda" class="member-grid">
            <p style="text-align:center; color:#999; grid-column: 1 / -1;">Buscando agenda no Google...</p>
         </div>
@@ -311,14 +346,44 @@
         </form>
       </div>
 
-      <div id="secao-sugestao" class="hidden form-box">
-        <h3 style="color:var(--accent); margin-top:0;">Pedidos e Sugestões</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Envie seu pedido de oração, sugestão ou feedback.</p>
-        <form id="formSugestao">
-           <label>Mensagem</label>
-           <textarea name="mensagem" rows="5" required placeholder="Escreva aqui sua mensagem..."></textarea>
-           <button type="submit" id="btnSugestao" class="btn-save">Enviar</button>
-        </form>
+      <div id="secao-sugestao" class="hidden">
+        
+        <h4 style="color: var(--primary); margin-top: 0; margin-bottom: 15px;"><i class="fas fa-hand-holding-heart"></i> Dízimos e Ofertas</h4>
+        <div class="member-card" style="text-align: center; border-top: 4px solid #10b981; margin-bottom: 15px;">
+            <h3 style="margin-top:0; color:#10b981;"><i class="fa-brands fa-pix"></i> Pagamento via PIX</h3>
+            <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px;">Escaneie o QR Code com o app do seu banco:</p>
+            
+            <div style="background:#f8fafc; padding:15px; border-radius:12px; display:inline-block; margin: 10px 0; border: 1px dashed #cbd5e1;">
+                <img src="pix.png" alt="QR Code PIX" style="width:150px; height:150px; border-radius:8px;">
+            </div>
+            
+            <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px; margin-top: 10px;">Ou copie a chave PIX (CNPJ):</p>
+            <div class="pix-copy-box">
+                <input type="text" id="chavePix" value="27.105.498/0001-03" readonly>
+                <button onclick="copiarPix()" id="btnCopiarPix">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+            </div>
+        </div>
+
+        <div class="member-card" style="text-align: center; margin-bottom: 25px; border-top: 4px solid #009ee3; opacity: 0.8;">
+            <h3 style="margin-top:0; color:#009ee3;"><i class="fas fa-credit-card"></i> Cartão / Mercado Pago</h3>
+            <p style="font-size: 0.9rem; color:var(--text-light);">Em breve você poderá ofertar usando seu cartão de crédito de forma segura.</p>
+            <button disabled style="background:#cbd5e1; color:#64748b; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:not-allowed; margin-top:10px; width: 100%;">
+                <i class="fas fa-lock"></i> Disponível em Breve
+            </button>
+        </div>
+
+        <div class="form-box">
+            <h3 style="color:var(--accent); margin-top:0;"><i class="fa-solid fa-hands-praying"></i> Pedidos e Sugestões</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Envie seu pedido de oração, sugestão ou feedback.</p>
+            <form id="formSugestao">
+               <label>Mensagem</label>
+               <textarea name="mensagem" rows="5" required placeholder="Escreva aqui sua mensagem..."></textarea>
+               <button type="submit" id="btnSugestao" class="btn-save">Enviar Mensagem</button>
+            </form>
+        </div>
+
       </div>
 
     </div>
@@ -441,6 +506,30 @@
       }
 
       // ==========================================
+      // FUNÇÃO COPIAR PIX
+      // ==========================================
+      function copiarPix() {
+          const input = document.getElementById('chavePix');
+          input.select();
+          input.setSelectionRange(0, 99999); 
+          
+          navigator.clipboard.writeText(input.value).then(() => {
+              const btn = document.getElementById('btnCopiarPix');
+              const htmlOriginal = btn.innerHTML;
+              
+              btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+              btn.style.background = '#059669';
+              
+              setTimeout(() => {
+                  btn.innerHTML = htmlOriginal;
+                  btn.style.background = '#10b981';
+              }, 2000);
+          }).catch(err => {
+              alert("Erro ao copiar. Copie manualmente!");
+          });
+      }
+
+      // ==========================================
       // CARREGAMENTO INICIAL
       // ==========================================
       async function carregarTudo() {
@@ -471,8 +560,6 @@
             document.getElementById('badge-total-membros').innerText = dadosMembros.length;
             renderizarMembros(dadosMembros);
         } catch (e) { console.error("Erro Membros Supabase:", e); }
-
-        // ... resto da função continua igual
 
         try {
             dadosCelulas = await lerSupabase('celulas');
@@ -726,7 +813,7 @@
          finally { btn.disabled = false; btn.innerText="Salvar"; }
       };
 
-     
+      
       // SALVAR RELATÓRIO (Supabase)
       document.getElementById('formRelatorio').onsubmit = async function(e) {
          e.preventDefault(); 
@@ -764,7 +851,7 @@
              this.reset();
              mudarSecao('lista');
          } catch (err) { alert(err.message); } 
-         finally { btn.disabled = false; btn.innerText="Enviar"; }
+         finally { btn.disabled = false; btn.innerText="Enviar Mensagem"; }
       };
 
       // SALVAR AGENDA (Exclusivo Google Script)
