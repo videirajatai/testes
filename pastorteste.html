@@ -349,7 +349,10 @@
         <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
           
           <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px;">
-            <h4 style="margin:0; color: var(--text-light); flex-grow: 1;"><span id="totalMembros">0</span> Membros</h4>
+            <h4 style="margin:0; color: var(--text-light); flex-grow: 1;">
+            <span id="totalMembros">0</span> Membros 
+            <span id="contagemFiltrados" style="font-size: 0.75rem; color: #94a3b8; font-weight: normal; margin-left: 8px; display: none;">(0 filtrados)</span>
+          </h4>
             
             <div style="display:flex; gap: 8px;">
               <button onclick="exportarExcel()" class="btn-add-member" style="background: #166534; color: white;" title="Exportar Excel">
@@ -1035,14 +1038,33 @@
           const cat = document.getElementById('filtroCategoria').value.toLowerCase();
           const tag = document.getElementById('filtroTag').value.toLowerCase();
 
+          let visiveis = 0; // Variável para contar quantos passaram no filtro
+
           document.querySelectorAll('.member-card').forEach(card => { 
               const matchBusca = card.getAttribute('data-nome').includes(b);
               const matchCelula = (c === "" || card.getAttribute('data-celula').includes(c));
               const matchCat = (cat === "" || card.getAttribute('data-categoria') === cat);
               const matchTag = (tag === "" || card.getAttribute('data-tags').includes(tag));
               
-              card.style.display = (matchBusca && matchCelula && matchCat && matchTag) ? 'flex' : 'none'; 
+              if (matchBusca && matchCelula && matchCat && matchTag) {
+                  card.style.display = 'flex';
+                  visiveis++; // Soma +1 toda vez que um card fica visível
+              } else {
+                  card.style.display = 'none';
+              }
           }); 
+
+          // Atualiza o texto discreto na tela
+          const spanFiltrados = document.getElementById('contagemFiltrados');
+          const total = parseInt(document.getElementById('totalMembros').innerText) || 0;
+          
+          // Só mostra o "(X filtrados)" se o número for menor que o total da igreja
+          if (visiveis < total) {
+              spanFiltrados.innerText = `(${visiveis} filtrados)`;
+              spanFiltrados.style.display = 'inline-block';
+          } else {
+              spanFiltrados.style.display = 'none';
+          }
       }
       
       function preencherSelects(celulas) { const s1 = document.getElementById('selectCelulas'), s2 = document.getElementById('filtroCelula'), s3 = document.getElementById('celLider'); s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Células</option>'; s3.innerHTML='<option value="">Selecione...</option>'; celulas.forEach(c => { s1.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; s2.innerHTML += `<option value="${c[0]}">${c[0]}</option>`; }); lideres.forEach(l => s3.innerHTML += `<option value="${l}">${l}</option>`); }
