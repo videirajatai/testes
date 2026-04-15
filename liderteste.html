@@ -797,6 +797,7 @@
   const palavra = listaPalavras[index];
   if (!palavra) return;
 
+  // Formatar data
   let dataFormatada = palavra.data || '';
   try {
     if (dataFormatada.includes('-')) {
@@ -808,59 +809,92 @@
   const titulo = palavra.tema || 'Palavra / Estudo';
   const texto = palavra.texto || 'Texto não disponível.';
 
-  const element = document.createElement('div');
-  element.style.position = 'absolute';
-  element.style.left = '-9999px';
-  element.style.top = '0';
-  element.style.width = '800px';
-  element.style.background = 'white';
-  element.style.padding = '20px';
-  element.style.fontFamily = "'Inter', sans-serif";
-  element.innerHTML = `
-    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 25px;">
-        <!-- Ícone de igreja em texto, sem depender de CORS -->
-        <div style="font-size: 48px;">⛪</div>
-        <h2 style="margin: 0; color: #800020;">Igreja Videira de Jataí</h2>
-        <p style="margin: 5px 0; font-weight: 500;">Pr. Gemerson Araujo</p>
-        <hr style="border-top: 2px solid #D4AF37; width: 80px;">
-        <p style="color: #555;"><strong>📅 Data da Palavra:</strong> ${dataFormatada}</p>
+  // Criar um iframe invisível para gerar o PDF
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'absolute';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '-9999px';
+  iframe.style.width = '800px';
+  iframe.style.height = '800px';
+  iframe.style.border = 'none';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${titulo}</title>
+      <style>
+        body {
+          font-family: 'Inter', sans-serif;
+          padding: 20px;
+          margin: 0;
+          background: white;
+          width: 800px;
+          margin: 0 auto;
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .logo-emoji { font-size: 48px; }
+        h2 { margin: 0; color: #800020; }
+        .pastor { margin: 5px 0; font-weight: 500; }
+        hr { border-top: 2px solid #D4AF37; width: 80px; }
+        .data { color: #555; }
+        .titulo-palavra { color: #800020; border-left: 5px solid #D4AF37; padding-left: 15px; margin-bottom: 20px; }
+        .texto { line-height: 1.6; text-align: justify; white-space: pre-wrap; margin-bottom: 30px; }
+        .observacoes { margin-top: 50px; }
+        .linha { border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px; }
+        .footer { font-size: 0.8rem; color: gray; margin-top: 30px; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="logo-emoji">⛪</div>
+        <h2>Igreja Videira de Jataí</h2>
+        <div class="pastor">Pr. Gemerson Araujo</div>
+        <hr>
+        <div class="data"><strong>📅 Data da Palavra:</strong> ${dataFormatada}</div>
       </div>
 
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #800020; border-left: 5px solid #D4AF37; padding-left: 15px;">${titulo}</h3>
-        <div style="line-height: 1.6; text-align: justify; white-space: pre-wrap;">${texto}</div>
-      </div>
+      <div class="titulo-palavra">${titulo}</div>
+      <div class="texto">${texto}</div>
 
-      <div style="margin-top: 50px;">
+      <div class="observacoes">
         <p style="font-weight: bold;">✍️ Observações do líder:</p>
-        <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
-        <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
-        <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
-        <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
-        <p style="font-size: 0.8rem; color: gray; margin-top: 30px;">Documento gerado pelo Sistema Videira</p>
+        <div class="linha"></div>
+        <div class="linha"></div>
+        <div class="linha"></div>
+        <div class="linha"></div>
       </div>
-    </div>
-  `;
+      <div class="footer">Documento gerado pelo Sistema Videira</div>
+    </body>
+    </html>
+  `);
+  doc.close();
 
-  document.body.appendChild(element);
-  await new Promise(resolve => setTimeout(resolve, 200));
+  // Aguardar o iframe carregar completamente
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   const opt = {
     margin: [0.5, 0.5, 0.5, 0.5],
     filename: `${titulo.replace(/[^a-z0-9]/gi, '_')}_${dataFormatada}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, letterRendering: true, useCORS: false }, // useCORS false para evitar erros
+    html2canvas: { scale: 2, letterRendering: true, useCORS: false },
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
 
   try {
+    // Gerar o PDF a partir do conteúdo do iframe
+    const element = iframe.contentDocument.body;
     await html2pdf().set(opt).from(element).save();
   } catch (err) {
     console.error("Erro ao gerar PDF:", err);
     alert("Não foi possível gerar o PDF. Tente novamente.");
   } finally {
-    document.body.removeChild(element);
+    // Remover o iframe após gerar
+    document.body.removeChild(iframe);
   }
 }
 
