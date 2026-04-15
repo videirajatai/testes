@@ -9,16 +9,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
-         <link rel="icon" type="image/png" href="logo.png">
-  <link rel="shortcut icon" type="image/png" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
+    <!-- html2pdf para download direto -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Sistema Videira">
-  <meta name="apple-mobile-web-app-title" content="Sistema Videira">
-  <meta name="theme-color" content="#0f172a"> 
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="shortcut icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Sistema Videira">
+    <meta name="apple-mobile-web-app-title" content="Sistema Videira">
+    <meta name="theme-color" content="#0f172a"> 
     <link rel="manifest" href="manifest.json">
+    
     <style>
       /* --- ESTILOS ESPECÍFICOS DO PAINEL DO LÍDER --- */
       
@@ -393,7 +397,10 @@
           <button class="btn-close-modal" onclick="fecharModal(null)">&times;</button>
           <h3 id="modalTitulo" style="color:var(--primary); margin-top:10px;"></h3>
           <small id="modalData" style="color:#777; display:block; margin-bottom:15px;"></small>
-          <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+              <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden" style="flex:1;"><i class="fab fa-youtube"></i> Assistir</a>
+              <button id="btnBaixarPDF" onclick="gerarPDFPalavra(palavraIndexAtual)" class="btn-youtube" style="background: #2c7da0; flex:1;"><i class="fas fa-file-pdf"></i> Baixar PDF</button>
+          </div>
           <div id="modalTexto" class="word-text"></div>
       </div>
     </div>
@@ -430,6 +437,7 @@
       const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
 
       let dadosMembros = [], dadosCelulas = [], listaPalavras = [], listaAgenda = [];
+      let palavraIndexAtual = null; // Índice da palavra aberta no modal
       
       window.onload = carregarTudo;
 
@@ -570,23 +578,20 @@
         try {
             listaPalavras = await lerSupabase('palavras');
             
-            // Aqui a mágica acontece: ele lê as datas, converte e ordena da maior (mais nova) para a menor (mais velha)
+            // Ordena da mais nova para a mais antiga
             listaPalavras.sort((a, b) => {
                 const pegarTempo = (d) => {
                     if (!d) return 0;
-                    // Se for formato YYYY-MM-DD (Padrão banco de dados)
                     if (d.includes('-')) { 
                         const p = d.split('-'); 
                         return new Date(p[0], p[1]-1, p[2]).getTime(); 
                     }
-                    // Se for formato DD/MM/YYYY (Padrão brasileiro)
                     if (d.includes('/')) { 
                         const p = d.split('/'); 
                         return new Date(p[2], p[1]-1, p[0]).getTime(); 
                     }
                     return new Date(d).getTime();
                 };
-                
                 return pegarTempo(b.data) - pegarTempo(a.data);
             });
 
@@ -653,20 +658,19 @@
          if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="3" style="text-align:center;">Nenhuma célula encontrada.</td></tr>'; return; }
          
          lista.forEach(c => {
-            // Cria a linha do endereço com um ícone, se existir o dado no banco
             let enderecoHTML = c.endereco 
                 ? `<div style="font-size: 0.75rem; color: #888; margin-top: 3px;"><i class="fas fa-map-marker-alt" style="color: #64748b;"></i> ${c.endereco}</div>` 
                 : `<div style="font-size: 0.75rem; color: #ccc; margin-top: 3px;">Sem endereço cadastrado</div>`;
                 
             tb.innerHTML += `
-            <tr>
-                <td>
+             <tr>
+                 <td>
                     <div style="font-weight: 700; color: #333;">${c.nome || ''}</div>
                     ${enderecoHTML}
-                </td>
+                 </td>
                 <td style="color: #444;">${c.lider || ''}</td>
                 <td style="color: #444;">${c.dia_horario || ''}</td>
-            </tr>`;
+             </tr>`;
          });
       }
 
@@ -751,7 +755,6 @@
          const b = document.getElementById('inputBusca').value.toLowerCase();
          const c = document.getElementById('filtroCelula').value.toLowerCase();
          document.querySelectorAll('.member-card').forEach(card => {
-            // Checa se o card tem os atributos antes de tentar filtrar (ignora cards da agenda)
             if(card.hasAttribute('data-nome') && card.hasAttribute('data-celula')){
                 const match = card.getAttribute('data-nome').includes(b) && (c==="" || card.getAttribute('data-celula').includes(c));
                 card.style.display = match ? 'flex' : 'none';
@@ -760,6 +763,7 @@
       }
 
       function abrirPalavra(index) {
+          palavraIndexAtual = index; // Guarda o índice para o PDF
           const p = listaPalavras[index]; 
           document.getElementById('modalTitulo').innerText = p.tema || '';
           let dataF = p.data || '';
@@ -784,6 +788,81 @@
           if(e === null || e.target.id === 'modalPalavra') {
               document.getElementById('modalPalavra').classList.add('hidden');
           }
+      }
+
+      // ==========================================
+      // GERAR PDF DIRETAMENTE (sem janela de impressão)
+      // ==========================================
+      async function gerarPDFPalavra(index) {
+        const palavra = listaPalavras[index];
+        if (!palavra) return;
+
+        // Formatar data
+        let dataFormatada = palavra.data || '';
+        try {
+          if (dataFormatada.includes('-')) {
+            const partes = dataFormatada.split('-');
+            dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+          }
+        } catch(e) {}
+
+        const titulo = palavra.tema || 'Palavra / Estudo';
+        const texto = palavra.texto || 'Texto não disponível.';
+        const logoSrc = "https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png";
+
+        // Criar um elemento div temporário para gerar o PDF
+        const element = document.createElement('div');
+        element.style.position = 'absolute';
+        element.style.left = '-9999px';
+        element.style.top = '-9999px';
+        element.style.width = '800px';
+        element.style.background = 'white';
+        element.style.padding = '20px';
+        element.style.fontFamily = "'Inter', sans-serif";
+        element.innerHTML = `
+          <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+              <img src="${logoSrc}" style="width: 100px; margin-bottom: 10px;">
+              <h2 style="margin: 0; color: #800020;">Igreja Videira de Jataí</h2>
+              <p style="margin: 5px 0; font-weight: 500;">Pr. Gemerson Araujo</p>
+              <hr style="border-top: 2px solid #D4AF37; width: 80px;">
+              <p style="color: #555;"><strong>📅 Data da Palavra:</strong> ${dataFormatada}</p>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #800020; border-left: 5px solid #D4AF37; padding-left: 15px;">${titulo}</h3>
+              <div style="line-height: 1.6; text-align: justify; white-space: pre-wrap;">${texto}</div>
+            </div>
+
+            <div style="margin-top: 50px;">
+              <p style="font-weight: bold;">✍️ Observações do líder:</p>
+              <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
+              <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
+              <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
+              <div style="border-bottom: 1px solid #ccc; margin: 20px 0; height: 30px;"></div>
+              <p style="font-size: 0.8rem; color: gray; margin-top: 30px;">Documento gerado pelo Sistema Videira</p>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(element);
+
+        const opt = {
+          margin:        [0.5, 0.5, 0.5, 0.5],
+          filename:     `${titulo.replace(/[^a-z0-9]/gi, '_')}_${dataFormatada}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, letterRendering: true },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+          await html2pdf().set(opt).from(element).save();
+        } catch (err) {
+          console.error("Erro ao gerar PDF:", err);
+          alert("Não foi possível gerar o PDF. Tente novamente.");
+        } finally {
+          document.body.removeChild(element);
+        }
       }
 
       // ==========================================
@@ -819,7 +898,6 @@
          e.preventDefault(); 
          const btn = document.getElementById('btnRelatorio'); btn.disabled = true; btn.innerText="Enviando...";
          
-         // Pegamos apenas o texto bruto, sem fazer contagem
          const d = { 
             data: this.data.value, 
             celula: this.celula.value, 
@@ -840,6 +918,7 @@
          } catch (err) { alert(err.message); } 
          finally { btn.disabled = false; btn.innerText="Enviar Relatório"; }
       };
+      
       // SALVAR SUGESTÃO (Supabase)
       document.getElementById('formSugestao').onsubmit = async function(e) {
          e.preventDefault(); 
@@ -877,12 +956,9 @@
          finally { btn.disabled = false; btn.innerText="Salvar Evento"; }
       };
 
-
-      
       // ==========================================
       // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
-      // Variável para carregar Gênesis sozinho na primeira vez
       let bibliaIniciada = false;
 
       const dadosBiblia = [
@@ -946,7 +1022,6 @@
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
           
-          // Forçando a injeção do HTML direto para não ter erro no Discipulador
           let htmlLivros = '';
           dadosBiblia.forEach((livro, index) => {
               let negrito = index >= 39 ? 'font-weight: bold;' : '';
@@ -977,7 +1052,6 @@
               selectCapitulo.innerHTML = htmlCaps;
               selectCapitulo.disabled = false;
               
-              // Carrega o capítulo 1 automaticamente ao trocar de livro
               carregarCapitulo();
           }
       }
@@ -1018,8 +1092,8 @@
 
       function fazerLogout() {
           if (confirm("Tem certeza que deseja sair do sistema?")) {
-              sessionStorage.clear(); // Limpa todos os dados de login
-              window.location.href = "index.html"; // Redireciona para a tela de login
+              sessionStorage.clear();
+              window.location.href = "index.html";
           }
       }
     </script>
