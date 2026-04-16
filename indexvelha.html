@@ -232,6 +232,9 @@
                 }
             }
 
+            console.log("🔥 TENTANDO LOGAR COM O E-MAIL:", emailParaLogin);
+            console.log("🔥 A SENHA ENVIADA É:", pass);
+
             // LOGIN OFICIAL DO SUPABASE COM O CRACHÁ
             const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
                 email: emailParaLogin,
