@@ -198,21 +198,27 @@
 
         async function verificarLogin() {
             const entrada = document.getElementById('usuario-input').value.trim().toLowerCase();
+            
+            // O TRUQUE DA SENHA TAMBÉM NA HORA DE ENTRAR
             const passDigitado = document.getElementById('senha-input').value.trim();
             const pass = passDigitado + "-videira";
+
             const erro = document.getElementById('mensagem-erro');
             const btn = document.getElementById('btn-entrar');
 
-            if(!entrada || !pass) { 
+            if(!entrada || !passDigitado) { 
                 erro.innerText = "⚠️ Preencha usuário/e-mail e senha."; 
-                erro.style.display = 'block'; return; 
+                erro.style.display = 'block'; 
+                return; 
             }
 
-            btn.innerText = "Autenticando..."; btn.disabled = true; erro.style.display = 'none';
+            btn.innerText = "Autenticando..."; 
+            btn.disabled = true; 
+            erro.style.display = 'none';
 
             let emailParaLogin = entrada;
 
-            // Se o cara digitou um nome de usuário, achamos o e-mail dele primeiro
+            // Se a pessoa digitou um "nome de usuário" e não um e-mail com @
             if (!entrada.includes('@')) {
                 const { data } = await supabaseClient.from('usuarios').select('email').eq('usuario', entrada).single();
                 if (data) {
@@ -220,12 +226,13 @@
                 } else {
                     erro.innerText = "⚠️ Usuário não encontrado.";
                     erro.style.display = 'block';
-                    btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+                    btn.innerText = "Entrar no Sistema"; 
+                    btn.disabled = false;
                     return;
                 }
             }
 
-            // LOGIN OFICIAL DO SUPABASE usando supabaseClient
+            // LOGIN OFICIAL DO SUPABASE COM O CRACHÁ
             const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
                 email: emailParaLogin,
                 password: pass
@@ -235,11 +242,12 @@
                 erro.innerText = "⚠️ E-mail ou senha incorretos.";
                 erro.style.display = 'block';
                 document.getElementById('senha-input').value = "";
-                btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+                btn.innerText = "Entrar no Sistema"; 
+                btn.disabled = false;
                 return;
             }
 
-            // O Login deu certo! Pegamos a categoria na tabela
+            // O Login deu certo! Agora pegamos os dados dele na tabela para saber o Cargo
             const { data: dadosUsuario } = await supabaseClient.from('usuarios').select('*').eq('email', emailParaLogin).single();
 
             if (dadosUsuario) {
@@ -247,13 +255,15 @@
                 const usuarioReal = dadosUsuario.usuario || dadosUsuario.email; 
                 const categoria = (dadosUsuario.categoria || "").toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
 
+                // Grava o LOG
                 registrarLog(usuarioReal, nomeReal, "Fez login no sistema");
 
+                // Salva na memória do navegador para as outras telas funcionarem
                 sessionStorage.setItem('usuarioLogado', nomeReal);
                 sessionStorage.setItem('loginDigitado', usuarioReal); 
                 sessionStorage.setItem('urlApi', urlBackend);
 
-                // --- RESTANTE DO SEU CÓDIGO DE PERMISSÕES IGUAL AO ANTERIOR ---
+                // --- TABELA DE PERMISSÕES DA VIDEIRA ---
                 let paginas = [];
                 if (categoria === 'administrador') {
                     paginas = [
@@ -274,12 +284,14 @@
                 } else if (categoria === 'membro') {
                     paginas = [ { nome: "Área do Membro", url: "membro" } ];
                 } else {
+                    // Categoria Líder ou não identificada cai aqui
                     paginas = [ { nome: "Painel do Líder", url: "lider" } ];
                 }
 
                 const urlsPermitidas = paginas.map(p => p.url);
                 sessionStorage.setItem('paginasPermitidas', JSON.stringify(urlsPermitidas));
 
+                // Redireciona o usuário
                 if (paginas.length === 1) {
                     entrarNoPainel(nomeReal, paginas[0].url);
                 } else {
@@ -297,6 +309,11 @@
                         divBotoes.appendChild(b);
                     });
                 }
+            } else {
+                erro.innerText = "⚠️ Erro ao buscar os dados do usuário.";
+                erro.style.display = 'block';
+                btn.innerText = "Entrar no Sistema"; 
+                btn.disabled = false;
             }
         }
 
@@ -362,22 +379,26 @@
             const email = document.getElementById('cad-email').value.trim();
             const whatsapp = document.getElementById('cad-whatsapp').value.trim();
             const usuario = document.getElementById('cad-usuario').value.trim().toLowerCase();
-            const senha = document.getElementById('cad-senha').value.trim();
-
+            
+            // O TRUQUE DA SENHA: O usuário digita 4 números, a gente completa pra ficar gigante
             const senhaDigitada = document.getElementById('cad-senha').value.trim();
-            const senha = senhaDigitada + "-videira";
+            const senha = senhaDigitada + "-videira"; 
             
             const btn = document.getElementById('btn-cadastrar');
             const erro = document.getElementById('mensagem-erro-cad');
 
-            if (!nome || !email || !whatsapp || !usuario || !senha) {
+            // Verifica se deixou algo em branco (checa a senha digitada normal)
+            if (!nome || !email || !whatsapp || !usuario || !senhaDigitada) {
                 erro.innerText = "⚠️ Todos os campos são obrigatórios.";
-                erro.style.display = 'block'; return;
+                erro.style.display = 'block'; 
+                return;
             }
 
-            btn.innerText = "Aguarde..."; btn.disabled = true; erro.style.display = 'none';
+            btn.innerText = "Aguarde..."; 
+            btn.disabled = true; 
+            erro.style.display = 'none';
 
-            // 1. CRIA O CRACHÁ OFICIAL (Auth) usando supabaseClient
+            // 1. CRIA O CRACHÁ OFICIAL (Auth)
             const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                 email: email,
                 password: senha
@@ -386,18 +407,18 @@
             if (authError) {
                 erro.innerText = "⚠️ Erro no Cadastro: " + authError.message; 
                 erro.style.display = 'block';
-                btn.innerText = "Finalizar Cadastro"; btn.disabled = false;
+                btn.innerText = "Finalizar Cadastro"; 
+                btn.disabled = false;
                 return;
             }
 
-            // 2. AGORA SIM, SALVA OS DADOS NA SUA TABELA usando supabaseClient
+            // 2. SALVA OS DADOS NA SUA TABELA (Sem mandar o ID, pois ele é gerado pelo banco)
             const novoUsuario = {
-               // id: authData.user.id, // Liga a tabela ao Auth!
                 nome: nome,
                 email: email,
                 whatsapp: whatsapp,
                 usuario: usuario,
-                categoria: 'membro' // Nasce como membro
+                categoria: 'membro' // Todo mundo nasce como membro
             };
 
             const { error: dbError } = await supabaseClient.from('usuarios').insert([novoUsuario]);
@@ -408,9 +429,17 @@
             } else {
                 alert("Cadastro realizado com sucesso! Faça login para continuar.");
                 mudarTela('bloco-login');
+                
+                // Limpa os campos do formulário
+                document.getElementById('cad-nome').value = "";
+                document.getElementById('cad-email').value = "";
+                document.getElementById('cad-whatsapp').value = "";
+                document.getElementById('cad-usuario').value = "";
+                document.getElementById('cad-senha').value = "";
             }
             
-            btn.innerText = "Finalizar Cadastro"; btn.disabled = false;
+            btn.innerText = "Finalizar Cadastro"; 
+            btn.disabled = false;
         }
 
         // ================= NOVAS FUNÇÕES: RECUPERAR SENHA =================
