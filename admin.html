@@ -71,14 +71,46 @@
     </style>
   </head>
   <body>
+    <body>
+    <!-- ========================================== -->
+    <!-- NOVA VERIFICAÇÃO DE ACESSO (PADRÃO PASTOR) -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const usuarioLogado = sessionStorage.getItem('usuarioLogado');
-        const categoriaUser = sessionStorage.getItem('categoria');
-        
-        // Apenas o Administrador pode acessar esta página
-        if(!usuarioLogado || categoriaUser !== "Administrador") {
-            window.location.href = "index.html";
-        }
+      (async () => {
+          const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co";
+          const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA";
+          const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+
+          const { data: { user } } = await supabaseTemp.auth.getUser();
+
+          if (!user) {
+              window.location.href = "index.html";
+              return;
+          }
+
+          const { data: usuario } = await supabaseTemp
+              .from('usuarios')
+              .select('categoria')
+              .eq('email', user.email)
+              .single();
+
+          const cat = (usuario?.categoria || "membro").toLowerCase();
+
+          // Apenas ADMINISTRADOR pode acessar este painel
+          if (cat !== "administrador") {
+              alert("Acesso restrito. Apenas administradores podem acessar este painel.");
+              if (cat === "membro") window.location.href = "membro.html";
+              else if (cat === "lider" || cat === "líder") window.location.href = "lider.html";
+              else if (cat === "pastor") window.location.href = "pastor.html";
+              else if (cat === "tesoureiro") window.location.href = "financeiromobile.html";
+              else window.location.href = "index.html";
+          }
+
+          // Salva as informações necessárias no sessionStorage (mantendo compatibilidade)
+          sessionStorage.setItem('usuarioLogado', user.user_metadata?.nome || user.email);
+          sessionStorage.setItem('loginDigitado', user.email);
+      })();
     </script>
 
     <div class="container">
@@ -167,18 +199,11 @@
     </div>
 
     <script>
-      // ==========================================
-      // CONFIGURAÇÃO SUPABASE
-      // ==========================================
-      // ==========================================
-      // CONFIGURAÇÃO SUPABASE OFICIAL (JWT)
-      // ==========================================
       const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA';
       const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-      let dadosUsuarios = []; 
-      let dadosExibidos = [];
+            let dadosUsuarios = []; 
+            let dadosExibidos = [];
 
       window.onload = carregarTudo;
 
