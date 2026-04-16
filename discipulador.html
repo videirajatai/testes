@@ -141,11 +141,36 @@
   </head>
   <body>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      const paginasPermitidas = JSON.parse(sessionStorage.getItem('paginasPermitidas') || "[]");
-      if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("discipulador")) {
-          window.location.href = "index.html";
-      }
+        (async () => {
+            const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co";
+            const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA";
+            const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+
+            const { data: { user } } = await supabaseTemp.auth.getUser();
+
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const { data: usuario } = await supabaseTemp
+                .from('usuarios')
+                .select('categoria')
+                .eq('email', user.email)
+                .single();
+
+            const cat = (usuario?.categoria || "membro").toLowerCase();
+
+            // Lista de quem PODE estar aqui
+            const permitidos = ["discipulador", "pastor", "administrador"];
+
+            if (!permitidos.includes(cat)) {
+                alert("Acesso negado. Esta área é restrita a Discipuladores e Pastores.");
+                window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
+            }
+        })();
     </script>
 
     <div class="container">
@@ -425,56 +450,36 @@
       }
 
       // 3. MOTORES SUPABASE (Para o Resto)
+     // 3. MOTORES SUPABASE (Utilizando a biblioteca oficial)
       async function lerSupabase(tabela) {
-          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
-              method: 'GET',
-              headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-          });
-          if (!res.ok) throw new Error(`Erro ao ler tabela: ${tabela}`);
-          return await res.json();
+          const { data, error } = await supabaseClient.from(tabela).select('*');
+          if (error) throw new Error(`Erro ao ler ${tabela}: ${error.message}`);
+          return data;
       }
 
       async function inserirSupabase(tabela, dados) {
-          const res = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
-              method: 'POST',
-              headers: { 
-                  'apikey': SB_KEY, 
-                  'Authorization': `Bearer ${SB_KEY}`,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(dados)
-          });
-          if (!res.ok) throw new Error(`Erro ao inserir no Supabase.`);
+          const { error } = await supabaseClient.from(tabela).insert([dados]);
+          if (error) throw new Error(`Erro ao inserir: ${error.message}`);
           
-          // Rastreador de Novos Cadastros
-          let identificador = dados.nome || dados.celula || dados.tema || 'Registro';
-          registrarLogAcao(`Criou novo item na aba ${tabela}: ${identificador}`);
-          
-          return "Inserido com sucesso!";
+          let identificador = dados.nome || dados.tema || 'Registro';
+          registrarLogAcao(`Criou item em ${tabela}: ${identificador}`);
+          return "Inserido com sucesso! 🚀";
       }
       
       async function atualizarSupabase(tabela, id, dados) {
-          const res = await fetch(`${SB_URL}/rest/v1/${tabela}?id=eq.${id}`, {
-              method: 'PATCH',
-              headers: { 
-                  'apikey': SB_KEY, 
-                  'Authorization': `Bearer ${SB_KEY}`,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(dados)
-          });
-          if (!res.ok) throw new Error(`Erro ao atualizar no Supabase.`);
+          const { error } = await supabaseClient
+              .from(tabela)
+              .update(dados)
+              .eq('id', id);
+
+          if (error) throw new Error(`Erro ao atualizar: ${error.message}`);
           
-          // Rastreador de Edições e Arquivamentos
-          let identificador = dados.nome || dados.celula || 'ID ' + id;
-          let extra = dados.arquivado ? `(Status Arquivado: ${dados.arquivado})` : 'Edição dos dados';
-          registrarLogAcao(`Modificou item na aba ${tabela}: ${identificador} - ${extra}`);
-          
-          return "Atualizado com sucesso!";
+          let identificador = dados.nome || 'ID ' + id;
+          registrarLogAcao(`Editou item em ${tabela}: ${identificador}`);
+          return "Atualizado com sucesso! ✅";
       }
 
+      
       // ==========================================
       // CARREGAMENTO INICIAL
       // ==========================================
