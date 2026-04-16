@@ -175,7 +175,8 @@
         <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" alt="Carregando" class="splash-logo">
         <p id="splash-texto">Autenticando e carregando painel...</p>
     </div>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // MANTER O BACKEND DO GOOGLE PARA A AGENDA / E-MAILS
         const urlBackend = "https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec"; 
@@ -183,6 +184,8 @@
         // DADOS DO SUPABASE PARA O LOGIN
         const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
         const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
+
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         // ================= FUNÇÃO PARA ALTERNAR TELAS =================
         function mudarTela(idBloco) {
@@ -193,147 +196,108 @@
             document.querySelectorAll('.mensagem-erro').forEach(msg => msg.style.display = 'none');
         }
 
-        // ================= FUNÇÃO DE LOGIN ORIGINAL MANTIDA =================
         async function verificarLogin() {
-    const entrada = document.getElementById('usuario-input').value.trim().toLowerCase();
-    const pass = document.getElementById('senha-input').value.trim();
-    const erro = document.getElementById('mensagem-erro');
-    const btn = document.getElementById('btn-entrar');
-    
-    // Validação inicial
-    if(!entrada || !pass) { 
-        erro.innerText = "⚠️ Preencha usuário/e-mail e senha."; 
-        erro.style.display = 'block'; 
-        return; 
-    }
+            const entrada = document.getElementById('usuario-input').value.trim().toLowerCase();
+            const pass = document.getElementById('senha-input').value.trim();
+            const erro = document.getElementById('mensagem-erro');
+            const btn = document.getElementById('btn-entrar');
 
-    btn.innerText = "Autenticando..."; 
-    btn.disabled = true; 
-    erro.style.display = 'none';
-
-    try {
-        let resposta;
-        const ehEmail = entrada.includes('@'); // <--- DETECTA SE É E-MAIL
-
-        if (ehEmail) {
-            // CASO 1: LOGIN COM E-MAIL
-            resposta = await fetch(`${SB_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(entrada)}&senha=eq.${encodeURIComponent(pass)}&select=*`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SB_KEY,
-                    'Authorization': `Bearer ${SB_KEY}`
-                }
-            });
-        } else {
-            // CASO 2: LOGIN COM USUÁRIO (ORIGINAL)
-            resposta = await fetch(`${SB_URL}/rest/v1/usuarios?usuario=eq.${encodeURIComponent(entrada)}&senha=eq.${encodeURIComponent(pass)}&select=*`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SB_KEY,
-                    'Authorization': `Bearer ${SB_KEY}`
-                }
-            });
-        }
-        
-        if (!resposta.ok) throw new Error("Credenciais inválidas");
-
-        let resultado = await resposta.json();
-
-        // Se encontrou o usuário
-        if (resultado && resultado.length > 0) {
-            const dadosUsuario = resultado[0];
-            const nomeReal = dadosUsuario.nome;
-            // Importante: para o log, usamos o nome de usuário real do banco, não o email digitado
-            const usuarioReal = dadosUsuario.usuario; 
-
-            // Pega a categoria, joga pra minúsculo, tira espaços e remove acentos
-            const categoria = (dadosUsuario.categoria || "").toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-
-            // Registra o log usando o nome de usuário real
-            registrarLog(usuarioReal, nomeReal, "Fez login no sistema");
-
-            // Salva os dados de sessão
-            sessionStorage.setItem('usuarioLogado', nomeReal);
-            sessionStorage.setItem('loginDigitado', usuarioReal); // Usa o nome de usuário real para as outras telas
-            sessionStorage.setItem('urlApi', urlBackend);
-            
-            // --- RESTANTE DO CÓDIGO DE PERMISSÕES MANTIDO IGUAL ---
-            let paginas = [];
-            
-            if (categoria === 'administrador') {
-                paginas = [
-                    { nome: "Painel Admin", url: "admin" },
-                    { nome: "Painel do Pastor", url: "pastor" },
-                    { nome: "Painel Discipulador", url: "discipulador" },
-                    { nome: "Painel do Líder", url: "lider" },
-                    { nome: "Financeiro Mobile", url: "financeiromobile" },
-                    { nome: "Painel Financeiro", url: "financeiro" },
-                    { nome: "Painel do Membro", url: "membro" }
-                ];
-            } else if (categoria === 'pastor') {
-                paginas = [
-                    { nome: "Painel do Pastor", url: "pastor" },
-                    { nome: "Painel Admin", url: "admin" }
-                ];
-            } else if (categoria === 'discipulador') {
-                paginas = [
-                    { nome: "Painel Discipulador", url: "discipulador" },
-                    { nome: "Painel do Líder", url: "lider" }
-                ];
-            } else if (categoria === 'tesoureiro') {
-                paginas = [
-                    { nome: "Financeiro PC", url: "financeiro" },
-                    { nome: "Financeiro Mobile", url: "financeiromobile" }
-                ];
-            } else if (categoria === 'membro') {
-                paginas = [
-                    { nome: "Área do Membro", url: "membro" }
-                ];
-            } else {
-                paginas = [
-                    { nome: "Painel do Líder", url: "lider" }
-                ];
+            if(!entrada || !pass) { 
+                erro.innerText = "⚠️ Preencha usuário/e-mail e senha."; 
+                erro.style.display = 'block'; return; 
             }
-            
-            const urlsPermitidas = paginas.map(p => p.url);
-            sessionStorage.setItem('paginasPermitidas', JSON.stringify(urlsPermitidas));
 
-            // Redirecionamento ou Tela de Escolha
-            if (paginas.length === 1) {
-                entrarNoPainel(nomeReal, paginas[0].url);
-            } else {
-                document.getElementById('area-form').style.display = 'none';
-                document.getElementById('area-escolha').style.display = 'block';
-                document.getElementById('titulo-login').innerText = `Olá, ${nomeReal}`;
-                document.getElementById('subtitulo-login').innerText = "Qual painel você deseja acessar?";
+            btn.innerText = "Autenticando..."; btn.disabled = true; erro.style.display = 'none';
 
-                const divBotoes = document.getElementById('botoes-painel');
-                divBotoes.innerHTML = '';
-                paginas.forEach(pag => {
-                    let b = document.createElement('button');
-                    b.innerText = pag.nome;
-                    b.onclick = () => entrarNoPainel(nomeReal, pag.url);
-                    divBotoes.appendChild(b);
-                });
+            let emailParaLogin = entrada;
+
+            // Se o cara digitou um nome de usuário, achamos o e-mail dele primeiro
+            if (!entrada.includes('@')) {
+                const { data } = await supabaseClient.from('usuarios').select('email').eq('usuario', entrada).single();
+                if (data) {
+                    emailParaLogin = data.email;
+                } else {
+                    erro.innerText = "⚠️ Usuário não encontrado.";
+                    erro.style.display = 'block';
+                    btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+                    return;
+                }
             }
-            
-        } else {
-            // Array vazio = usuário/e-mail ou senha incorretos
-            erro.innerText = "⚠️ Usuário/e-mail ou senha incorretos.";
-            erro.style.display = 'block';
-            document.getElementById('senha-input').value = "";
-            document.getElementById('senha-input').focus();
-            btn.innerText = "Entrar no Sistema"; 
-            btn.disabled = false;
+
+            // LOGIN OFICIAL DO SUPABASE usando supabaseClient
+            const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
+                email: emailParaLogin,
+                password: pass
+            });
+
+            if (loginError) {
+                erro.innerText = "⚠️ E-mail ou senha incorretos.";
+                erro.style.display = 'block';
+                document.getElementById('senha-input').value = "";
+                btn.innerText = "Entrar no Sistema"; btn.disabled = false;
+                return;
+            }
+
+            // O Login deu certo! Pegamos a categoria na tabela
+            const { data: dadosUsuario } = await supabaseClient.from('usuarios').select('*').eq('email', emailParaLogin).single();
+
+            if (dadosUsuario) {
+                const nomeReal = dadosUsuario.nome;
+                const usuarioReal = dadosUsuario.usuario || dadosUsuario.email; 
+                const categoria = (dadosUsuario.categoria || "").toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+
+                registrarLog(usuarioReal, nomeReal, "Fez login no sistema");
+
+                sessionStorage.setItem('usuarioLogado', nomeReal);
+                sessionStorage.setItem('loginDigitado', usuarioReal); 
+                sessionStorage.setItem('urlApi', urlBackend);
+
+                // --- RESTANTE DO SEU CÓDIGO DE PERMISSÕES IGUAL AO ANTERIOR ---
+                let paginas = [];
+                if (categoria === 'administrador') {
+                    paginas = [
+                        { nome: "Painel Admin", url: "admin" },
+                        { nome: "Painel do Pastor", url: "pastor" },
+                        { nome: "Painel Discipulador", url: "discipulador" },
+                        { nome: "Painel do Líder", url: "lider" },
+                        { nome: "Financeiro Mobile", url: "financeiromobile" },
+                        { nome: "Painel Financeiro", url: "financeiro" },
+                        { nome: "Painel do Membro", url: "membro" }
+                    ];
+                } else if (categoria === 'pastor') {
+                    paginas = [ { nome: "Painel do Pastor", url: "pastor" }, { nome: "Painel Admin", url: "admin" } ];
+                } else if (categoria === 'discipulador') {
+                    paginas = [ { nome: "Painel Discipulador", url: "discipulador" }, { nome: "Painel do Líder", url: "lider" } ];
+                } else if (categoria === 'tesoureiro') {
+                    paginas = [ { nome: "Financeiro PC", url: "financeiro" }, { nome: "Financeiro Mobile", url: "financeiromobile" } ];
+                } else if (categoria === 'membro') {
+                    paginas = [ { nome: "Área do Membro", url: "membro" } ];
+                } else {
+                    paginas = [ { nome: "Painel do Líder", url: "lider" } ];
+                }
+
+                const urlsPermitidas = paginas.map(p => p.url);
+                sessionStorage.setItem('paginasPermitidas', JSON.stringify(urlsPermitidas));
+
+                if (paginas.length === 1) {
+                    entrarNoPainel(nomeReal, paginas[0].url);
+                } else {
+                    document.getElementById('area-form').style.display = 'none';
+                    document.getElementById('area-escolha').style.display = 'block';
+                    document.getElementById('titulo-login').innerText = `Olá, ${nomeReal}`;
+                    document.getElementById('subtitulo-login').innerText = "Qual painel você deseja acessar?";
+
+                    const divBotoes = document.getElementById('botoes-painel');
+                    divBotoes.innerHTML = '';
+                    paginas.forEach(pag => {
+                        let b = document.createElement('button');
+                        b.innerText = pag.nome;
+                        b.onclick = () => entrarNoPainel(nomeReal, pag.url);
+                        divBotoes.appendChild(b);
+                    });
+                }
+            }
         }
-    } catch (e) {
-        erro.innerText = "⚠️ Usuário/e-mail ou senha incorretos.";
-        erro.style.display = 'block';
-        document.getElementById('senha-input').value = "";
-        btn.innerText = "Entrar no Sistema"; 
-        btn.disabled = false;
-    }
-}
 
         // ================= FUNÇÃO DE ANIMAÇÃO DE ENTRADA =================
         function entrarNoPainel(nome, urlDestino) {
@@ -392,8 +356,7 @@
         }
 
         // ================= NOVAS FUNÇÕES: CADASTRO =================
-        // ================= NOVAS FUNÇÕES: CADASTRO =================
-        async function cadastrarMembro() {
+       async function cadastrarMembro() {
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim();
             const whatsapp = document.getElementById('cad-whatsapp').value.trim();
@@ -405,88 +368,45 @@
 
             if (!nome || !email || !whatsapp || !usuario || !senha) {
                 erro.innerText = "⚠️ Todos os campos são obrigatórios.";
+                erro.style.display = 'block'; return;
+            }
+
+            btn.innerText = "Aguarde..."; btn.disabled = true; erro.style.display = 'none';
+
+            // 1. CRIA O CRACHÁ OFICIAL (Auth) usando supabaseClient
+            const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                email: email,
+                password: senha
+            });
+
+            if (authError) {
+                erro.innerText = "⚠️ Erro no Cadastro: " + authError.message; 
                 erro.style.display = 'block';
+                btn.innerText = "Finalizar Cadastro"; btn.disabled = false;
                 return;
             }
 
-            btn.innerText = "Aguarde...";
-            btn.disabled = true;
-            erro.style.display = 'none';
+            // 2. AGORA SIM, SALVA OS DADOS NA SUA TABELA usando supabaseClient
+            const novoUsuario = {
+                id: authData.user.id, // Liga a tabela ao Auth!
+                nome: nome,
+                email: email,
+                whatsapp: whatsapp,
+                usuario: usuario,
+                categoria: 'membro' // Nasce como membro
+            };
 
-            try {
-                // 1. VALIDAÇÃO: VERIFICA SE O USUÁRIO JÁ EXISTE NO BANCO
-                const resBuscaUser = await fetch(`${SB_URL}/rest/v1/usuarios?usuario=eq.${encodeURIComponent(usuario)}&select=id`, {
-                    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-                });
-                const userExistente = await resBuscaUser.json();
+            const { error: dbError } = await supabaseClient.from('usuarios').insert([novoUsuario]);
 
-                if (userExistente && userExistente.length > 0) {
-                    erro.innerText = "⚠️ Este Nome de Usuário já está em uso. Escolha outro.";
-                    erro.style.display = 'block';
-                    btn.innerText = "Finalizar Cadastro";
-                    btn.disabled = false;
-                    return; // Bloqueia e para por aqui
-                }
-
-                // 2. VALIDAÇÃO: VERIFICA SE O E-MAIL JÁ EXISTE NO BANCO
-                const resBuscaEmail = await fetch(`${SB_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=id`, {
-                    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-                });
-                const emailExistente = await resBuscaEmail.json();
-
-                if (emailExistente && emailExistente.length > 0) {
-                    erro.innerText = "⚠️ Este E-mail já possui um cadastro no sistema.";
-                    erro.style.display = 'block';
-                    btn.innerText = "Finalizar Cadastro";
-                    btn.disabled = false;
-                    return; // Bloqueia e para por aqui
-                }
-
-                // 3. SE PASSOU NAS VALIDAÇÕES, FAZ O CADASTRO NORMALMENTE
-                const novoUsuario = {
-                    nome: nome,
-                    email: email,
-                    whatsapp: whatsapp,
-                    usuario: usuario,
-                    senha: senha,
-                    categoria: 'membro' // Define automaticamente
-                };
-
-                const resposta = await fetch(`${SB_URL}/rest/v1/usuarios`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SB_KEY,
-                        'Authorization': `Bearer ${SB_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify(novoUsuario)
-                });
-
-                if (resposta.ok) {
-                    alert("Cadastro realizado com sucesso! Faça login para continuar.");
-                    
-                    // Limpa form
-                    document.getElementById('cad-nome').value = "";
-                    document.getElementById('cad-email').value = "";
-                    document.getElementById('cad-whatsapp').value = "";
-                    document.getElementById('cad-usuario').value = "";
-                    document.getElementById('cad-senha').value = "";
-                    
-                    mudarTela('bloco-login');
-                } else {
-                    const data = await resposta.json();
-                    erro.innerText = "⚠️ Erro ao salvar os dados no servidor.";
-                    erro.style.display = 'block';
-                    console.error(data);
-                }
-            } catch (e) {
-                erro.innerText = "⚠️ Erro de conexão ao tentar cadastrar.";
+            if (dbError) {
+                erro.innerText = "⚠️ Erro ao salvar dados. O usuário já existe?";
                 erro.style.display = 'block';
-            } finally {
-                btn.innerText = "Finalizar Cadastro";
-                btn.disabled = false;
+            } else {
+                alert("Cadastro realizado com sucesso! Faça login para continuar.");
+                mudarTela('bloco-login');
             }
+            
+            btn.innerText = "Finalizar Cadastro"; btn.disabled = false;
         }
 
         // ================= NOVAS FUNÇÕES: RECUPERAR SENHA =================
