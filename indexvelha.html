@@ -10,7 +10,7 @@
 
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="shortcut icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">enviarRecuperacao
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -162,7 +162,7 @@
                     <input type="email" id="rec-email" placeholder="Digite seu e-mail" onkeypress="verificarEnter(event, 'recuperar')">
                 </div>
                 
-                <button id="btn-recuperar" onclick="enviarRecuperacao()">Enviar Link</button>
+                <button id="btn-recuperar" onclick="()">Enviar Link</button>
                 <p id="mensagem-erro-rec" class="mensagem-erro"></p>
                 
                 <button class="btn-secondary" onclick="mudarTela('bloco-login')" style="margin-top: 15px; padding: 10px; font-size: 14px;">Voltar para o Login</button>
@@ -445,7 +445,7 @@
             btn.disabled = false;
         }
 
-        // ================= NOVAS FUNÇÕES: RECUPERAR SENHA =================
+       /* // ================= NOVAS FUNÇÕES: RECUPERAR SENHA =================
        async function enviarRecuperacao() {
             const email = document.getElementById('rec-email').value.trim();
             const btn = document.getElementById('btn-recuperar');
@@ -516,7 +516,52 @@
                 btn.innerText = "Enviar Link";
                 btn.disabled = false;
             }
+        }*/
+
+
+
+        // ================= FUNÇÃO: RECUPERAR SENHA OFICIAL =================
+        async function enviarRecuperacao() {
+            const email = document.getElementById('rec-email').value.trim();
+            const btn = document.getElementById('btn-recuperar');
+            const erro = document.getElementById('mensagem-erro-rec');
+
+            if (!email) {
+                erro.innerText = "⚠️ Informe seu e-mail cadastrado.";
+                erro.style.display = 'block';
+                return;
+            }
+
+            btn.innerText = "Processando...";
+            btn.disabled = true;
+            erro.style.display = 'none';
+
+            try {
+                // ATENÇÃO: Essa URL é para onde o Supabase vai mandar o usuário de volta 
+                // quando ele clicar no link do e-mail. Ajuste se necessário!
+                const urlDestino = window.location.origin + "/nova-senha.html";
+
+                const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: urlDestino,
+                });
+
+                if (error) throw error;
+
+                alert("E-mail de recuperação enviado! Verifique sua caixa de entrada (e a pasta de Spam).");
+                document.getElementById('rec-email').value = "";
+                mudarTela('bloco-login');
+
+            } catch (e) {
+                erro.innerText = "⚠️ Erro: " + e.message;
+                erro.style.display = 'block';
+            } finally {
+                btn.innerText = "Enviar Link";
+                btn.disabled = false;
+            }
         }
+
+        
+        
 
         // ================= CONTROLE DE ENTER NOS INPUTS =================
         function verificarEnter(event, contexto) { 
