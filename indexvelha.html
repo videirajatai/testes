@@ -538,7 +538,7 @@
 
             try {
                 // Ajuste a URL caso seu sistema rode em outro link principal
-                const urlDestino = window.location.origin + "/nova-senha.html";
+                const urlDestino = window.location.origin + "/sistema/nova-senha.html";
 
                 const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
                     redirectTo: urlDestino,
