@@ -313,12 +313,37 @@
     </style>
   </head>
   <body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      const paginasPermitidas = JSON.parse(sessionStorage.getItem('paginasPermitidas') || "[]");
-      if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("pastor")) {
-          window.location.href = "index.html";
-      }
-  </script>
+        (async () => {
+            const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co";
+            const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA";
+            const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+
+            const { data: { user } } = await supabaseTemp.auth.getUser();
+
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const { data: usuario } = await supabaseTemp
+                .from('usuarios')
+                .select('categoria')
+                .eq('email', user.email)
+                .single();
+
+            const cat = (usuario?.categoria || "membro").toLowerCase();
+
+            // SÓ PASTOR E ADMINISTRADOR ENTRAM AQUI
+            const permitidos = ["pastor", "administrador"];
+
+            if (!permitidos.includes(cat)) {
+                alert("Acesso restrito. Sua tentativa de acesso foi registrada.");
+                window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
+            }
+        })();
+    </script>
 
     <div class="container">
       
@@ -698,11 +723,11 @@
 
     <script>
       // ==========================================
-      // CONFIGURAÇÃO SUPABASE
+      // CONFIGURAÇÃO SUPABASE OFICIAL (JWT)
       // ==========================================
-      const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
-      const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
-      const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+      const SB_URL = 'https://ryvfogmfpjyamgqsltks.supabase.co';
+      const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA';
+      const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
       const API_URL = sessionStorage.getItem('urlApi'); 
       let dadosMembros = [], dadosCelulas = [], dadosFinanceiros = [], lideres = [], dadosRelatorios = [], listaPalavras = [], listaAgenda = [];
@@ -712,6 +737,22 @@
           const campoData = document.getElementById('finData'); if(campoData) campoData.valueAsDate = hoje;
           const filtroMes = document.getElementById('filtroMesFin'); if(filtroMes) filtroMes.value = hoje.toISOString().slice(0, 7);
           carregarTudo();
+      }
+
+      // 1. O MOTOR DE LOG (AGORA USANDO O CLIENTE OFICIAL)
+      async function registrarLogAcao(acaoRealizada) {
+          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+          
+          try {
+              await supabaseClient.from('log').insert([{ 
+                  datahora: dataHoraAtual, 
+                  usuario: user, 
+                  nomelider: nomeReal, 
+                  acao: acaoRealizada 
+              }]);
+          } catch (e) { console.error("Erro no log:", e); }
       }
 
       async function fetchGoogle(action, payload = {}) {
@@ -732,65 +773,36 @@
       async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
         try {
+            // Busca membros não arquivados
             const { data: memData, error: memError } = await supabaseClient
                 .from('membros')
                 .select('*')
-                .or('arquivado.eq.Não,arquivado.eq.nao,arquivado.eq.Nao,arquivado.is.null')
+                .eq('arquivado', 'Não')
                 .order('nome', { ascending: true });
                 
-            if (memError) console.error("Erro ao carregar membros:", memError);
+            if (memError) throw memError;
 
             const { data: celData } = await supabaseClient.from('celulas').select('*');
 
-           dadosMembros = memData ? memData.map(m => {
-                let tipoBanco = m.tipo ? m.tipo.trim().toLowerCase() : 'membro';
-                let tipoCorreto = 'Membro';
+            dadosMembros = memData ? memData.map(m => [
+                m.id, 
+                m.nome || 'Sem Nome', 
+                m.tipo || 'Membro',        
+                m.celula || 'Sem Célula', 
+                m.telefone || '', 
+                '',                                  
+                m.batizado || 'Não',
+                m.cursao || 'Não',  
+                m.ctl || 'Não',     
+                m.encontro || 'Não',
+                m.nascimento || '',
+                m.seminario || 'Não',
+                m.dizimista || 'Não'
+            ]) : [];
 
-                if (tipoBanco === 'lider' || tipoBanco === 'líder') tipoCorreto = 'Líder';
-                else if (tipoBanco === 'pastor') tipoCorreto = 'Pastor';
-                else if (tipoBanco === 'discipulador') tipoCorreto = 'Discipulador';
-                else if (tipoBanco === 'frequentador') tipoCorreto = 'Frequentador';
-                else tipoCorreto = m.tipo; 
-
-                return [
-                    m.id, 
-                    m.nome || 'Sem Nome', 
-                    tipoCorreto,        
-                    m.celula || 'Sem Célula', 
-                    m.telefone || '', 
-                    '',                 
-                    m.batizado || 'Não',
-                    m.cursao || 'Não',  
-                    m.ctl || 'Não',     
-                    m.encontro || 'Não',
-                    m.nascimento || '',
-                    m.seminario || 'Não', // NOVO: Índice 11
-                    m.dizimista || 'Não'  // NOVO: Índice 12
-                ];
-            }) : [];
-
-            // ==========================================
-            // ORDENAÇÃO HIERÁRQUICA + ALFABÉTICA
-            // ==========================================
-            const pesoCargos = {
-                "Pastor": 1,
-                "Discipulador": 2,
-                "Líder": 3,
-                "Membro": 4,
-                "Frequentador": 5
-            };
-
-            dadosMembros.sort((a, b) => {
-                let pesoA = pesoCargos[a[2]] || 99; 
-                let pesoB = pesoCargos[b[2]] || 99;
-
-                if (pesoA !== pesoB) {
-                    return pesoA - pesoB; 
-                } else {
-                    return a[1].localeCompare(b[1]);
-                }
-            });
-            // ==========================================
+            // ORDENAÇÃO HIERÁRQUICA
+            const pesoCargos = { "Pastor": 1, "Discipulador": 2, "Líder": 3, "Membro": 4, "Frequentador": 5 };
+            dadosMembros.sort((a, b) => (pesoCargos[a[2]] || 99) - (pesoCargos[b[2]] || 99) || a[1].localeCompare(b[1]));
 
             dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia_horario || '-', c.endereco]) : [];
             
@@ -804,13 +816,6 @@
             preencherSelects(dadosCelulas); 
             preencherSelectMembrosFin(dadosMembros);
             carregarFinanceiro();
-
-            try {
-                listaAgenda = await fetchGoogle('buscarAgenda') || [];
-                renderizarAgenda(listaAgenda);
-            } catch(e) {
-                renderizarAgenda([]);
-            }
 
         } catch(e) { console.error(e); } finally { if(icon) icon.classList.remove('fa-spin'); }
       }
