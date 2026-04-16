@@ -98,7 +98,7 @@
           const cat = (usuario?.categoria || "membro").toLowerCase();
 
           // Apenas ADMINISTRADOR pode acessar este painel
-          if (cat !== "administrador") {
+          if (cat !== "Administrador") {
               alert("Acesso restrito. Apenas administradores podem acessar este painel.");
               if (cat === "membro") window.location.href = "membro.html";
               else if (cat === "lider" || cat === "líder") window.location.href = "lider.html";
