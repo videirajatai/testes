@@ -24,7 +24,6 @@
     <link rel="manifest" href="manifest.json">
     <!-- ==========================================LOGO NAV =============================================================-->
     
-    
 
     <style>
       .container { max-width: 900px; margin: 0 auto; padding: 15px 15px; }
@@ -315,16 +314,47 @@
     </style>
   </head>
   <body>
+    <!-- ========================================== -->
+    <!-- NOVA VERIFICAÇÃO DE ACESSO (PADRÃO PASTOR) -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      // TRAVA DE SEGURANÇA POR CATEGORIA
-      const usuarioLogado = sessionStorage.getItem('usuarioLogado');
-      const categoriaUser = sessionStorage.getItem('categoria'); 
-      const permitidos = ["Tesoureiro", "Pastor", "Administrador"];
+      (async () => {
+          const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co";
+          const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA";
+          const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
 
-      if(!usuarioLogado || !permitidos.includes(categoriaUser)) {
-          window.location.href = "index.html";
-      }
-  </script>
+          const { data: { user } } = await supabaseTemp.auth.getUser();
+
+          if (!user) {
+              window.location.href = "index.html";
+              return;
+          }
+
+          const { data: usuario } = await supabaseTemp
+              .from('usuarios')
+              .select('categoria')
+              .eq('email', user.email)
+              .single();
+
+          const cat = (usuario?.categoria || "membro").toLowerCase();
+
+          // Permissões para o painel financeiro: Tesoureiro, Pastor, Administrador
+          const permitidos = ["tesoureiro", "pastor", "administrador"];
+
+          if (!permitidos.includes(cat)) {
+              alert("Acesso restrito. Você não tem permissão para este painel.");
+              // Redireciona conforme a categoria do usuário
+              if (cat === "membro") window.location.href = "membro.html";
+              else if (cat === "lider" || cat === "líder") window.location.href = "lider.html";
+              else window.location.href = "index.html";
+          }
+
+          // Salva informações úteis no sessionStorage para uso nas funções de log
+          sessionStorage.setItem('usuarioLogado', user.user_metadata?.nome || user.email);
+          sessionStorage.setItem('loginDigitado', user.email);
+      })();
+    </script>
 
     <div class="container">
       
@@ -343,9 +373,6 @@
         <button onclick="mudarSecao('financeiro')" class="nav-btn active" id="btn-financeiro"><i class="fas fa-wallet"></i> Financeiro</button>
         <button onclick="mudarSecao('lista')" class="nav-btn" id="btn-lista"><i class="fas fa-users"></i> Membros</button>
         <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
-         <!-- <button onclick="carregarArquivados()" class="nav-btn" id="btn-arquivo"><i class="fas fa-archive"></i> Arquivos</button> -->
-        <!-- <button onclick="carregarSugestoes()" class="nav-btn" id="btn-sugestoes"><i class="fa-solid fa-hands-praying"></i> Pedidos </button> -->
-        <!-- <button onclick="carregarRelatorios()" class="nav-btn" id="btn-relatorios"><i class="fas fa-clipboard-list"></i> Relatórios</button>   -->    
         <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
         <button onclick="carregarPalavras()" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
         <button onclick="abrirBiblia()" class="nav-btn"><i class="fas fa-bible"></i>A Mensagem</button>
@@ -366,25 +393,23 @@
       </div>
 
       <div id="secao-celulas" class="hidden">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-    <h4 style="margin:0; color:var(--primary);">Gestão de Células</h4>
-    <!-- <button onclick="novaCelula()" class="btn-add-member" style="background:var(--accent); color:#333;">+ Nova Célula</button> -->
-  </div> 
-  <div style="overflow-x:auto;">
-    <table class="table-clean" id="tabelaCelulas">
-      <thead>
-        <tr>
-          <th>CÉLULA</th>
-          <th>LÍDER</th>
-          <th>DIA</th>
-          <th style="text-align:center;"></th>
-        </tr>
-      </thead>
-      <tbody id="corpoCelulas"></tbody>
-    </table>
-  </div>
-</div>
-      
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h4 style="margin:0; color:var(--primary);">Gestão de Células</h4>
+        </div> 
+        <div style="overflow-x:auto;">
+          <table class="table-clean" id="tabelaCelulas">
+            <thead>
+              <tr>
+                <th>CÉLULA</th>
+                <th>LÍDER</th>
+                <th>DIA</th>
+                <th style="text-align:center;"></th>
+              </tr>
+            </thead>
+            <tbody id="corpoCelulas"></tbody>
+          </table>
+        </div>
+      </div>
       
       <div id="secao-financeiro" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -421,40 +446,6 @@
         <div id="tab-extrato" class="hidden"><table class="table-clean"><thead><tr><th>Dia</th><th>Descrição</th><th>Valor</th></tr></thead><tbody id="corpoFin"></tbody></table></div>
       </div>
 
-      <div id="secao-arquivo" class="hidden">
-        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
-          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h4 style="margin:0; color: var(--text-light);"><i class="fas fa-archive"></i> Arquivo</h4>
-          </div>
-          <input type="text" id="inputBuscaArquivo" placeholder="🔍 Buscar no arquivo..." onkeyup="filtrarCardsArquivo()" style="margin:0; width: 100%;">
-        </div>
-        <div id="gridArquivo" class="member-grid"></div>
-      </div> 
-
-      <div id="secao-sugestoes" class="hidden">
-        <h4 style="color:#b58900;">Pedidos de Orações Recebidos</h4>
-        <button onclick="carregarSugestoes()" class="btn-add-member" style="background:#eee; color:#333; margin-bottom:10px; width:auto;"><i class="fas fa-sync-alt"></i> Atualizar</button>
-        <div class="form-box">
-          <table class="table-clean" id="tabelaSugestoes">
-            <thead><tr><th>Data</th><th>Mensagem</th></tr></thead>
-            <tbody id="corpoSugestoes"><tr><td colspan="2">Carregando...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="secao-relatorios" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-           <h4 style="color:var(--text-light); margin:0;">Relatórios de Célula</h4>
-           <button onclick="carregarRelatorios()" class="btn-add-member" style="width:auto; background:white; color:#333; border:1px solid #ddd;"><i class="fas fa-sync-alt"></i></button>
-        </div>
-        <div style="margin-bottom:15px;">
-           <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; background:white; font-size:1rem; color:#444;">
-              <option value="">Todas as Células</option>
-           </select>
-        </div>
-        <div id="listaRelatorios"></div>
-      </div>
-
       <div id="secao-agenda" class="hidden">
         <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
           <div style="display:flex; justify-content: space-between; align-items: center;">
@@ -466,85 +457,11 @@
         </div>
       </div>
 
-      <div id="secao-cadastro-agenda" class="form-box hidden">
-        <h3 id="tituloFormAgenda" style="color:var(--primary); margin-top:0;">Cadastrar Evento na Agenda</h3>
-        <form id="formAgenda">
-           <input type="hidden" name="indexOriginal" id="indexAgenda">
-           <label>Data do Evento</label><input type="date" name="dataEvento" id="agendaData" required>
-           <label>Descrição</label><input type="text" name="descricao" id="agendaDesc" required placeholder="Nome/Descrição do evento">
-           <label>Observações</label><textarea name="observacao" id="agendaObs" rows="3" placeholder="Detalhes adicionais..."></textarea>
-           <div style="display:flex; gap:10px;">
-              <div style="flex:1;">
-                 <label>Tipo</label>
-                 <select name="tipo" id="agendaTipo" required>
-                    <option value="Gratuito">Gratuito</option>
-                    <option value="Pago">Pago</option>
-                 </select>
-              </div>
-              <div style="flex:1;">
-                 <label>Categoria</label>
-                 <select name="categoria" id="agendaCat" required>
-                    <option value="RL">RL</option>
-                    <option value="GOOGLE AGENDA">GOOGLE AGENDA</option>
-                    <option value="KIDS">KIDS</option>
-                 </select>
-              </div>
-           </div>
-           <div style="display:flex; gap:10px; margin-top: 15px;">
-               <button type="button" onclick="mudarSecao('agenda')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
-               <button type="submit" id="btnSalvarAgenda" class="btn-save" style="flex:2;">Salvar Evento</button>
-           </div>
-        </form>
-      </div>
-
       <div id="secao-palavras" class="hidden">
          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h4 style="margin:0; color:var(--accent);">Palavras e Estudos</h4>
-            <!-- <button onclick="novaPalavra()" class="btn-add-member" style="background:var(--accent); color:#333;"><i class="fas fa-plus"></i> Nova</button> -->
          </div>
          <div id="listaPalavras"></div>
-      </div>
-
-     <div id="secao-nova-palavra" class="form-box hidden">
-          <h3 style="color:var(--primary); margin-top:0;">Adicionar Palavra</h3>
-          <form id="formPalavra">
-             <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>Data</label><input type="date" name="data" id="palavraData" required></div>
-                <div style="flex:2;"><label>Tema / Título</label><input type="text" name="tema" required></div>
-             </div>
-             <label>Link do YouTube (Opcional)</label><input type="text" name="link" placeholder="Cole o link aqui...">
-             <label>Texto / Esboço</label><textarea name="texto" rows="10" required placeholder="Escreva o esboço aqui..."></textarea>
-             <div style="display:flex; gap:10px;">
-                <button type="button" onclick="mudarSecao('palavras')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
-                <button type="submit" id="btnSalvarPalavra" class="btn-save" style="flex:2;">Publicar</button>
-             </div>
-          </form>
-      </div>
-
-      <div id="modal-ver-relatorio" class="form-box hidden">
-         <div class="paper-report">
-            <div class="paper-header"><span class="paper-title" id="relCelula">Nome</span><span class="paper-date" id="relData">00/00/0000</span></div>
-            <div class="attend-box"><span class="attend-num" id="relTotal">0</span><span class="attend-label">PESSOAS PRESENTES</span></div>
-            <div class="role-grid">
-               <div class="role-box"><span class="role-label">Palavra</span><span class="role-val" id="relPalavra">-</span></div>
-               <div class="role-box"><span class="role-label">Louvor</span><span class="role-val" id="relLouvor">-</span></div>
-               <div class="role-box"><span class="role-label">Lanche</span><span class="role-val" id="relLanche">-</span></div>
-               <div class="role-box"><span class="role-label">Quebra-Gelo</span><span class="role-val" id="relGelo">-</span></div>
-            </div>
-            <div style="margin-top:15px;"><span class="paper-label" style="font-weight:bold; color:#555; font-size:0.85rem;">Frequência / Nomes</span><div class="list-present" id="relLista"></div></div>
-            <div class="obs-box" id="relObs">...</div>
-         </div>
-         <button onclick="mudarSecao('relatorios')" class="btn-save" style="margin-top:20px; background:#333;">Voltar</button>
-      </div>
-
-      <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="btn-close-modal" onclick="fecharModal(null)">&times;</button>
-            <h3 id="modalTitulo" style="color:var(--primary); margin-top:10px;"></h3>
-            <small id="modalDataPalavra" style="color:#777; display:block; margin-bottom:15px;"></small>
-            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
-            <div id="modalTexto" class="word-text"></div>
-        </div>
       </div>
 
       <div id="secao-cadastro" class="form-box hidden">
@@ -576,19 +493,14 @@
         </form>
       </div>
 
-      <div id="secao-form-celula" class="form-box hidden">
-        <h3 id="tituloFormCelula" style="color:var(--primary); margin-top:0;">Nova Célula</h3>
-        <form id="formCelula">
-          <input type="hidden" name="nomeOriginal" id="nomeOriginalCelula">
-          <label>Nome</label><input type="text" name="nome" id="celNome" required>
-          <label>Líder</label><select name="lider" id="celLider" required></select>
-          <label>Dia</label><select name="dia" id="celDia"><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option></select>
-          <label>Endereço</label><input type="text" name="endereco" id="celEndereco">
-          <div style="display:flex; gap:10px;">
-             <button type="button" onclick="mudarSecao('celulas')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px;">Voltar</button>
-             <button type="submit" id="btnSalvarCelula" class="btn-save" style="flex:2;">Salvar</button>
-          </div>
-        </form>
+      <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModal(null)">&times;</button>
+            <h3 id="modalTitulo" style="color:var(--primary); margin-top:10px;"></h3>
+            <small id="modalDataPalavra" style="color:#777; display:block; margin-bottom:15px;"></small>
+            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
+            <div id="modalTexto" class="word-text"></div>
+        </div>
       </div>
 
     </div>
@@ -653,7 +565,6 @@
           }
       }
 
-      // --- CARREGAMENTO INICIAL COM supabaseClient ---
       // --- CARREGAMENTO INICIAL COM SUPABASE ---
       async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
@@ -745,18 +656,10 @@
                </div>
                <div class="card-actions">
                   ${btnZap}
-
-
-                  
                </div>
             </div>`;
         });
       }
-
-      //botoes removidos, de logo abaixo do BTNZAP
-//<button onclick="editarMembro('${m[0]}')" class="btn-card" title="Editar"><i class="fas fa-pencil-alt"></i></button>
-//<button onclick="arquivar('${m[0]}', '${m[1]}')" class="btn-card" title="Arquivar" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>
-              
       
       function mudarSecao(s) {
         ['lista','celulas','financeiro','arquivo','cadastro','form-celula','sugestoes', 'relatorios', 'modal-ver-relatorio', 'palavras', 'nova-palavra', 'agenda', 'cadastro-agenda'].forEach(id => {
@@ -794,117 +697,10 @@
           if (p[3] && p[3].trim() !== "") { btn.href = p[3]; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); }
           document.getElementById('modalPalavra').classList.remove('hidden');
       }
-      function novaPalavra() { 
-          document.getElementById('formPalavra').reset();
-          mudarSecao('nova-palavra'); 
-      }
-      
       function fecharModal(e) { 
           if(e === null || e.target.id === 'modalPalavra') document.getElementById('modalPalavra').classList.add('hidden'); 
       }
-      
-      document.getElementById('formPalavra').onsubmit = async function(e) {
-          e.preventDefault(); const btn = document.getElementById('btnSalvarPalavra'); btn.disabled = true; btn.innerText = "Salvando...";
-          try {
-              const dados = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link_youtube: this.link.value };
-              await supabaseClient.from('palavras').insert([dados]);
-              registrarLogAcao(`Publicou a palavra/estudo: ${dados.tema}`); // LOG
-              alert("Publicado com sucesso!"); carregarPalavras();
-          } finally { btn.disabled = false; btn.innerText = "Publicar"; }
-      };
 
-      
-      // --- SUGESTOES (supabaseClient) ---
-      async function carregarSugestoes() {
-        mudarSecao('sugestoes'); const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="2" align="center">Carregando...</td></tr>';
-        try {
-            const { data } = await supabaseClient.from('sugestoes').select('*').order('id', { ascending: false });
-            corpo.innerHTML = '';
-            if(!data || data.length === 0) { corpo.innerHTML = '<tr><td colspan="2" align="center">Vazio.</td></tr>'; return; }
-            data.forEach(row => { let d = String(row.data); if(d.length > 16) d = d.substring(0, 16); corpo.innerHTML += `<tr><td style="width:130px; font-size:0.8rem; color:#666;">${d}</td><td style="font-weight:500;">${row.mensagem}</td></tr>`; });
-        } catch(e){} 
-      }
-
-      // --- RELATÓRIOS (supabaseClient) ---
-      async function carregarRelatorios() {
-        mudarSecao('relatorios'); const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '<p align="center">Carregando...</p>';
-        const sel = document.getElementById('filtroRelCelula'); sel.innerHTML = '<option value="">Todas as Células</option>';
-        dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c[0]}">${c[0]}</option>`);
-        try { 
-            const { data } = await supabaseClient.from('relatorios').select('*').order('id', { ascending: false });
-            dadosRelatorios = data ? data.map(r => [r.data, r.celula, r.presentes, r.quebra_gelo, r.palavra, '', r.lanche, r.louvor, r.observacoes]) : [];
-            filtrarRelatorios(); 
-        } catch(e){}
-      }
-      function filtrarRelatorios() {
-         const divLista = document.getElementById('listaRelatorios'); divLista.innerHTML = '';
-         const celulaFiltro = document.getElementById('filtroRelCelula').value.toLowerCase();
-         if(!dadosRelatorios || dadosRelatorios.length === 0) { divLista.innerHTML = '<p align="center">Vazio.</p>'; return; }
-         const listaFiltrada = dadosRelatorios.filter(r => { return celulaFiltro === "" || String(r[1]).toLowerCase().includes(celulaFiltro); });
-         if(listaFiltrada.length === 0) { divLista.innerHTML = '<p align="center">Vazio.</p>'; return; }
-         listaFiltrada.forEach((r) => {
-             const index = dadosRelatorios.indexOf(r); let dataExibicao = String(r[0]); if(dataExibicao.length > 10) dataExibicao = dataExibicao.substring(0,10);
-             divLista.innerHTML += `<div class="report-list-item" onclick="verRelatorio(${index})"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-weight:bold; color:var(--text-main); font-size:0.95rem;">${r[1]}</span><span style="font-size:0.8rem; color:var(--text-light);"><i class="far fa-calendar-alt"></i> ${dataExibicao}</span></div><div style="color:var(--accent);"><i class="fas fa-chevron-right"></i></div></div>`;
-         });
-      }
-      function verRelatorio(index) {
-         const item = dadosRelatorios[index]; let dataF = String(item[0]); if(dataF.length>10) dataF = dataF.substring(0,10);
-         document.getElementById('relData').innerText = dataF; document.getElementById('relCelula').innerText = item[1];
-         let lista = String(item[2] || ""); let contagem = lista.split(',').filter(x => x.trim().length > 0).length; if(contagem === 0 && lista.length > 2) contagem = 1;
-         document.getElementById('relTotal').innerText = contagem; document.getElementById('relLista').innerText = lista || "-";
-         document.getElementById('relGelo').innerText = item[3] || "-"; document.getElementById('relPalavra').innerText = item[4] || "-";
-         document.getElementById('relLanche').innerText = item[6] || "-"; document.getElementById('relLouvor').innerText = item[7] || "-";
-         document.getElementById('relObs').innerText = item[8] || "Sem observações."; mudarSecao('modal-ver-relatorio');
-      }
-
-      // --- ARQUIVO (supabaseClient) ---
-      async function carregarArquivados() { 
-        mudarSecao('arquivo'); 
-        const grid = document.getElementById('gridArquivo'); 
-        grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Carregando arquivo...</p>';
-        
-        try {
-            // Busca membros com status Sim ou sim no arquivado
-            const { data, error } = await supabaseClient
-                .from('membros')
-                .select('*')
-                .or('arquivado.eq.Sim,arquivado.eq.sim');
-
-            if (error) throw error;
-            grid.innerHTML = ''; 
-
-            if (!data || data.length === 0) { 
-                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color:#999;">Nenhum membro arquivado.</p>'; 
-                return; 
-            }
-
-            data.forEach(m => {
-                const nasc = m.nascimento ? m.nascimento.split('-').reverse().slice(0,2).join('/') : '--/--';
-                
-                grid.innerHTML += `
-                <div class="member-card card-arquivo" data-nome="${m.nome.toLowerCase()}">
-                    <div class="card-header">
-                        <h4 class="card-name">${m.nome}</h4>
-                        <span class="cat-badge">${m.tipo || 'Membro'}</span>
-                    </div>
-                    <div class="card-info">
-                        <i class="fas fa-history" style="color:#bbb;"></i> Arquivado
-                        <span style="font-size:0.8rem; margin-left:auto; color:#999;">
-                            <i class="fas fa-birthday-cake"></i> ${nasc}
-                        </span>
-                    </div>
-                    <div class="card-actions" style="border-top: 1px dashed #eee; margin-top: 10px; padding-top: 10px;">
-                        <button onclick="restaurar('${m.id}')" class="btn-card" style="color:var(--success-text); background:#f0fdf4; border-color:#bbf7d0; width: 100%;">
-                            <i class="fas fa-undo"></i> Restaurar Membro
-                        </button>
-                    </div>
-                </div>`;
-            }); 
-        } catch(e) {
-            console.error(e);
-            grid.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar.</p>';
-        }
-      }
       // --- FINANCEIRO BÁSICO (supabaseClient) ---
       async function carregarFinanceiro() { 
         try { 
@@ -912,13 +708,6 @@
             dadosFinanceiros = data ? data.map(f => [f.data, f.tipo, f.categoria, f.descricao, f.valor]) : [];
             recalcularFinanceiro(); 
         } catch(e){} 
-      }
-      function filtrarCardsArquivo() {
-          const busca = document.getElementById('inputBuscaArquivo').value.toLowerCase();
-          document.querySelectorAll('.card-arquivo').forEach(card => {
-              const nome = card.getAttribute('data-nome');
-              card.style.display = nome.includes(busca) ? 'flex' : 'none';
-          });
       }
       function recalcularFinanceiro() { const mes = document.getElementById('filtroMesFin').value; let ent = 0, sai = 0, fil = []; dadosFinanceiros.forEach(r => { if(r[0].startsWith(mes)){ let v=parseFloat(r[4]); if(r[1]==='Entrada')ent+=v; else sai+=v; fil.push(r); }}); const fmt = (v) => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); document.getElementById('finSaldo').innerText = fmt(ent - sai); document.getElementById('finEntrada').innerText = fmt(ent); document.getElementById('finSaida').innerText = fmt(sai); renderizarExtrato(fil); }
       function renderizarExtrato(lista) { const corpo = document.getElementById('corpoFin'); corpo.innerHTML = ''; const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); lista.forEach(l => { let c = l[1] === 'Entrada' ? 'var(--success-text)' : 'var(--danger-text)'; corpo.innerHTML += `<tr><td>${l[0].split('-')[2]}/${l[0].split('-')[1]}</td><td>${l[3]}</td><td style="font-weight:bold; color:${c};">${fmt(l[4])}</td></tr>`; }); }
@@ -969,87 +758,31 @@
       };
       
       function renderizarCelulas(l) { 
-    const corpo = document.getElementById('corpoCelulas'); 
-    corpo.innerHTML = ''; 
-    
-    if (!l || l.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="4" align="center">Nenhuma célula encontrada</td></tr>';
-        return;
-    }
+        const corpo = document.getElementById('corpoCelulas'); 
+        corpo.innerHTML = ''; 
+        
+        if (!l || l.length === 0) {
+            corpo.innerHTML = '<tr><td colspan="4" align="center">Nenhuma célula encontrada</td></tr>';
+            return;
+        }
 
-    l.forEach((i, x) => {
-        // i[0] = Nome, i[1] = Líder, i[2] = Dia/Horário, i[3] = Endereço
-        corpo.innerHTML += `
-        <tr>
-            <td>
-                <div style="font-weight: 700; color: #333;">${i[0]}</div>
-                <div style="font-size: 0.75rem; color: #888; margin-top: 2px;">
-                    <i class="fas fa-map-marker-alt" style="color: #64748b;"></i> ${i[3] || 'Rua não informada'}
-                </div>
-            </td>
-            <td style="color: #444;">${i[1]}</td>
-            <td style="color: #444;">${i[2]}</td>
-            <td align="center">
-
-                
-                
-            </td>
-        </tr>`;
-    }); 
-}
-      // REMOVIDO ABAIDO DE CENTER
-      //<button onclick="editarCelula(${x})" style="background:#f8f9fa; border:1px solid #ddd; color:#666; cursor:pointer; padding: 5px 8px; border-radius: 4px;">
-      //<i class="fas fa-edit"></i> </button>
-      function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('nomeOriginalCelula').value = ""; document.getElementById('tituloFormCelula').innerText = "Nova Célula"; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => s.innerHTML += `<option value="${l}">${l}</option>`); mudarSecao('form-celula'); }
-      function editarCelula(index) { const c = dadosCelulas[index]; if(!c) return; document.getElementById('nomeOriginalCelula').value = c[0]; document.getElementById('celNome').value = c[0]; document.getElementById('celDia').value = c[2]; document.getElementById('celEndereco').value = c[3]; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => { let opt = document.createElement('option'); opt.value = l; opt.text = l; if(l === c[1]) opt.selected = true; s.appendChild(opt); }); document.getElementById('tituloFormCelula').innerText = "Editar Célula"; mudarSecao('form-celula'); }
-      
-      document.getElementById('formCelula').onsubmit = async function(e) { 
-          e.preventDefault(); const btn = document.getElementById('btnSalvarCelula'); btn.disabled = true; btn.innerText = "Salvando...";
-          const nomeOrig = document.getElementById('nomeOriginalCelula').value;
-          
-          const dados = { 
-              nome: document.getElementById('celNome').value, lider: document.getElementById('celLider').value, 
-              dia_horario: document.getElementById('celDia').value, endereco: document.getElementById('celEndereco').value 
-          }; 
-          
-          try { 
-              if (nomeOrig) {
-                  await supabaseClient.from('celulas').update(dados).eq('nome', nomeOrig);
-                  registrarLogAcao(`Editou a célula: ${dados.nome}`); // LOG
-              } else {
-                  await supabaseClient.from('celulas').insert([dados]);
-                  registrarLogAcao(`Cadastrou nova célula: ${dados.nome}`); // LOG
-              }
-              alert("Salvo com sucesso!"); mudarSecao('celulas'); carregarTudo(); 
-          } catch(err) { console.error(err); alert("Erro ao salvar a célula: " + err.message); } 
-          finally { btn.disabled = false; btn.innerText = "Salvar"; }
-      };
-      
-     async function arquivar(id, n) { 
-          if(confirm(`Arquivar ${n}?`)) { 
-              try{ 
-                  await supabaseClient.from('membros').update({arquivado: 'Sim'}).eq('id', id); 
-                  registrarLogAcao(`Arquivou o membro: ${n}`); // LOG
-                  carregarTudo(); 
-              } catch(e){} 
-          } 
+        l.forEach((i, x) => {
+            corpo.innerHTML += `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: #333;">${i[0]}</div>
+                    <div style="font-size: 0.75rem; color: #888; margin-top: 2px;">
+                        <i class="fas fa-map-marker-alt" style="color: #64748b;"></i> ${i[3] || 'Rua não informada'}
+                    </div>
+                </td>
+                <td style="color: #444;">${i[1]}</td>
+                <td style="color: #444;">${i[2]}</td>
+                <td align="center"></td>
+            </tr>`;
+        }); 
       }
-      async function restaurar(id) { 
-          if(confirm("Restaurar?")) { 
-              try{ 
-                  await supabaseClient.from('membros').update({arquivado: 'Não'}).eq('id', id); 
-                  registrarLogAcao(`Restaurou membro ID: ${id}`); // LOG
-                  mudarSecao('lista'); carregarTudo(); 
-              } catch(e){} 
-          } 
-      }
-      function filtrarTabela(id) { const b = document.getElementById('inputBuscaArquivo').value.toLowerCase(); const rows = document.getElementById('corpoArquivo').getElementsByTagName('tr'); for(let r of rows) r.style.display = r.innerText.toLowerCase().includes(b)?'':'none'; }
-
-
-
-
       
-      // ========================================== NAO MEXER A BAIXO =====================================================================
+      // ==========================================
       // AGENDA
       // ==========================================
       function renderizarAgenda(lista) {
@@ -1086,10 +819,10 @@
              </div>`;
          });
       }
+      
       // ==========================================
       // BÍBLIA (DADOS E INTEGRAÇÃO GITHUB)
       // ==========================================
-      // Variável para carregar Gênesis sozinho na primeira vez
       let bibliaIniciada = false;
 
       const dadosBiblia = [
@@ -1153,7 +886,6 @@
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
           
-          // Forçando a injeção do HTML direto para não ter erro no Discipulador
           let htmlLivros = '';
           dadosBiblia.forEach((livro, index) => {
               let negrito = index >= 39 ? 'font-weight: bold;' : '';
@@ -1184,7 +916,6 @@
               selectCapitulo.innerHTML = htmlCaps;
               selectCapitulo.disabled = false;
               
-              // Carrega o capítulo 1 automaticamente ao trocar de livro
               carregarCapitulo();
           }
       }
@@ -1241,10 +972,10 @@
           }
       }
 
-function fazerLogout() {
+      function fazerLogout() {
           if (confirm("Tem certeza que deseja sair do sistema?")) {
-              sessionStorage.clear(); // Limpa todos os dados de login
-              window.location.href = "index.html"; // Redireciona para a tela de login
+              sessionStorage.clear();
+              window.location.href = "index.html";
           }
       }
       
