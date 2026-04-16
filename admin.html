@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
          <link rel="icon" type="image/png" href="logo.png">
   <link rel="shortcut icon" type="image/png" href="logo.png">
@@ -71,8 +72,11 @@
   </head>
   <body>
     <script>
-        const paginasPermitidas = JSON.parse(sessionStorage.getItem('paginasPermitidas') || "[]");
-        if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("admin")) {
+        const usuarioLogado = sessionStorage.getItem('usuarioLogado');
+        const categoriaUser = sessionStorage.getItem('categoria');
+        
+        // Apenas o Administrador pode acessar esta página
+        if(!usuarioLogado || categoriaUser !== "Administrador") {
             window.location.href = "index.html";
         }
     </script>
@@ -166,12 +170,15 @@
       // ==========================================
       // CONFIGURAÇÃO SUPABASE
       // ==========================================
+      // ==========================================
+      // CONFIGURAÇÃO SUPABASE OFICIAL (JWT)
+      // ==========================================
       const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
-      const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA';
       const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-      let dadosUsuarios = []; // Todos os usuários do banco
-      let dadosExibidos = []; // Usuários filtrados sendo mostrados
+      let dadosUsuarios = []; 
+      let dadosExibidos = [];
 
       window.onload = carregarTudo;
 
@@ -375,20 +382,22 @@
 
       // FUNÇÃO PARA REGISTRAR AS AÇÕES DO ADMIN NO LOG
       async function registrarLogAcao(acaoRealizada) {
-         const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
-         const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
-         const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
-         
-         try {
-             await supabaseClient.from('log').insert([{ 
-                 datahora: dataHoraAtual, 
-                 usuario: user, 
-                 nomelider: nomeReal, 
-                 acao: acaoRealizada 
-             }]);
-         } catch (e) { console.error("Erro ao salvar o log:", e); }
+          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+          const userEmail = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+          
+          try {
+              await supabaseClient.from('log').insert([{ 
+                  datahora: dataHoraAtual, 
+                  usuario: userEmail, 
+                  nomelider: nomeReal, 
+                  acao: acaoRealizada 
+              }]);
+          } catch (e) { 
+              console.error("Erro ao salvar o log:", e); 
+          }
       }
-
+      
       function fazerLogout() {
           if (confirm("Tem certeza que deseja sair do sistema?")) {
               sessionStorage.clear(); // Limpa todos os dados de login
