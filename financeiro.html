@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet"> 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
 
        <!-- ==========================================LOGO NAV=============================================================-->
   <link rel="icon" type="image/png" href="logo.png">
@@ -152,12 +153,39 @@
   </style>
 </head>
 <body>
-  <script>
-      const paginasPermitidas = JSON.parse(sessionStorage.getItem('paginasPermitidas') || "[]");
-      if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("financeiro")) {
-          window.location.href = "index.html";
-      }
-  </script>
+   <script>
+      (async () => {
+           const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+
+          const { data: { user } } = await supabaseTemp.auth.getUser();
+
+          if (!user) {
+              window.location.href = "index.html";
+              return;
+          }
+
+          const { data: usuario } = await supabaseTemp
+              .from('usuarios')
+              .select('categoria')
+              .eq('email', user.email)
+              .single();
+
+          const cat = (usuario?.categoria || "membro").toLowerCase();
+          const permitidos = ["tesoureiro", "pastor", "administrador"];
+
+          if (!permitidos.includes(cat)) {
+              alert("Acesso restrito. Você não tem permissão para este painel.");
+              if (cat === "membro") window.location.href = "membro.html";
+              else if (cat === "lider" || cat === "líder") window.location.href = "lider.html";
+              else window.location.href = "index.html";
+          }
+
+          // Salva as informações necessárias no sessionStorage (mantendo compatibilidade com Google Agenda)
+          sessionStorage.setItem('usuarioLogado', user.user_metadata?.nome || user.email);
+          sessionStorage.setItem('loginDigitado', user.email);
+          // A urlApi continua vindo de sessionStorage (definida no login)
+      })();
+    </script>
 
   <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" class="watermark">
   
@@ -345,8 +373,6 @@
     // ==========================================
     // CONFIGURAÇÃO SUPABASE
     // ==========================================
-    const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA';
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let dadosFinanceiros = [];
