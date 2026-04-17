@@ -66,33 +66,44 @@
     <!-- ========================================== -->
     <!-- VERIFICAÇÃO DE ACESSO (PADRÃO PASTOR)       -->
     <!-- ========================================== -->
-     <script>
-        (async () => {
-              const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+    <script>
+      (async () => {
+          // Usa as variáveis globais do config.js
+          const supabaseTemp = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            const { data: { user } } = await supabaseTemp.auth.getUser();
+          const { data: { user } } = await supabaseTemp.auth.getUser();
 
-            if (!user) {
-                window.location.href = "index.html";
-                return;
-            }
+          if (!user) {
+              window.location.href = "index.html";
+              return;
+          }
 
-            const { data: usuario } = await supabaseTemp
-                .from('usuarios')
-                .select('categoria')
-                .eq('email', user.email)
-                .single();
+          const { data: usuario } = await supabaseTemp
+              .from('usuarios')
+              .select('categoria')
+              .eq('email', user.email)
+              .single();
 
-            const cat = (usuario?.categoria || "membro").toLowerCase();
+          const cat = (usuario?.categoria || "membro").toLowerCase();
 
-            // SÓ PASTOR E ADMINISTRADOR ENTRAM AQUI
-            const permitidos = ["administrador"];
+          // Apenas ADMINISTRADOR pode acessar este painel
+          const permitidos = ["administrador"];
 
-            if (!permitidos.includes(cat)) {
-                alert("Acesso restrito. Sua tentativa de acesso foi registrada.");
-                window.location.href = "index.html";
-            }
-        })();
+          if (!permitidos.includes(cat)) {
+              alert("Acesso restrito. Apenas administradores podem acessar este painel.");
+              // Redireciona de acordo com a categoria real
+              if (cat === "membro") window.location.href = "membro.html";
+              else if (cat === "lider" || cat === "líder") window.location.href = "lider.html";
+              else if (cat === "pastor") window.location.href = "pastor.html";
+              else if (cat === "tesoureiro") window.location.href = "financeiromobile.html";
+              else window.location.href = "index.html";
+              return;
+          }
+
+          // Salva informações no sessionStorage (para uso em logs e outras funções)
+          sessionStorage.setItem('usuarioLogado', user.user_metadata?.nome || user.email);
+          sessionStorage.setItem('loginDigitado', user.email);
+      })();
     </script>
 
     <div class="container">
@@ -147,8 +158,8 @@
           <label>Login de Acesso (Usuário)</label>
           <input type="text" name="usuario" id="cadUsuario" required placeholder="Ex: thiago.lider" style="text-transform: lowercase;">
           
-          <label>Telefone / WhatsApp</label>
-          <input type="tel" name="telefone" id="cadTelefone" placeholder="(64) 99999-9999">
+          <label>WhatsApp</label>
+          <input type="tel" name="whatsapp" id="cadWhatsapp" placeholder="(64) 99999-9999">
           
           <label>Nível de Acesso (Categoria)</label>
           <select name="categoria" id="cadCategoria" required>
@@ -243,7 +254,7 @@
              const nome = u.nome; 
              const cat = u.categoria;
              const email = u.email || 'E-mail não cadastrado';
-             const telefone = u.whatsapp || 'Sem telefone';
+             const whatsapp = u.whatsapp || 'Sem telefone';
              
              div.innerHTML += `
              <div class="user-card">
@@ -251,7 +262,7 @@
                    <h4>${nome}</h4>
                    <p><i class="fas fa-user-circle"></i> Login: <strong>${user}</strong></p>
                    <p><i class="fas fa-envelope"></i> ${email}</p>
-                   <p><i class="fas fa-phone"></i> ${telefone}</p>
+                   <p><i class="fab fa-whatsapp"></i> ${whatsapp}</p>
                    <span class="badge-role ${cat}">${cat}</span>
                 </div>
                 <div class="action-btns">
@@ -291,7 +302,7 @@
          document.getElementById('usuarioOriginal').value = u.id;
          document.getElementById('cadUsuario').value = u.usuario;
          document.getElementById('cadNome').value = u.nome;
-         document.getElementById('cadTelefone').value = u.whatsapp || '';
+         document.getElementById('cadWhatsapp').value = u.whatsapp || '';
          document.getElementById('cadCategoria').value = u.categoria;
          
          document.getElementById('tituloFormUsuario').innerText = "Editar Usuário";
@@ -308,7 +319,7 @@
          const d = {
             usuario: this.usuario.value.trim().toLowerCase(),
             nome: this.nome.value,
-            telefone: this.telefone.value,
+            whatsapp: this.whatsapp.value,   // ✅ Corrigido: agora usa whatsapp
             categoria: this.categoria.value
          };
 
@@ -399,7 +410,7 @@
           
           try {
               const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                  redirectTo: window.location.origin + '/nova-senha.html'
+                  redirectTo: window.location.origin + '/sistema/nova-senha.html'
               });
               if (error) throw error;
               
