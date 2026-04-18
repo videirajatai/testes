@@ -715,71 +715,49 @@ async function baixarPalavraWord() {
         const data = palavraAtual.data || '';
         const texto = palavraAtual.texto || '';
 
-        // Formata a data (se vier no formato ISO)
         let dataFormatada = data;
         if (data && data.includes('-')) {
             const partes = data.split('-');
             dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
         }
 
-        // Constrói o HTML com estilização básica
-        const htmlContent = `<!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>${titulo}</title>
-                <style>
-                    body {
-                        font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-                        margin: 2.5cm 2cm;
-                        color: #333;
-                    }
-                    h1 {
-                        color: #600018;
-                        font-size: 28pt;
-                        margin-bottom: 10px;
-                    }
-                    .data {
-                        color: #718096;
-                        font-size: 12pt;
-                        margin-bottom: 30px;
-                        border-bottom: 1px solid #e2e8f0;
-                        padding-bottom: 10px;
-                    }
-                    .texto {
-                        font-size: 14pt;
-                        line-height: 1.8;
-                        text-align: justify;
-                        white-space: pre-wrap;
-                    }
-                </style>
-            </head>
-            <body>
-                <h1>${titulo}</h1>
-                <div class="data">${dataFormatada}</div>
-                <div class="texto">${texto}</div>
-            </body>
-            </html>`;
+        const conteudo = `Título: ${titulo}\nData: ${dataFormatada}\n\n${texto}`;
+        const nomeArquivo = `${titulo.replace(/\s+/g, '_')}_${dataFormatada.replace(/\//g, '-')}.txt`;
+
+        // Tenta usar a API de compartilhamento nativo (funciona em celulares)
+        if (navigator.share && navigator.canShare) {
+            const blob = new Blob([conteudo], { type: 'text/plain' });
+            const file = new File([blob], nomeArquivo, { type: 'text/plain' });
             
-                    // Cria o Blob e faz o download
-                    const blob = new Blob([htmlContent], { type: 'application/msword' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${titulo.replace(/\s+/g, '_')}_${dataFormatada.replace(/\//g, '-')}.doc`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-            
-                } catch (error) {
-                    console.error('Erro ao gerar arquivo Word:', error);
-                    alert('Não foi possível gerar o arquivo Word.');
-                } finally {
-                    btn.innerHTML = originalHTML;
-                    btn.classList.remove('loading');
-                }
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: titulo,
+                    text: texto.substring(0, 100) + '...',
+                    files: [file]
+                });
+                return; // Sai após compartilhar
             }
+        }
+
+        // Fallback: download como arquivo .txt (abre em qualquer celular)
+        const blob = new Blob([conteudo], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomeArquivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('Erro ao gerar arquivo:', error);
+        alert('Não foi possível gerar o arquivo.');
+    } finally {
+        btn.innerHTML = originalHTML;
+        btn.classList.remove('loading');
+    }
+}
 
         // ================= SELEÇÃO DE VERSÃO (MODAL) =================
         let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
