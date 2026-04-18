@@ -32,6 +32,11 @@ const Biblia = (function() {
             nome: 'ACF - Almeida Corrigida Fiel',
             tipo: 'unico',
             url: 'https://raw.githubusercontent.com/videirajatai/sistema/refs/heads/main/biblias/acf.json'
+        },
+        ntlh: {
+            nome: 'NTLH  - Nova Tradução na Linguagem de Hoje',
+            tipo: 'unico',
+            url: 'https://raw.githubusercontent.com/videirajatai/sistema/refs/heads/main/biblias/ntlh.json'
         }
     };
 
