@@ -134,7 +134,7 @@
 .btn-fechar-biblia { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; margin: 0; }
 
 /* Novos controles da Bíblia - corrigidos */
-/*.biblia-controles {
+.biblia-controles {
     padding: 15px;
     background-color: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
@@ -174,47 +174,8 @@
     cursor: pointer;
     text-overflow: ellipsis;
     white-space: nowrap;
-}*/
+}
 
-      .biblia-controles {
-          padding: 15px;
-          background-color: #f8fafc;
-          border-bottom: 1px solid #e2e8f0;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: nowrap;
-      }
-      .versao-selector-btn {
-          background: white;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          padding: 10px 12px;
-          font-family: 'Inter', sans-serif;
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: var(--primary);
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          cursor: pointer;
-          width: 80px;
-          justify-content: center;
-          white-space: nowrap;
-      }
-      .biblia-controles select {
-          flex: 1;
-          min-width: 0;
-          padding: 10px 8px;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          outline: none;
-          font-family: 'Inter', sans-serif;
-          background: white;
-          cursor: pointer;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-      }
 
 /* Ajuste para telas pequenas */
 @media (max-width: 380px) {
@@ -612,7 +573,7 @@
       </div>
     </div>
     
-       <!-- OFF CANVAS DA BÍBLIA (COM BOTÕES FLUTUANTES CORRIGIDOS) -->
+    <!--  <!-- OFF CANVAS DA BÍBLIA (COM BOTÕES FLUTUANTES CORRIGIDOS) 
     <div id="biblia-overlay" onclick="fecharBiblia()"></div>
     <div id="painel-biblia" class="biblia-offcanvas">
         <div class="biblia-header">
@@ -636,7 +597,7 @@
             <p class="biblia-placeholder">Selecione o livro e o capítulo para começar a leitura.</p>
         </div>
 
-        <!-- Botões flutuantes: Próximo em cima, Anterior embaixo -->
+        <!-- Botões flutuantes: Próximo em cima, Anterior embaixo 
         <div class="biblia-floating-nav">
             <button class="nav-capitulo-btn" onclick="capituloAnterior()" title="Capítulo anterior">
                 <i class="fas fa-chevron-left"></i>
@@ -645,9 +606,9 @@
                 <i class="fas fa-chevron-right"></i>
             </button>            
         </div>
-    </div>
+    </div> -->
 
-    <!-- MODAL DE SELEÇÃO DE VERSÃO -->
+    <!-- MODAL DE SELEÇÃO DE VERSÃO 
     <div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
         <div class="modal-versao-content" onclick="event.stopPropagation()">
             <div class="modal-versao-header">
@@ -656,8 +617,43 @@
             </div>
             <div class="versao-lista" id="listaVersoes"></div>
         </div>
-    </div>
+    </div> -->
 
+    <!-- OFF CANVAS DA BÍBLIA (NOVO PADRÃO) -->
+      <div id="biblia-overlay" onclick="fecharBiblia()"></div>
+      <div id="painel-biblia" class="biblia-offcanvas">
+        <div class="biblia-header">
+            <div class="biblia-titulo-area"><i class="fas fa-bible" style="font-size: 1.2rem;"></i><h2>Bíblia</h2></div>
+            <button class="btn-fechar-biblia" onclick="fecharBiblia()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="biblia-controles">
+            <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()">
+                <span id="versaoSiglaAtual">MSG</span><i class="fas fa-chevron-down"></i>
+            </button>
+            <select id="biblia-livro" onchange="Biblia.onLivroChange()"></select>
+            <select id="biblia-capitulo" onchange="Biblia.onCapituloChange()"></select>
+        </div>
+        <div id="biblia-conteudo" class="biblia-texto-area">
+            <p class="biblia-placeholder">Selecione o livro e o capítulo para começar a leitura.</p>
+        </div>
+        <div class="biblia-floating-nav">
+            <button class="nav-capitulo-btn" onclick="capituloProximo()" title="Próximo capítulo"><i class="fas fa-chevron-right"></i></button>
+            <button class="nav-capitulo-btn" onclick="capituloAnterior()" title="Capítulo anterior"><i class="fas fa-chevron-left"></i></button>
+        </div>
+      </div>
+
+      <!-- MODAL DE SELEÇÃO DE VERSÃO -->
+      <div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
+        <div class="modal-versao-content" onclick="event.stopPropagation()">
+            <div class="modal-versao-header">
+                <h3>Selecione a Versão</h3>
+                <button class="modal-versao-close" onclick="fecharModalVersao()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="versao-lista" id="listaVersoes"></div>
+        </div>
+      </div>
+
+    
     
     <script>
      const API_URL = sessionStorage.getItem('urlApi');
