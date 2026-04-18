@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     <!-- Bibliotecas para geração direta de DOCX -->
+    <script src="https://unpkg.com/html-to-docx@1.9.1/dist/html-to-docx.umd.js"></script>
     <!-- Módulo centralizado da Bíblia -->
     <script src="js/biblia.js"></script>
     <script src="config.js"></script>
@@ -517,7 +519,7 @@
     <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-actions">
-                <button class="modal-download" onclick="baixarPalavraPDF()" title="Baixar PDF">
+                <button class="modal-download" onclick="baixarPalavraWord()" title="Baixar DOC">
                     <i class="fas fa-download"></i>
                 </button>
                 <button class="modal-close" onclick="fecharModal(null)">
@@ -697,57 +699,60 @@
         }
 
         // ================= FUNÇÃO DE DOWNLOAD DIRETO DE PDF =================
-async function baixarPalavraPDF() {
+async function baixarPalavraWord() {
     if (!palavraAtual) return;
-    
+
     const btn = document.querySelector('.modal-download');
     const originalHTML = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     btn.classList.add('loading');
-    
+
     try {
-        // Elemento a ser capturado (todo o conteúdo do modal)
-        const element = document.querySelector('.modal-content');
-        const canvas = await html2canvas(element, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            logging: false
-        });
-        
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
-        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-        const width = imgWidth * ratio;
-        const height = imgHeight * ratio;
-        
-        let position = 0;
-        let remainingHeight = height;
-        
-        while (remainingHeight > 0) {
-            pdf.addImage(imgData, 'PNG', 0, position, width, height);
-            remainingHeight -= pdfHeight;
-            position -= pdfHeight;
-            if (remainingHeight > 0) {
-                pdf.addPage();
-            }
-        }
-        
-        const nomeArquivo = `${palavraAtual.tema || 'palavra'}_${palavraAtual.data || ''}.pdf`.replace(/\s+/g, '_');
-        pdf.save(nomeArquivo);
-        
+        // 1. Obter o HTML que você deseja converter.
+        //    Pode ser o conteúdo interno do modal ou uma string HTML formatada.
+        const titulo = document.getElementById('modalTitulo').innerText;
+        const data = document.getElementById('modalData').innerText;
+        const texto = document.getElementById('modalTexto').innerText; // ou .innerHTML
+
+        // 2. Construir uma string HTML completa para o documento.
+        //    Isso garante uma formatação adequada.
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>${titulo}</title>
+                <style>
+                    body { font-family: 'Inter', sans-serif; padding: 2em; }
+                    h1 { color: #600018; }
+                    .data { color: #718096; margin-bottom: 2em; }
+                    .texto { line-height: 1.7; text-align: justify; }
+                </style>
+            </head>
+            <body>
+                <h1>${titulo}</h1>
+                <p class="data">${data}</p>
+                <div class="texto">${texto.replace(/\n/g, '<br>')}</div>
+            </body>
+            </html>
+        `;
+
+        // 3. Converter o HTML para um blob (arquivo) .docx
+        const blob = await htmlDocx.asBlob(htmlContent);
+
+        // 4. Fazer o download do arquivo
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${palavraAtual.tema || 'palavra'}_${palavraAtual.data || ''}.docx`.replace(/\s+/g, '_');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
     } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        alert('Não foi possível gerar o PDF. Tente novamente.');
+        console.error('Erro ao gerar arquivo Word:', error);
+        alert('Não foi possível gerar o arquivo Word. Tente novamente.');
     } finally {
         btn.innerHTML = originalHTML;
         btn.classList.remove('loading');
