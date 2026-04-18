@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel do Líder - Videira Jataí</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <!-- Módulo unificado da Bíblia -->
+    <script src="js/biblia.js"></script>
+
+         <link rel="icon" type="image/png" href="logo.png">
+  <link rel="shortcut icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Sistema Videira">
+  <meta name="apple-mobile-web-app-title" content="Sistema Videira">
+  <meta name="theme-color" content="#0f172a"> 
+    <link rel="manifest" href="manifest.json">
+    <style>
+      /* --- ESTILOS ESPECÍFICOS DO PAINEL DO LÍDER --- */
+      
+      /* Força o widget do DailyVerses a ficar branco e legível */
+      #dailyVersesWrapper, 
+      #dailyVersesWrapper a, 
+      #dailyVersesWrapper div,
+      #dailyVersesWrapper span,
+      #dailyVersesWrapper .vV, 
+      #dailyVersesWrapper .vR {
+          color: white !important;
+          text-decoration: none !important;
+          font-family: 'Inter', sans-serif !important;
+      }
+      
+      #dailyVersesWrapper .vV {
+          font-size: 1.05rem !important;
+          font-weight: 500 !important;
+          line-height: 1.5 !important;
+          margin-bottom: 8px !important;
+      }
+      
+      #dailyVersesWrapper .vR {
+          font-weight: 700 !important;
+          opacity: 0.9 !important;
+          display: block !important;
+          text-align: right !important;
+      }
+
+      .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+
+      /* HEADER */
+      .header { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; border-left: 5px solid var(--primary); }
+      .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.1rem; }
+      .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
+      .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
+
+      /* DASHBOARD / VERSÍCULO DO DIA */
+      .stat-card { background: linear-gradient(135deg, var(--primary), #5c0016); color: white; padding: 25px 20px; border-radius: var(--radius); text-align: center; box-shadow: 0 4px 15px rgba(128, 0, 32, 0.2); margin-bottom: 15px; position: relative; overflow: hidden; }
+      .stat-card::before { content: "\f10d"; font-family: "Font Awesome 5 Free"; font-weight: 900; position: absolute; top: -10px; left: 10px; font-size: 4rem; opacity: 0.1; }
+      .titulo-versiculo { text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; color: #facc15; font-weight: 700; margin-bottom: 10px; display: block; }
+
+      /* BOTÃO BÍBLIA DESTAQUE */
+      .btn-biblia-destaque { width: 100%; background: linear-gradient(135deg, var(--ouro-videira), var(--ouro-escuro)); color: white; border: none; padding: 16px; border-radius: var(--radius); font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); margin-bottom: 20px; transition: 0.3s; }
+      .btn-biblia-destaque:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
+
+      /* MENU NAVEGAÇÃO */
+      .nav-menu { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+      .nav-btn { flex: 1 1 30%; min-width: 90px; padding: 12px; border: none; border-radius: 10px; background: white; color: var(--text-light); font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); font-size: 0.8rem; }
+      .nav-btn i { font-size: 1.2rem; }
+      .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128, 0, 32, 0.3); }
+
+      /* CARDS MEMBROS & AGENDA */
+      .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; }
+      @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+      .member-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px; }
+      .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+      .card-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0; }
+      .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; text-transform: uppercase; }
+      .card-info { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+      .status-row { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+      .status-pill { flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px; border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600; white-space: nowrap; }
+      .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
+      .btn-zap { display: block; width: 100%; text-align: center; padding: 10px; margin-top: 5px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; box-sizing: border-box; }
+
+      /* TABELA CELULAS */
+      .table-clean { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid #ddd; }
+      .table-clean th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; }
+      .table-clean td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-size: 0.9rem; font-weight: 500; }
+      .table-clean tr:nth-child(even) { background-color: #fcfcfc; }
+
+      /* LISTA DE PALAVRAS & MODAL */
+      .word-list-item { background: white; border-radius: var(--radius); padding: 15px; margin-bottom: 10px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-left: 4px solid var(--accent); transition: 0.2s; }
+      .word-list-item:active { transform: scale(0.98); }
+      .word-date { font-weight: 800; color: var(--text-main); font-size: 1rem; }
+      .word-theme { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
+
+      .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+      .modal-content { background: white; width: 100%; max-width: 800px; height: 85vh; border-radius: 20px 20px 0 0; padding: 20px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .word-text { line-height: 1.6; color: #444; font-size: 0.95rem; white-space: pre-wrap; margin-top: 15px; }
+      .btn-close-modal { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; z-index: 10; display: flex; align-items: center; justify-content: center;}
+
+      .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; transition: background 0.2s; box-sizing: border-box; }
+      .btn-youtube:hover { background-color: #cc0000; }
+
+      /* FORMS */
+      .form-box { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); }
+      label { display: block; margin-bottom: 5px; color: var(--text-light); font-weight: 600; font-size: 0.85rem; }
+      input, select, textarea { width: 100%; padding: 12px; background: var(--input-bg); margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; box-sizing: border-box; }
+      input:focus, textarea:focus { border-color: var(--primary); background: #fff; }
+      .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+      .btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
+      .btn-add-member { background: var(--success-text); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+      
+      .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+      .check-option { display: block; position: relative; cursor: pointer; }
+      .check-option input { position: absolute; opacity: 0; }
+      .checkmark { display: block; padding: 10px; text-align: center; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; color: #777; font-weight: 600; }
+      .check-option input:checked ~ .checkmark { background: var(--success-bg); color: var(--success-text); border-color: #badbcc; }
+
+      /* ESTILOS DA BÍBLIA (OFFCANVAS ATUALIZADO) */
+      :root { --ouro-videira: #D4AF37; --ouro-escuro: #b5952f; }
+      .biblia-offcanvas { position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100vh; background-color: #ffffff; box-shadow: -5px 0 25px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+      .biblia-offcanvas.aberto { right: 0; }
+      #biblia-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1999; display: none; opacity: 0; transition: opacity 0.3s ease; }
+      .biblia-header { background-color: var(--ouro-videira); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+      .biblia-titulo-area { display: flex; align-items: center; gap: 10px; }
+      .biblia-header h2 { color: white; margin: 0; font-size: 1.2rem; font-weight: 700; }
+      .btn-fechar-biblia { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; margin: 0; }
+
+      /* Novos controles da Bíblia (integrados) */
+      .biblia-controles {
+          padding: 15px;
+          background-color: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+      }
+      .versao-selector-btn {
+          background: white;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          padding: 10px 15px;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--primary);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          min-width: 80px;
+          justify-content: center;
+      }
+      .biblia-controles select {
+          flex: 1;
+          min-width: 100px;
+          padding: 10px;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          outline: none;
+          font-family: 'Inter', sans-serif;
+          background: white;
+          cursor: pointer;
+      }
+      .biblia-navigation {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 15px;
+          background: #f8fafc;
+      }
+      .nav-capitulo-btn {
+          background: rgba(96, 0, 24, 0.7);
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          color: white;
+          border: none;
+          border-radius: 40px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+          cursor: pointer;
+          opacity: 0.8;
+          transition: all 0.2s;
+      }
+      .nav-capitulo-btn:active { opacity: 1; background: var(--primary); }
+
+      .biblia-texto-area { padding: 25px 20px; overflow-y: auto; flex: 1; line-height: 1.8; font-size: 1rem; color: #334155; }
+      .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 50px; }
+
+      /* Modal de seleção de versão */
+      .modal-versao-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          z-index: 2100;
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          backdrop-filter: blur(2px);
+      }
+      .modal-versao-overlay.hidden { display: none; }
+      .modal-versao-content {
+          background: white;
+          width: 100%;
+          max-width: 500px;
+          border-radius: 20px 20px 0 0;
+          padding: 25px;
+          animation: slideUp 0.3s ease-out;
+      }
+      .modal-versao-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+      }
+      .modal-versao-header h3 { margin: 0; color: var(--primary); }
+      .modal-versao-close {
+          background: #f1f5f9;
+          border: none;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          cursor: pointer;
+      }
+      .versao-lista { display: flex; flex-direction: column; gap: 8px; }
+      .versao-item {
+          padding: 15px;
+          border-radius: 12px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          cursor: pointer;
+          font-weight: 500;
+      }
+      .versao-item.selecionada { background: var(--primary); color: white; }
+
+      /* ESTILOS DA ABA OFERTAS (COPIAR PIX) */
+      .pix-copy-box {
+          display: flex;
+          align-items: center;
+          background: #f1f5f9;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-top: 5px;
+      }
+      .pix-copy-box input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          padding: 12px;
+          font-family: monospace;
+          font-size: 0.95rem;
+          color: #334155;
+          font-weight: bold;
+          outline: none;
+          text-align: center;
+      }
+      .pix-copy-box button {
+          background: #10b981;
+          color: white;
+          border: none;
+          padding: 12px 15px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 0.9rem;
+      }
+      .pix-copy-box button:active { background: #059669; }
+
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        (async () => {
+           const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+
+            const { data: { user } } = await supabaseTemp.auth.getUser();
+
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const { data: usuario } = await supabaseTemp
+                .from('usuarios')
+                .select('categoria')
+                .eq('email', user.email)
+                .single();
+
+            const cat = usuario?.categoria || "membro";
+
+            if (cat.toLowerCase() === "membro") {
+                alert("Acesso negado. Redirecionando para sua área.");
+                window.location.href = "membro.html";
+            }
+        })();
+    </script>
+    <div class="container">
+      
+      <div class="header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 110px;">
+          <h3>Painel do Líder</h3>
+        </div>
+        <div style="display:flex; align-items:center; gap: 15px;">
+          <button onclick="carregarTudo()" class="btn-refresh" title="Atualizar Dados"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+          <button onclick="fazerLogout()" class="btn-refresh" style="color: #991b1b;" title="Sair do Sistema"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+
+      <div class="stat-card" id="card-versiculo">
+        <span class="titulo-versiculo">Versículo do Dia</span>
+        <div id="dailyVersesWrapper"></div>
+        <script async defer src="https://dailyverses.net/get/verse.js?language=arc"></script>
+      </div>
+
+      <button onclick="abrirBiblia()" class="btn-biblia-destaque">
+        <i class="fas fa-bible"></i>Bíblia A Mensagem
+      </button>
+
+      <div class="nav-menu">
+        <button onclick="mudarSecao('lista')" class="nav-btn active" id="btn-lista"><i class="fas fa-users"></i> Membros</button>
+        <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-network-wired"></i> Células</button>
+        <button onclick="mudarSecao('relatorio')" class="nav-btn" id="btn-relatorio"><i class="fas fa-clipboard-list"></i> Relatório</button>
+        <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
+        <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
+        <button onclick="mudarSecao('sugestao')" class="nav-btn" id="btn-sugestao"><i class="fas fa-hand-holding-heart"></i> Oferta</button>
+      </div>
+
+      <!-- SEÇÕES (MANTIDAS EXATAMENTE COMO ESTAVAM) -->
+      <div id="secao-lista">
+        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow);">
+          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h4 style="margin:0; color: var(--text-light); display: flex; align-items: center; gap: 8px;">
+                Membros 
+                <span id="badge-total-membros" style="background: var(--primary); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem;">0</span>
+              </h4>
+              <button onclick="mudarSecao('cadastro')" class="btn-add-member"><i class="fas fa-plus"></i> Novo Membro</button>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="inputBusca" placeholder="🔍 Buscar nome..." onkeyup="filtrarMembros()" style="margin:0; flex:2;">
+            <select id="filtroCelula" onchange="filtrarMembros()" style="margin:0; flex:1;"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div id="gridMembros" class="member-grid"></div>
+      </div>
+
+      <div id="secao-celulas" class="hidden">
+        <h4 style="color: var(--primary); margin-top:0; margin-bottom: 15px;">Quadro de Células</h4>
+        <div style="overflow-x:auto;">
+          <table class="table-clean" id="tabelaCelulas">
+            <thead><tr><th>Célula</th><th>Líder</th><th>Dia</th></tr></thead>
+            <tbody id="corpoCelulas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="secao-palavras" class="hidden">
+         <h4 style="color: var(--accent); margin-top:0; margin-bottom: 15px;">Palavras & Estudos</h4>
+         <div id="listaPalavras">
+           <p style="text-align:center; color:#999;">Carregando...</p>
+         </div>
+      </div>
+
+      <div id="secao-cadastro" class="hidden form-box">
+        <!-- ... todo o conteúdo do cadastro de membro permanece igual ... -->
+        <h3 style="color:var(--primary); margin-top:0;">Cadastrar Novo</h3>
+        <form id="formMembro">
+          <label>Nome Completo</label><input type="text" name="nome" required>
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label>Nascimento</label><input type="date" name="nascimento"></div>
+            <div style="flex:1;"><label>WhatsApp</label><input type="tel" name="telefone" placeholder="(00) 00000-0000"></div>
+          </div>
+          <label>Célula</label><select name="celula" id="selectCelulas" required></select>
+          <label>Categoria</label><select name="categoria"><option>Membro</option><option selected>Frequentador</option><option>Líder</option></select>
+          <label style="margin-top:15px;">Passos de Fé</label>
+         <div class="check-grid">
+             <label class="check-option"><input type="checkbox" name="batizado"><span class="checkmark">Batismo</span></label>
+             <label class="check-option"><input type="checkbox" name="cursao"><span class="checkmark">Cursão</span></label>
+             <label class="check-option"><input type="checkbox" name="ctl"><span class="checkmark">CTL</span></label>
+             <label class="check-option"><input type="checkbox" name="encontro"><span class="checkmark">Encontro</span></label>
+             <label class="check-option"><input type="checkbox" name="seminario"><span class="checkmark">Seminário</span></label>
+             <label class="check-option"><input type="checkbox" name="dizimista"><span class="checkmark">Dizimista</span></label>
+          </div>
+          <div style="display:flex; gap:10px;">
+             <button type="button" onclick="mudarSecao('lista')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
+             <button type="submit" id="btnSalvar" class="btn-save" style="flex:2;">Salvar</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="secao-relatorio" class="hidden form-box">
+        <!-- ... relatório permanece igual ... -->
+        <h3 style="color:#0056b3; margin-top:0;">Relatório Semanal</h3>
+        <form id="formRelatorio">
+           <div style="display:flex; gap:10px;">
+             <div style="flex:1;"><label>Data</label><input type="date" name="data" id="relData" required></div>
+             <div style="flex:1;"><label>Célula</label><select name="celula" id="selectCelulasRel" required></select></div>
+           </div>
+           <label>Nomes dos Presentes (Separados por vírgula)</label>
+           <textarea name="presentes" rows="2" required placeholder="Ex: João, Pedro, Maria..."></textarea>
+           <h4 style="margin-bottom:10px; color:#555; border-bottom:1px solid #eee; padding-bottom:5px;">Responsáveis (Encargos)</h4>
+           <label>Quebra-Gelo</label><input type="text" name="quebraGelo" placeholder="Ex: Lucas">
+           <label>Palavra / Estudo</label><input type="text" name="palavra" placeholder="Ex: Mateus">
+           <label>Louvor / Oração</label><input type="text" name="louvor" placeholder="Ex: Ministério de Louvor / Ana">
+           <label>Lanche / Comunhão</label><input type="text" name="lanche" placeholder="Ex: Irmã Maria">
+           <label>Observações / Testemunhos</label><textarea name="observacoes" rows="3" placeholder="Aconteceu algo especial? Alguém aceitou a Jesus?"></textarea>
+           <button type="submit" id="btnRelatorio" class="btn-save">Enviar Relatório</button>
+        </form>
+      </div>
+
+      <div id="secao-agenda" class="hidden">
+        <!-- ... agenda permanece igual ... -->
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h4 style="margin:0; color: var(--text-light);"><i class="far fa-calendar-alt"></i> Próximos Eventos</h4>
+            </div> 
+        <div id="listaAgenda" class="member-grid">
+           <p style="text-align:center; color:#999; grid-column: 1 / -1;">Buscando agenda no Google...</p>
+        </div>
+      </div>
+
+      <div id="secao-cadastro-agenda" class="hidden form-box">
+        <!-- ... cadastro agenda permanece igual ... -->
+        <h3 style="color:var(--primary); margin-top:0;">Cadastrar Evento</h3>
+        <form id="formAgenda">
+          <label>Data do Evento</label><input type="date" name="dataEvento" required>
+          <label>Título / Descrição</label><input type="text" name="descricao" required placeholder="Ex: Acampamento de Jovens">
+          <label>Categoria (Rede)</label>
+          <select name="categoria" required>
+            <option>RADICAIS LIVRES</option>
+            <option>RADICAIS KIDS</option>
+            <option>REDE DA FAMÍLIA</option>
+            <option>GERAL</option>
+            <option>GOOGLE AGENDA</option>
+          </select>
+          <label>Tipo de Evento</label>
+          <select name="tipo" required>
+            <option>Gratuito</option>
+            <option>Pago</option>
+          </select>
+          <label>Observações Adicionais</label>
+          <textarea name="observacao" rows="2" placeholder="Local, preletor, valor, etc..."></textarea>
+          <div style="display:flex; gap:10px;">
+             <button type="button" onclick="mudarSecao('agenda')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
+             <button type="submit" id="btnSalvarAgenda" class="btn-save" style="flex:2;">Salvar Evento</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="secao-sugestao" class="hidden">
+        <!-- ... ofertas permanece igual ... -->
+        <h4 style="color: var(--primary); margin-top: 0; margin-bottom: 15px;"><i class="fas fa-hand-holding-heart"></i> Dízimos e Ofertas</h4>
+        <div class="member-card" style="text-align: center; border-top: 4px solid #10b981; margin-bottom: 15px;">
+            <h3 style="margin-top:0; color:#10b981;"><i class="fa-brands fa-pix"></i> Pagamento via PIX</h3>
+            <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px;">Escaneie o QR Code com o app do seu banco:</p>
+            <div style="background:#f8fafc; padding:15px; border-radius:12px; display:inline-block; margin: 10px 0; border: 1px dashed #cbd5e1;">
+                <img src="pix.png" alt="QR Code PIX" style="width:150px; height:150px; border-radius:8px;">
+            </div>
+            <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px; margin-top: 10px;">Ou copie a chave PIX (CNPJ):</p>
+            <div class="pix-copy-box">
+                <input type="text" id="chavePix" value="27.105.498/0001-03" readonly>
+                <button onclick="copiarPix()" id="btnCopiarPix"><i class="far fa-copy"></i> Copiar</button>
+            </div>
+        </div>
+        <div class="member-card" style="text-align: center; margin-bottom: 25px; border-top: 4px solid #009ee3; opacity: 0.8;">
+            <h3 style="margin-top:0; color:#009ee3;"><i class="fas fa-credit-card"></i> Cartão / Mercado Pago</h3>
+            <p style="font-size: 0.9rem; color:var(--text-light);">Em breve você poderá ofertar usando seu cartão de crédito de forma segura.</p>
+            <button disabled style="background:#cbd5e1; color:#64748b; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:not-allowed; margin-top:10px; width: 100%;"><i class="fas fa-lock"></i> Disponível em Breve</button>
+        </div>
+        <div class="form-box">
+            <h3 style="color:var(--accent); margin-top:0;"><i class="fa-solid fa-hands-praying"></i> Pedidos e Sugestões</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Envie seu pedido de oração, sugestão ou feedback.</p>
+            <form id="formSugestao">
+               <label>Mensagem</label>
+               <textarea name="mensagem" rows="5" required placeholder="Escreva aqui sua mensagem..."></textarea>
+               <button type="submit" id="btnSugestao" class="btn-save">Enviar Mensagem</button>
+            </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL PALAVRA (COM DOWNLOAD WORD) -->
+    <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+          <button class="btn-close-modal" onclick="fecharModal(null)">&times;</button>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px;">
+              <button class="modal-download" onclick="baixarPalavraWord()" title="Baixar Word" style="background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; color: #600018; cursor: pointer;"><i class="fas fa-download"></i></button>
+          </div>
+          <h3 id="modalTitulo" style="color:var(--primary); margin-top:10px;"></h3>
+          <small id="modalData" style="color:#777; display:block; margin-bottom:15px;"></small>
+          <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
+          <div id="modalTexto" class="word-text"></div>
+      </div>
+    </div>
+
+    <!-- OFF CANVAS DA BÍBLIA (NOVO PADRÃO) -->
+    <div id="biblia-overlay" onclick="fecharBiblia()"></div>
+    <div id="painel-biblia" class="biblia-offcanvas">
+        <div class="biblia-header">
+            <div class="biblia-titulo-area">
+                <i class="fas fa-bible" style="font-size: 1.2rem;"></i>
+                <h2>Bíblia</h2>
+            </div>
+            <button class="btn-fechar-biblia" onclick="fecharBiblia()"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <!-- NOVOS CONTROLES -->
+        <div class="biblia-controles">
+            <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()">
+                <span id="versaoSiglaAtual">MSG</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <select id="biblia-livro" onchange="Biblia.onLivroChange()"></select>
+            <select id="biblia-capitulo" onchange="Biblia.onCapituloChange()"></select>
+        </div>
+        
+        <!-- BOTÕES DE NAVEGAÇÃO DE CAPÍTULO -->
+        <div class="biblia-navigation">
+            <button class="nav-capitulo-btn" onclick="capituloAnterior()"><i class="fas fa-chevron-left"></i></button>
+            <button class="nav-capitulo-btn" onclick="capituloProximo()"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <div id="biblia-conteudo" class="biblia-texto-area">
+            <p class="biblia-placeholder">Selecione o livro e o capítulo para começar a leitura.</p>
+        </div>
+    </div>
+
+    <!-- MODAL SELEÇÃO DE VERSÃO -->
+    <div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
+        <div class="modal-versao-content" onclick="event.stopPropagation()">
+            <div class="modal-versao-header">
+                <h3>Selecione a Versão</h3>
+                <button class="modal-versao-close" onclick="fecharModalVersao()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="versao-lista" id="listaVersoes"></div>
+        </div>
+    </div>
+
+    <script>
+     const API_URL = sessionStorage.getItem('urlApi');
+
+      const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+      let dadosMembros = [], dadosCelulas = [], listaPalavras = [], listaAgenda = [], palavraAtual = null;
+      
+      window.onload = carregarTudo;
+
+      // ==========================================
+      // MOTORES DE COMUNICAÇÃO (COM LOG AUTOMÁTICO)
+      // ==========================================
+      
+      async function registrarLogAcao(acaoRealizada) {
+          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+          try {
+              await fetch(`${SB_URL}/rest/v1/log`, {
+                  method: 'POST',
+                  headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                  body: JSON.stringify({ datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada })
+              });
+          } catch (e) { console.error("Erro no log:", e); }
+      }
+
+      async function fetchGoogle(action, payload = {}) {
+        payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
+          try {
+              let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }) });
+              let json = await res.json();
+              if (json.status === "sucesso") {
+                  if (action === 'salvarAgenda') registrarLogAcao(`Cadastrou evento na agenda: ${payload.descricao}`);
+                  return json.dados || json.mensagem;
+              } else throw new Error(json.mensagem);
+          } catch(e) { console.error("Erro na API Google:", e); throw e; }
+      }
+
+      async function lerSupabase(tabela) {
+          const { data, error } = await supabaseClient.from(tabela).select('*');
+          if (error) throw new Error(`Erro ao ler ${tabela}: ${error.message}`);
+          return data;
+      }
+
+      async function salvarSupabase(tabela, dados) {
+          const { error } = await supabaseClient.from(tabela).insert([dados]);
+          if (error) throw new Error(`Erro ao salvar: ${error.message}`);
+          registrarLogAcao(`Criou registro na aba ${tabela}`);
+          return "Salvo com sucesso! 🚀";
+      }
+
+      function copiarPix() {
+          const input = document.getElementById('chavePix');
+          input.select(); input.setSelectionRange(0, 99999);
+          navigator.clipboard.writeText(input.value).then(() => {
+              const btn = document.getElementById('btnCopiarPix');
+              btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+              btn.style.background = '#059669';
+              setTimeout(() => { btn.innerHTML = '<i class="far fa-copy"></i> Copiar'; btn.style.background = '#10b981'; }, 2000);
+          }).catch(err => alert("Erro ao copiar. Copie manualmente!"));
+      }
+
+      async function carregarTudo() {
+        const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
+        document.getElementById('relData').valueAsDate = new Date();
+        try {
+            let todosMembros = await lerSupabase('membros'); 
+            dadosMembros = todosMembros.filter(m => String(m.arquivado || '').toLowerCase() !== 'sim');
+            const pesoCargos = { "Pastor": 1, "Discipulador": 2, "Líder": 3, "Membro": 4, "Frequentador": 5 };
+            dadosMembros.sort((a, b) => {
+                let tipoA = a.tipo || "Frequentador"; if (tipoA.toLowerCase() === 'líder') tipoA = 'Líder';
+                let tipoB = b.tipo || "Frequentador"; if (tipoB.toLowerCase() === 'líder') tipoB = 'Líder';
+                let pesoA = pesoCargos[tipoA] || 99, pesoB = pesoCargos[tipoB] || 99;
+                if (pesoA !== pesoB) return pesoA - pesoB;
+                return (a.nome || "").localeCompare(b.nome || "");
+            });
+            document.getElementById('badge-total-membros').innerText = dadosMembros.length;
+            renderizarMembros(dadosMembros);
+        } catch (e) { console.error("Erro Membros Supabase:", e); }
+        try {
+            dadosCelulas = await lerSupabase('celulas');
+            renderizarCelulas(dadosCelulas);
+            preencherSelects(dadosCelulas);
+        } catch (e) { console.error("Erro Celulas Supabase:", e); }
+        try {
+            listaPalavras = await lerSupabase('palavras');
+            listaPalavras.sort((a, b) => {
+                const pegarTempo = (d) => {
+                    if (!d) return 0;
+                    if (d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                    if (d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                    return new Date(d).getTime();
+                };
+                return pegarTempo(b.data) - pegarTempo(a.data);
+            });
+            renderizarPalavras(listaPalavras);
+        } catch (e) { console.error("Erro Palavras Supabase:", e); }
+        try {
+            const agendaRes = await fetchGoogle('buscarAgenda');
+            listaAgenda = agendaRes || [];
+            renderizarAgenda(listaAgenda);
+        } catch(e) { console.error("Erro Agenda Google:", e); renderizarAgenda([]); }
+        if(icon) icon.classList.remove('fa-spin');
+      }
+
+      function mudarSecao(s) {
+         ['lista','celulas','cadastro','relatorio','sugestao','palavras','agenda','cadastro-agenda'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
+         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+         document.getElementById('secao-'+s).classList.remove('hidden');
+         if(document.getElementById('btn-'+s)) document.getElementById('btn-'+s).classList.add('active');
+      }
+
+      // ========== FUNÇÕES DE RENDERIZAÇÃO (inalteradas) ==========
+      function renderizarMembros(lista) {
+         const grid = document.getElementById('gridMembros'); grid.innerHTML = '';
+         const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
+         const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+         lista.forEach(m => {
+            let nome = m.nome || 'Sem Nome', celula = m.celula || '-', categoria = m.tipo || 'Frequentador', tel = String(m.telefone || '');
+            let telClean = tel.replace(/\D/g, '');
+            let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
+            let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+            grid.innerHTML += `
+              <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+                 <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge cat-${categoria}">${categoria}</span></div>
+                 <div class="card-info" style="flex-wrap: wrap;"><i class="fas fa-users" style="color:#bbb;"></i> ${celula} ${nasc}</div>
+                 <div class="status-row">
+                    <div class="status-pill ${check(m.batizado)}">Batismo</div><div class="status-pill ${check(m.cursao)}">Cursão</div><div class="status-pill ${check(m.ctl)}">CTL</div>
+                    <div class="status-pill ${check(m.encontro)}">Encontro</div><div class="status-pill ${check(m.seminario)}">Seminário</div><div class="status-pill ${check(m.dizimista)}">Dizimista</div>
+                 </div>
+                 ${btnZap}
+              </div>`;
+         });
+      }
+
+      function renderizarCelulas(lista) {
+         const tb = document.getElementById('corpoCelulas'); tb.innerHTML = '';
+         if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="3" style="text-align:center;">Nenhuma célula encontrada.</td></tr>'; return; }
+         lista.forEach(c => {
+            let enderecoHTML = c.endereco ? `<div style="font-size: 0.75rem; color: #888; margin-top: 3px;"><i class="fas fa-map-marker-alt"></i> ${c.endereco}</div>` : `<div style="font-size: 0.75rem; color: #ccc;">Sem endereço cadastrado</div>`;
+            tb.innerHTML += `<tr><td><div style="font-weight:700;">${c.nome||''}</div>${enderecoHTML}</td><td>${c.lider||''}</td><td>${c.dia_horario||''}</td></tr>`;
+         });
+      }
+
+      function renderizarPalavras(lista) {
+          const div = document.getElementById('listaPalavras'); div.innerHTML = '';
+          if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center;">Nenhuma palavra cadastrada.</p>'; return; }
+          lista.forEach((p, index) => {
+              let dataF = p.data || '';
+              try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+              div.innerHTML += `<div class="word-list-item" onclick="abrirPalavra(${index})"><div><div class="word-date"><i class="far fa-calendar-alt"></i> ${dataF}</div><div class="word-theme">${p.tema||'Sem Título'}</div></div><i class="fas fa-chevron-right"></i></div>`;
+          });
+      }
+
+      function renderizarAgenda(lista) {
+         const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+         if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center;">Nenhum evento na agenda.</p>'; return; }
+         lista.sort((a,b) => (new Date(a[0]) - new Date(b[0])));
+         lista.forEach(a => {
+             let dataF = a[0] || '';
+             try { if(a[0] && a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+             let corCategoria = '#555';
+             if(a[4]==='RADICAIS LIVRES') corCategoria='#0056b3'; else if(a[4]==='GOOGLE AGENDA') corCategoria='var(--primary)'; else if(a[4]==='RADICAIS KIDS') corCategoria='#b58900';
+             let corTipo = (a[3]==='Pago')?'#dc3545':'var(--success-text)';
+             div.innerHTML += `<div class="member-card"><div class="card-header"><h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4><span class="cat-badge" style="background:${corCategoria};">${a[4]||''}</span></div><div style="font-weight:700;">${a[1]||''}</div><div style="color:#666;">${a[2]||''}</div><div style="margin-top:10px;"><span style="color:${corTipo};">${a[3]||''}</span></div></div>`;
+         });
+      }
+
+      function preencherSelects(celulas) {
+         const s1=document.getElementById('selectCelulas'), s2=document.getElementById('filtroCelula'), s3=document.getElementById('selectCelulasRel');
+         s1.innerHTML='<option value="">Selecione...</option>'; s2.innerHTML='<option value="">Todas</option>'; s3.innerHTML='<option value="">Selecione...</option>';
+         if(!celulas) return;
+         celulas.forEach(c => { if(c.nome) { s1.innerHTML += `<option>${c.nome}</option>`; s2.innerHTML += `<option>${c.nome}</option>`; s3.innerHTML += `<option>${c.nome}</option>`; } });
+      }
+
+      function filtrarMembros() {
+         const b = document.getElementById('inputBusca').value.toLowerCase(), c = document.getElementById('filtroCelula').value.toLowerCase();
+         document.querySelectorAll('.member-card[data-nome]').forEach(card => {
+            card.style.display = (card.dataset.nome.includes(b) && (c==="" || card.dataset.celula.includes(c))) ? 'flex' : 'none';
+         });
+      }
+
+      function abrirPalavra(index) {
+          const p = listaPalavras[index]; palavraAtual = p;
+          document.getElementById('modalTitulo').innerText = p.tema || '';
+          let dataF = p.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+          document.getElementById('modalData').innerText = dataF;
+          document.getElementById('modalTexto').innerText = p.texto || '';
+          const btn = document.getElementById('btnLinkYoutube');
+          if (p.link_youtube?.trim()) { btn.href = p.link_youtube; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); }
+          document.getElementById('modalPalavra').classList.remove('hidden');
+      }
+
+      function fecharModal(e) { if(e === null || e.target.id === 'modalPalavra') document.getElementById('modalPalavra').classList.add('hidden'); }
+
+      async function baixarPalavraWord() {
+          if (!palavraAtual) return;
+          const btn = document.querySelector('.modal-download');
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          try {
+              const titulo = palavraAtual.tema || 'Palavra', data = palavraAtual.data || '', texto = palavraAtual.texto || '';
+              let dataF = data; if(data.includes('-')) { const p=data.split('-'); dataF=`${p[2]}/${p[1]}/${p[0]}`; }
+              const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Inter,sans-serif;padding:2em;}h1{color:#600018;}.data{color:#718096;}.texto{line-height:1.7;}</style></head><body><h1>${titulo}</h1><p class="data">${dataF}</p><div class="texto">${texto.replace(/\n/g,'<br>')}</div></body></html>`;
+              const blob = new Blob([html], { type: 'application/msword' });
+              const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${titulo}.doc`; a.click();
+          } catch(e) { alert('Erro ao gerar Word.'); }
+          finally { btn.innerHTML = '<i class="fas fa-download"></i>'; }
+      }
+
+      // ========== SALVAMENTOS (inalterados) ==========
+      document.getElementById('formMembro').onsubmit = async function(e) {
+         e.preventDefault(); const btn = document.getElementById('btnSalvar'); btn.disabled = true;
+         const d = { nome: this.nome.value, nascimento: this.nascimento.value||null, tipo: this.categoria.value, celula: this.celula.value, telefone: this.telefone.value, batizado: this.batizado.checked?"Sim":"Não", cursao: this.cursao.checked?"Sim":"Não", ctl: this.ctl.checked?"Sim":"Não", encontro: this.encontro.checked?"Sim":"Não", seminario: this.seminario.checked?"Sim":"Não", dizimista: this.dizimista.checked?"Sim":"Não" };
+         try { alert(await salvarSupabase('membros', d)); this.reset(); mudarSecao('lista'); carregarTudo(); } catch(err) { alert(err.message); } finally { btn.disabled = false; }
+      };
+      document.getElementById('formRelatorio').onsubmit = async function(e) {
+         e.preventDefault(); const btn = document.getElementById('btnRelatorio'); btn.disabled = true;
+         const d = { data: this.data.value, celula: this.celula.value, presentes: this.presentes.value.trim(), quebra_gelo: this.quebraGelo.value, palavra: this.palavra.value, louvor: this.louvor.value, lanche: this.lanche.value, observacoes: this.observacoes.value };
+         try { alert(await salvarSupabase('relatorios', d)); this.reset(); mudarSecao('lista'); } catch(err) { alert(err.message); } finally { btn.disabled = false; }
+      };
+      document.getElementById('formSugestao').onsubmit = async function(e) {
+         e.preventDefault(); const btn = document.getElementById('btnSugestao'); btn.disabled = true;
+         try { alert(await salvarSupabase('sugestoes', { mensagem: this.mensagem.value })); this.reset(); mudarSecao('lista'); } catch(err) { alert(err.message); } finally { btn.disabled = false; }
+      };
+      document.getElementById('formAgenda').onsubmit = async function(e) {
+         e.preventDefault(); const btn = document.getElementById('btnSalvarAgenda'); btn.disabled = true;
+         try { alert(await fetchGoogle('salvarAgenda', { dataEvento: this.dataEvento.value, descricao: this.descricao.value, observacao: this.observacao.value, tipo: this.tipo.value, categoria: this.categoria.value })); this.reset(); mudarSecao('agenda'); carregarTudo(); } catch(err) { alert(err.message); } finally { btn.disabled = false; }
+      };
+
+      function fazerLogout() { if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; } }
+
+      // ========== BÍBLIA (NOVO MÓDULO) ==========
+      let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
+      const siglasVersoes = { msg:'MSG', nvi:'NVI', aa:'ARA', acf:'ACF', ntlh:'NTLH' };
+      const nomesCompletos = { msg:'A Mensagem', nvi:'Nova Versão Internacional', aa:'Almeida Revista e Atualizada', acf:'Almeida Corrigida Fiel', ntlh:'Nova Tradução na Linguagem de Hoje' };
+
+      async function abrirBiblia() {
+          document.getElementById('painel-biblia').classList.add('aberto');
+          document.getElementById('biblia-overlay').style.display = 'block';
+          setTimeout(() => document.getElementById('biblia-overlay').style.opacity = '1', 10);
+          if (typeof Biblia !== 'undefined' && !Biblia.bibliaCarregada) {
+              await Biblia.inicializar();
+              versaoSelecionada = Biblia.getVersaoAtiva();
+              document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada;
+          }
+      }
+
+      function fecharBiblia() {
+          document.getElementById('painel-biblia').classList.remove('aberto');
+          const ov = document.getElementById('biblia-overlay');
+          ov.style.opacity = '0';
+          setTimeout(() => ov.style.display = 'none', 300);
+      }
+
+      function abrirModalVersao() {
+          const modal = document.getElementById('modalVersao');
+          const listaDiv = document.getElementById('listaVersoes');
+          listaDiv.innerHTML = '';
+          Object.entries(nomesCompletos).forEach(([id, nome]) => {
+              const item = document.createElement('div');
+              item.className = 'versao-item' + (id === versaoSelecionada ? ' selecionada' : '');
+              item.innerHTML = `${nome} <span style="float:right;opacity:0.7;">${siglasVersoes[id]}</span>`;
+              item.onclick = () => selecionarVersao(id);
+              listaDiv.appendChild(item);
+          });
+          modal.classList.remove('hidden');
+      }
+
+      function fecharModalVersao(e) {
+          if (!e || e.target === document.getElementById('modalVersao')) document.getElementById('modalVersao').classList.add('hidden');
+      }
+
+      async function selecionarVersao(id) {
+          versaoSelecionada = id;
+          localStorage.setItem('biblia_versao', id);
+          document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[id];
+          fecharModalVersao();
+          if (typeof Biblia !== 'undefined') await Biblia.mudarVersao(id);
+      }
+
+      function capituloAnterior() {
+          const selCap = document.getElementById('biblia-capitulo');
+          let val = parseInt(selCap.value);
+          if (val > 1) { selCap.value = val - 1; Biblia.onCapituloChange(); }
+          else {
+              const selLiv = document.getElementById('biblia-livro');
+              if (selLiv.selectedIndex > 0) {
+                  selLiv.selectedIndex--;
+                  Biblia.onLivroChange();
+                  setTimeout(() => { selCap.value = selCap.options.length; Biblia.onCapituloChange(); }, 100);
+              }
+          }
+      }
+
+      function capituloProximo() {
+          const selCap = document.getElementById('biblia-capitulo');
+          let val = parseInt(selCap.value);
+          if (val < selCap.options.length) { selCap.value = val + 1; Biblia.onCapituloChange(); }
+          else {
+              const selLiv = document.getElementById('biblia-livro');
+              if (selLiv.selectedIndex < selLiv.options.length - 1) {
+                  selLiv.selectedIndex++;
+                  Biblia.onLivroChange();
+                  setTimeout(() => { selCap.value = 1; Biblia.onCapituloChange(); }, 100);
+              }
+          }
+      }
+
+    </script>
+  </body>
+</html>
