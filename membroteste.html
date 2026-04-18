@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Área do Membro - Videira Jataí</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="biblia.js"></script>
+
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Videira Jataí">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        :root {
+            --primary: #600018; 
+            --accent: #D4AF37;
+            --bg-color: #f4f7f6;
+            --text-main: #333333;
+            --text-light: #718096;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --radius: 12px;
+            --ouro-videira: #b8860b;
+            --ouro-escuro: #8a6508;
+        }
+
+        body, html { 
+            height: 100%; 
+            margin: 0; 
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color); 
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CABEÇALHO FIXO */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo { width: 40px; height: auto; }
+        header h1 { color: var(--primary); font-size: 1.1rem; margin: 0; font-weight: 700; }
+        .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; margin-right: 15px; }
+        .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
+        .btn-sair { background: none; border: none; font-size: 1.2rem; color: #dc3545; cursor: pointer; transition: 0.3s; }
+        .btn-sair:hover { color: #a71d2a; }
+
+        /* ÁREA DE CONTEÚDO (ABAS) */
+        #content-area {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            padding: 15px;
+            padding-bottom: 80px; 
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* NAVEGAÇÃO INFERIOR */
+        nav.bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+            z-index: 20;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 0.70rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            flex: 1;
+            padding: 8px 0;
+            gap: 4px;
+        }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
+        .nav-item.active { color: var(--primary); }
+
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; }
+        .member-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 5px; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .word-list-item { background: white; border-radius: var(--radius); padding: 15px; margin-bottom: 10px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-left: 4px solid var(--accent); }
+        .word-date { font-weight: 800; color: var(--text-main); font-size: 1rem; }
+        .word-theme { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
+
+        /* BÍBLIA */
+        .biblia-controles { background-color: var(--card-bg); padding: 15px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;}
+        .biblia-controles select { flex: 1; min-width: 100px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: 'Inter', sans-serif; background: #f8fafc; cursor: pointer; }
+        .biblia-texto-area { background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); line-height: 1.8; font-size: 1rem; color: #334155; }
+        .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 20px; }
+
+        /* MODAL DE PALAVRAS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+        .modal-overlay.hidden { display: none; }
+        .modal-content { background: white; width: 100%; max-width: 800px; height: 85vh; border-radius: 20px 20px 0 0; padding: 25px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .modal-close { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #64748b; cursor: pointer; font-size: 1.1rem; }
+        .modal-title { font-size: 1.5rem; color: var(--primary); font-weight: 800; margin-bottom: 5px; margin-top: 10px; padding-right: 30px;}
+        .modal-date { color: var(--text-light); font-size: 0.9rem; margin-bottom: 20px; }
+        .modal-body { color: var(--text-main); font-size: 1.05rem; line-height: 1.7; text-align: justify; white-space: pre-wrap;}
+        
+        .btn-youtube { display: inline-flex; align-items: center; gap: 8px; background: #ff0000; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; margin-top: 15px;}
+        .btn-youtube.hidden { display: none !important; }
+
+        /* HEADER SAUDACAO */
+        .saudacao-header { margin-bottom: 20px; text-align: center; }
+        .saudacao-header h2 { margin: 0; color: var(--primary); font-size: 1.3rem; }
+        .saudacao-header p { margin: 5px 0 0 0; color: var(--text-light); font-size: 0.9rem; }
+
+        /* ESTILOS DA ABA OFERTAS (NOVOS) */
+        .pix-copy-box {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .pix-copy-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #334155;
+            font-weight: bold;
+            outline: none;
+            text-align: center;
+        }
+        .pix-copy-box button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        .pix-copy-box button:active {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="logo.png" alt="Logo" class="logo">
+            <h1>Videira Jataí</h1>
+        </div>
+        <div>
+            <button class="btn-refresh" onclick="carregarDados(this.querySelector('i'))" title="Atualizar Dados">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-sair" onclick="fazerLogoff()" title="Sair do Sistema">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <div id="content-area">
+        
+        <div class="saudacao-header">
+            <h2 id="texto-boas-vindas">Olá, Membro</h2>
+            <p>Bem-vindo(a) à sua área exclusiva.</p>
+        </div>
+
+        <div id="aba-biblia" class="tab-content active">
+            <div class="biblia-controles">
+                <select id="biblia-versao" onchange="mudarVersaoBiblia()">
+                    <option value="msg">A Mensagem</option>
+                    <option value="nvi">NVI</option>
+                    <option value="aa">ARA</option>
+                    <option value="acf">ACF</option>
+                </select>
+                <select id="biblia-livro" onchange="atualizarCapitulos()"></select>
+                <select id="biblia-capitulo" onchange="buscarCapituloBiblia()"></select>
+            </div>
+        </div>
+
+        <div id="aba-agenda" class="tab-content">
+            <h4 style="color: var(--primary); margin-top: 0; margin-bottom: 15px;"><i class="far fa-calendar-alt"></i> Próximos Eventos</h4>
+            <div id="listaAgenda" class="member-grid">
+                <p style="text-align:center; color:#999; grid-column: 1 / -1;"><i class='fas fa-spinner fa-spin'></i> Buscando agenda...</p>
+            </div>
+        </div>
+
+        <div id="aba-palavras" class="tab-content">
+            <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 15px;"><i class="fas fa-book-open"></i> Palavras & Estudos</h4>
+            <div id="listaPalavras">
+                <p style="text-align:center; color:#999;"><i class='fas fa-spinner fa-spin'></i> Carregando palavras...</p>
+            </div>
+        </div>
+        
+        <div id="aba-ofertas" class="tab-content">
+            <h4 style="color: var(--primary); margin-top: 0; margin-bottom: 15px;"><i class="fas fa-hand-holding-heart"></i> Dízimos e Ofertas</h4>
+            
+            <div class="member-card" style="text-align: center; border-top: 4px solid #10b981;">
+                <h3 style="margin-top:0; color:#10b981;"><i class="fa-brands fa-pix"></i> Pagamento via PIX</h3>
+                <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px;">Escaneie o QR Code com o app do seu banco:</p>
+                
+                <div style="background:#f8fafc; padding:15px; border-radius:12px; display:inline-block; margin: 10px 0; border: 1px dashed #cbd5e1;">
+                   <img src="pix.png" alt="QR Code PIX" style="width:150px; height:150px; border-radius:8px;">
+                </div>
+                
+                <p style="font-size: 0.9rem; color:var(--text-light); margin-bottom: 5px; margin-top: 10px;">Ou copie a chave PIX (CNPJ):</p>
+                <div class="pix-copy-box">
+                    <input type="text" id="chavePix" value="27.105.498/0001-03" readonly>
+                    <button onclick="copiarPix()" id="btnCopiarPix">
+                        <i class="far fa-copy"></i> Copiar
+                    </button>
+                </div>
+            </div>
+
+            <div class="member-card" style="text-align: center; margin-top: 15px; border-top: 4px solid #009ee3; opacity: 0.8;">
+                <h3 style="margin-top:0; color:#009ee3;"><i class="fas fa-credit-card"></i> Cartão / Mercado Pago</h3>
+                <p style="font-size: 0.9rem; color:var(--text-light);">Em breve você poderá ofertar usando seu cartão de crédito diretamente por aqui de forma segura.</p>
+                <button disabled style="background:#cbd5e1; color:#64748b; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:not-allowed; margin-top:10px; width: 100%;">
+                    <i class="fas fa-lock"></i> Disponível em Breve
+                </button>
+            </div>
+            
+            <p style="text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 20px;">
+                "Cada um dê conforme determinou em seu coração..." <br> 2 Coríntios 9:7
+            </p>
+        </div>
+
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="mudarAba('aba-biblia', this)">
+            <i class="fas fa-bible"></i>
+            Bíblia A Mensagem
+        </button>
+        <button class="nav-item" onclick="mudarAba('aba-agenda', this)">
+            <i class="far fa-calendar-alt"></i>
+            Agenda
+        </button>
+        <button class="nav-item" onclick="mudarAba('aba-palavras', this)">
+            <i class="fas fa-comment-dots"></i>
+            Palavras
+        </button>
+        <button class="nav-item" onclick="mudarAba('aba-ofertas', this)">
+            <i class="fas fa-hand-holding-heart"></i>
+            Ofertar
+        </button>
+    </nav>
+
+    <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="fecharModal(null)"><i class="fas fa-times"></i></button>
+            <h2 id="modalTitulo" class="modal-title"></h2>
+            <p id="modalData" class="modal-date"></p>
+            
+            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden">
+                <i class="fab fa-youtube"></i> Assistir Palavra Completa
+            </a>
+            
+            <div id="modalTexto" class="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ================= VERIFICAÇÃO DE SESSÃO E SAÍDA =================
+        const usuarioLogado = sessionStorage.getItem('usuarioLogado');
+        
+        if (!usuarioLogado) {
+            window.location.href = 'index.html'; 
+        } else {
+            const primeiroNome = usuarioLogado.split(' ')[0];
+            document.getElementById('texto-boas-vindas').innerText = `Olá, ${primeiroNome}`;
+        }
+
+        function fazerLogoff() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+               // ================= CONFIGURAÇÕES DE BANCO E APIS =================
+        
+        // Criando o cliente oficial (O que resolve o erro de não aparecer os dados)
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        const URL_GOOGLE_SCRIPT = sessionStorage.getItem('urlApi') || "SUA_URL_DO_GOOGLE_AQUI";
+
+        // ================= MUDANÇA DE ABAS =================
+        function mudarAba(idAba, elementoBtn) {
+            document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
+            document.getElementById(idAba).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            elementoBtn.classList.add('active');
+        }
+
+        // ================= FUNÇÃO COPIAR PIX (NOVA) =================
+        function copiarPix() {
+            const input = document.getElementById('chavePix');
+            
+            // Seleciona o texto de forma compatível com celular
+            input.select();
+            input.setSelectionRange(0, 99999); 
+            
+            // Copia para a área de transferência
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('btnCopiarPix');
+                const htmlOriginal = btn.innerHTML;
+                
+                // Feedback Visual
+                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                btn.style.background = '#059669'; // Fica um verde mais escuro
+                
+                // Volta ao normal depois de 2 segundos
+                setTimeout(() => {
+                    btn.innerHTML = htmlOriginal;
+                    btn.style.background = '#10b981';
+                }, 2000);
+            }).catch(err => {
+                alert("Erro ao copiar. Copie manualmente!");
+            });
+        }
+
+        // ================= CARREGAMENTO DE DADOS INICIAL =================
+        window.onload = () => {
+            carregarLivrosBiblia(); 
+            carregarDados(null);
+        };
+
+      async function carregarDados(icon) {
+            if(icon) icon.classList.add('fa-spin');
+            
+            // 1. CARREGAR PALAVRAS (SUPABASE COM CLIENTE OFICIAL PARA RLS)
+            try {
+                const { data, error } = await supabaseClient
+                    .from('palavras')
+                    .select('*');
+
+                if (error) throw error;
+
+                if (data) {
+                    listaPalavras = data;
+                    
+                    // MANTENDO SUA LÓGICA ORIGINAL DE ORDENAÇÃO
+                    listaPalavras.sort((a, b) => {
+                        const pegarTempo = (d) => {
+                            if (!d) return 0;
+                            if (d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                            if (d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                            return new Date(d).getTime();
+                        };
+                        return pegarTempo(b.data) - pegarTempo(a.data);
+                    });
+                    
+                    renderizarPalavras(listaPalavras);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar palavras:", e);
+                document.getElementById('listaPalavras').innerHTML = '<p style="text-align:center; color:#dc3545;">Erro ao carregar palavras.</p>';
+            }
+
+            // 2. CARREGAR AGENDA (GOOGLE SCRIPT - MANTENDO SUA LÓGICA DE POST)
+            try {
+                const respostaAgenda = await fetch(URL_GOOGLE_SCRIPT, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "buscarAgenda" })
+                    // Sem Content-Type para evitar bloqueios de CORS no Google Apps Script
+                });
+                
+                const responseData = await respostaAgenda.json();
+                
+                if (responseData.status === "sucesso") {
+                    listaAgenda = responseData.dados;
+                    renderizarAgenda(listaAgenda);
+                } else {
+                    console.error("Erro do servidor:", responseData.mensagem);
+                    renderizarAgenda([]); 
+                }
+            } catch(e) {
+                console.error("Erro na comunicação com a Agenda:", e);
+                renderizarAgenda([]);
+            }
+
+            if(icon) icon.classList.remove('fa-spin');
+        }
+        // ================= RENDERIZAÇÃO =================
+        function renderizarPalavras(lista) {
+            const div = document.getElementById('listaPalavras');
+            div.innerHTML = '';
+            if(!lista || lista.length === 0) {
+                div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada no momento.</p>';
+                return;
+            }
+
+            lista.forEach((p, index) => {
+                let dF = p.data || '';
+                try {
+                    if(dF.includes('-')) { const dp = dF.split('-'); dF = `${dp[2]}/${dp[1]}/${dp[0]}`; }
+                } catch(e){}
+
+                const iconeYoutube = (p.link_youtube && p.link_youtube.trim() !== "") ? `<i class="fab fa-youtube" style="color: #ff0000; font-size: 1.2rem;"></i>` : "";
+
+                div.innerHTML += `
+                    <div class="word-list-item" onclick="abrirPalavra(${index})">
+                        <div>
+                            <div class="word-date"><i class="far fa-calendar-alt" style="color: var(--ouro-videira); margin-right: 5px;"></i> ${dF}</div>
+                            <div class="word-theme">${p.tema}</div>
+                        </div>
+                        <div>
+                            ${iconeYoutube}
+                            <i class="fas fa-chevron-right" style="color: #cbd5e1; margin-left: 10px;"></i>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderizarAgenda(dados) {
+            const div = document.getElementById('listaAgenda');
+            div.innerHTML = '';
+            
+            if(!dados || dados.length === 0) {
+                div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px; grid-column: 1 / -1;">Nenhum evento futuro agendado.</p>';
+                return;
+            }
+
+            // O GS retorna: [Data(0), Título(1), Descrição(2), Tipo(3), Categoria(4)]
+            dados.forEach(a => {
+                const dataEv = a[0] || '';
+                const tituloEv = a[1] || 'Evento';
+                const descEv = a[2] || '';
+                const tipoEv = a[3] || 'Agenda';
+
+                let corTipo = "#3b82f6";
+                if(tituloEv.toLowerCase().includes('culto')) corTipo = "#600018";
+                if(tituloEv.toLowerCase().includes('célula')) corTipo = "#10b981";
+
+                div.innerHTML += `
+                <div class="member-card">
+                    <div class="card-header">
+                        <strong style="font-size: 1.1rem; color: #1e293b;">${dataEv}</strong>
+                        <span class="cat-badge" style="background-color: ${corTipo}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;">${tipoEv}</span>
+                    </div>
+                    <div style="font-size: 1rem; color: #334155; margin-top: 8px; font-weight: 600;">
+                        <i class="far fa-calendar-check" style="color: ${corTipo}; margin-right: 5px;"></i> ${tituloEv}
+                    </div>
+                    ${descEv ? `<div style="margin-top: 10px; font-size: 0.85rem; color: #64748b; padding: 8px; background: #f8fafc; border-radius: 6px; border-left: 3px solid ${corTipo};">${descEv}</div>` : ''}
+                </div>`;
+            });
+        }
+
+        // ================= MODAL PALAVRAS =================
+        function abrirPalavra(index) {
+            const p = listaPalavras[index];
+            document.getElementById('modalTitulo').innerText = p.tema || '';
+            
+            let dataF = p.data || '';
+            try {
+                if(dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; }
+            } catch(e){}
+            
+            document.getElementById('modalData').innerText = dataF;
+            document.getElementById('modalTexto').innerText = p.texto || '';
+            
+            const btn = document.getElementById('btnLinkYoutube');
+            if (p.link_youtube && p.link_youtube.trim() !== "") {
+                btn.href = p.link_youtube;
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+                btn.href = "#";
+            }
+            
+            document.getElementById('modalPalavra').classList.remove('hidden');
+        }
+
+        function fecharModal(e) {
+            if(e === null || e.target === document.getElementById('modalPalavra')) {
+                document.getElementById('modalPalavra').classList.add('hidden');
+            }
+        }
+
+        // ================= SISTEMA DA BÍBLIA AUTOMATIZADO =================
+        const dadosBiblia = [
+            { id: "genesis", nome: "Gênesis", caps: 50 }, { id: "exodo", nome: "Êxodo", caps: 40 }, { id: "levitico", nome: "Levítico", caps: 27 }, { id: "numeros", nome: "Números", caps: 36 },
+            { id: "deuteronomio", nome: "Deuteronômio", caps: 34 }, { id: "josue", nome: "Josué", caps: 24 }, { id: "juizes", nome: "Juízes", caps: 21 }, { id: "rute", nome: "Rute", caps: 4 },
+            { id: "1samuel", nome: "1 Samuel", caps: 31 }, { id: "2samuel", nome: "2 Samuel", caps: 24 }, { id: "1reis", nome: "1 Reis", caps: 22 }, { id: "2reis", nome: "2 Reis", caps: 25 },
+            { id: "1cronicas", nome: "1 Crônicas", caps: 29 }, { id: "2cronicas", nome: "2 Crônicas", caps: 36 }, { id: "esdras", nome: "Esdras", caps: 10 }, { id: "neemias", nome: "Neemias", caps: 13 },
+            { id: "ester", nome: "Ester", caps: 10 }, { id: "jo", nome: "Jó", caps: 42 }, { id: "salmos", nome: "Salmos", caps: 150 }, { id: "proverbios", nome: "Provérbios", caps: 31 },
+            { id: "eclesiastes", nome: "Eclesiastes", caps: 12 }, { id: "cantares", nome: "Cantares", caps: 8 }, { id: "isaias", nome: "Isaías", caps: 66 }, { id: "jeremias", nome: "Jeremias", caps: 52 },
+            { id: "lamentacoes", nome: "Lamentações", caps: 5 }, { id: "ezequiel", nome: "Ezequiel", caps: 48 }, { id: "daniel", nome: "Daniel", caps: 12 }, { id: "oseias", nome: "Oseias", caps: 14 },
+            { id: "joel", nome: "Joel", caps: 3 }, { id: "amos", nome: "Amós", caps: 9 }, { id: "obadias", nome: "Obadias", caps: 1 }, { id: "jonas", nome: "Jonas", caps: 4 },
+            { id: "miqueias", nome: "Miqueias", caps: 7 }, { id: "naum", nome: "Naum", caps: 3 }, { id: "habacuque", nome: "Habacuque", caps: 3 }, { id: "sofonias", nome: "Sofonias", caps: 3 },
+            { id: "ageu", nome: "Ageu", caps: 2 }, { id: "zacarias", nome: "Zacarias", caps: 14 }, { id: "malaquias", nome: "Malaquias", caps: 4 }, { id: "mateus", nome: "Mateus", caps: 28 },
+            { id: "marcos", nome: "Marcos", caps: 16 }, { id: "lucas", nome: "Lucas", caps: 24 }, { id: "joao", nome: "João", caps: 21 }, { id: "atos", nome: "Atos", caps: 28 },
+            { id: "romanos", nome: "Romanos", caps: 16 }, { id: "1corintios", nome: "1 Coríntios", caps: 16 }, { id: "2corintios", nome: "2 Coríntios", caps: 13 }, { id: "galatas", nome: "Gálatas", caps: 6 },
+            { id: "efesios", nome: "Efésios", caps: 6 }, { id: "filipenses", nome: "Filipenses", caps: 4 }, { id: "colossenses", nome: "Colossenses", caps: 4 }, { id: "1tessalonicenses", nome: "1 Tessalonicenses", caps: 5 },
+            { id: "2tessalonicenses", nome: "2 Tessalonicenses", caps: 3 }, { id: "1timoteo", nome: "1 Timóteo", caps: 6 }, { id: "2timoteo", nome: "2 Timóteo", caps: 4 }, { id: "tito", nome: "Tito", caps: 3 },
+            { id: "filemon", nome: "Filemom", caps: 1 }, { id: "hebreus", nome: "Hebreus", caps: 13 }, { id: "tiago", nome: "Tiago", caps: 5 }, { id: "1pedro", nome: "1 Pedro", caps: 5 },
+            { id: "2pedro", nome: "2 Pedro", caps: 3 }, { id: "1joao", nome: "1 João", caps: 5 }, { id: "2joao", nome: "2 João", caps: 1 }, { id: "3joao", nome: "3 João", caps: 1 },
+            { id: "judas", nome: "Judas", caps: 1 }, { id: "apocalipse", nome: "Apocalipse", caps: 22 }
+        ];
+
+        function carregarLivrosBiblia() {
+            const select = document.getElementById('biblia-livro');
+            dadosBiblia.forEach(l => {
+                select.innerHTML += `<option value="${l.id}">${l.nome}</option>`;
+            });
+            atualizarCapitulos();
+        }
+
+        // ========== NOVA LÓGICA DA BÍBLIA (INTEGRADA COM MÓDULO) ==========
+const VERSOES_SUPORTADAS = {
+    msg: { nome: 'A Mensagem', tipo: 'capitulos' },  // mantém lógica antiga
+    nvi: { nome: 'NVI', tipo: 'unico' },
+    aa:  { nome: 'ARA', tipo: 'unico' },
+    acf: { nome: 'ACF', tipo: 'unico' }
+};
+
+let versaoAtual = 'msg'; // padrão
+
+// Inicializa os selects de livro com a versão padrão
+async function inicializarBiblia() {
+    await carregarLivrosBiblia(); // da versão "A Mensagem"
+    // Pré-carrega as outras em background (opcional)
+    // BibliaManager.carregarVersao('nvi').catch(e=>console.warn);
+}
+
+function mudarVersaoBiblia() {
+    const select = document.getElementById('biblia-versao');
+    versaoAtual = select.value;
+    localStorage.setItem('biblia_versao_usuario', versaoAtual);
+    
+    if (versaoAtual === 'msg') {
+        carregarLivrosBiblia(); // usa lógica antiga
+    } else {
+        // Carrega versão única via módulo
+        const selectLivro = document.getElementById('biblia-livro');
+        const selectCapitulo = document.getElementById('biblia-capitulo');
+        selectLivro.innerHTML = '<option>Carregando...</option>';
+        selectCapitulo.innerHTML = '<option>—</option>';
+        
+        BibliaManager.carregarVersao(versaoAtual).then(() => {
+            preencherLivrosDoModulo();
+            atualizarCapitulos();
+        }).catch(err => {
+            alert('Erro ao carregar versão: ' + err.message);
+        });
+    }
+}
+
+function preencherLivrosDoModulo() {
+    const select = document.getElementById('biblia-livro');
+    const livros = BibliaManager.getLivros();
+    select.innerHTML = '';
+    livros.forEach(livro => {
+        const option = document.createElement('option');
+        option.value = livro.id;
+        option.textContent = livro.nome;
+        select.appendChild(option);
+    });
+    // Restaura último livro lido (opcional)
+    const ultimoLivro = localStorage.getItem(`biblia_livro_${versaoAtual}`);
+    if (ultimoLivro) select.value = ultimoLivro;
+}
+
+function atualizarCapitulos() {
+    if (versaoAtual === 'msg') {
+        // lógica antiga para "A Mensagem"
+        const selectLivro = document.getElementById('biblia-livro');
+        const selectCapitulo = document.getElementById('biblia-capitulo');
+        const livro = dadosBiblia.find(l => l.id === selectLivro.value);
+        if (livro) {
+            let html = '';
+            for (let i = 1; i <= livro.caps; i++) html += `<option value="${i}">Capítulo ${i}</option>`;
+            selectCapitulo.innerHTML = html;
+            selectCapitulo.value = "1";
+            buscarCapituloBiblia();
+        }
+        return;
+    }
+    
+    // Para versões do módulo
+    const selectLivro = document.getElementById('biblia-livro');
+    const selectCapitulo = document.getElementById('biblia-capitulo');
+    const abrev = selectLivro.value;
+    if (!abrev) return;
+    
+    localStorage.setItem(`biblia_livro_${versaoAtual}`, abrev);
+    const numCaps = BibliaManager.getCapitulos(abrev);
+    let html = '';
+    for (let i = 1; i <= numCaps; i++) html += `<option value="${i}">Capítulo ${i}</option>`;
+    selectCapitulo.innerHTML = html;
+    
+    const ultimoCap = localStorage.getItem(`biblia_cap_${versaoAtual}_${abrev}`) || "1";
+    selectCapitulo.value = ultimoCap;
+    buscarCapituloBiblia();
+}
+
+async function buscarCapituloBiblia() {
+    const conteudo = document.getElementById('biblia-conteudo');
+    conteudo.innerHTML = "<p class='biblia-placeholder'><i class='fas fa-spinner fa-spin'></i> Carregando texto...</p>";
+    
+    if (versaoAtual === 'msg') {
+        // Sua função original para "A Mensagem" (busca no GitHub por arquivos separados)
+        const livroId = document.getElementById('biblia-livro').value;
+        const capitulo = document.getElementById('biblia-capitulo').value;
+        // ... (seu código existente)
+        return;
+    }
+    
+          // Para versões do módulo
+          const livroAbrev = document.getElementById('biblia-livro').value;
+          const capitulo = document.getElementById('biblia-capitulo').value;
+          const nomeLivro = document.getElementById('biblia-livro').selectedOptions[0].text;
+          
+          localStorage.setItem(`biblia_cap_${versaoAtual}_${livroAbrev}`, capitulo);
+          
+          try {
+              // Garante que a Bíblia está carregada
+              if (!BibliaManager.bibliaCarregada) {
+                  await BibliaManager.carregarVersao(versaoAtual);
+                  preencherLivrosDoModulo();
+              }
+              
+              const versiculos = BibliaManager.getVersiculos(livroAbrev, capitulo);
+              let html = `<h3 style="color: var(--ouro-videira); margin-bottom: 25px;">${nomeLivro} ${capitulo}</h3>`;
+              
+              versiculos.forEach(v => {
+                  html += `<p style="margin:0 0 12px; text-align:justify;"><sup style="color:var(--ouro-videira); font-weight:bold; margin-right:6px;">${v.number}</sup>${v.content}</p>`;
+              });
+              
+              conteudo.innerHTML = html;
+          } catch (e) {
+              conteudo.innerHTML = `<p style="color:#dc3545;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar o capítulo.</p>`;
+              console.error(e);
+          }
+      }
+      
+      // Inicialização ao carregar a página
+      window.addEventListener('DOMContentLoaded', () => {
+          // Restaura última versão usada
+          const savedVersao = localStorage.getItem('biblia_versao_usuario') || 'msg';
+          versaoAtual = savedVersao;
+          const selectVersao = document.getElementById('biblia-versao');
+          if (selectVersao) {
+              selectVersao.value = savedVersao;
+              if (savedVersao !== 'msg') {
+                  // Carrega a versão do módulo imediatamente
+                  BibliaManager.carregarVersao(savedVersao).then(() => {
+                      preencherLivrosDoModulo();
+                      atualizarCapitulos();
+                  }).catch(e => console.warn);
+              } else {
+                  carregarLivrosBiblia(); // sua função original
+              }
+          }
+      });
+
+      
+    </script>
+</body>
+</html>
