@@ -117,12 +117,146 @@
         .word-theme { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
 
         /* BÍBLIA */
-        .biblia-controles { background-color: var(--card-bg); padding: 15px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;}
-        .biblia-controles select { flex: 1; min-width: 100px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: 'Inter', sans-serif; background: #f8fafc; cursor: pointer; }
-        .biblia-texto-area { background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); line-height: 1.8; font-size: 1rem; color: #334155; }
+        .biblia-controles {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .versao-selector-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            min-width: 80px;
+            justify-content: center;
+        }
+        .versao-selector-btn i { font-size: 0.9rem; color: var(--text-light); }
+        .biblia-controles select {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+        .biblia-texto-area {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            line-height: 1.8;
+            font-size: 1rem;
+            color: #334155;
+        }
         .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 20px; }
 
-        /* MODAL DE PALAVRAS */
+        /* BOTÕES FLUTUANTES DE NAVEGAÇÃO (CAPÍTULOS) */
+        .nav-capitulo-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 15;
+        }
+        .nav-capitulo-btn {
+            background: rgba(96, 0, 24, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+        .nav-capitulo-btn:hover, .nav-capitulo-btn:active {
+            opacity: 1;
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+        .nav-capitulo-btn i { pointer-events: none; }
+
+        /* MODAL DE SELEÇÃO DE VERSÃO */
+        .modal-versao-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            backdrop-filter: blur(2px);
+        }
+        .modal-versao-overlay.hidden { display: none; }
+        .modal-versao-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px 20px 0 0;
+            padding: 25px;
+            animation: slideUp 0.3s ease-out;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        .modal-versao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-versao-header h3 { margin: 0; color: var(--primary); font-weight: 700; }
+        .modal-versao-close {
+            background: #f1f5f9;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        .versao-lista { display: flex; flex-direction: column; gap: 8px; }
+        .versao-item {
+            padding: 15px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .versao-item:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .versao-item.selecionada { background: var(--primary); color: white; }
+
+        /* MODAL DE PALAVRAS (existente) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
         .modal-overlay.hidden { display: none; }
         .modal-content { background: white; width: 100%; max-width: 800px; height: 85vh; border-radius: 20px 20px 0 0; padding: 25px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
@@ -176,9 +310,7 @@
             gap: 5px;
             font-size: 0.9rem;
         }
-        .pix-copy-box button:active {
-            background: #059669;
-        }
+        .pix-copy-box button:active { background: #059669; }
     </style>
 </head>
 <body>
@@ -205,16 +337,30 @@
             <p>Bem-vindo(a) à sua área exclusiva.</p>
         </div>
 
-        <!-- ABA BÍBLIA (NOVO MÓDULO UNIFICADO) -->
+        <!-- ABA BÍBLIA -->
         <div id="aba-biblia" class="tab-content active">
             <div class="biblia-controles">
-                <select id="biblia-versao"></select>
+                <!-- Seletor de versão por sigla (abre modal) -->
+                <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()">
+                    <span id="versaoSiglaAtual">MSG</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
                 <select id="biblia-livro" onchange="Biblia.onLivroChange()"></select>
                 <select id="biblia-capitulo" onchange="Biblia.onCapituloChange()"></select>
             </div>
             <div class="biblia-texto-area" id="biblia-conteudo">
                 <p class="biblia-placeholder"><i class="fas fa-spinner fa-spin"></i> Carregando texto...</p>
             </div>
+        </div>
+
+        <!-- Botões flutuantes de navegação de capítulo -->
+        <div class="nav-capitulo-container" id="navCapituloContainer">
+            <button class="nav-capitulo-btn" onclick="capituloAnterior()" title="Capítulo anterior">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="nav-capitulo-btn" onclick="capituloProximo()" title="Próximo capítulo">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
 
         <div id="aba-agenda" class="tab-content">
@@ -285,6 +431,18 @@
         </button>
     </nav>
 
+    <!-- MODAL SELEÇÃO DE VERSÃO -->
+    <div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
+        <div class="modal-versao-content" onclick="event.stopPropagation()">
+            <div class="modal-versao-header">
+                <h3>Selecione a Versão</h3>
+                <button class="modal-versao-close" onclick="fecharModalVersao()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="versao-lista" id="listaVersoes"></div>
+        </div>
+    </div>
+
+    <!-- MODAL PALAVRAS -->
     <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="fecharModal(null)"><i class="fas fa-times"></i></button>
@@ -300,7 +458,7 @@
     </div>
 
     <script>
-        // ================= VERIFICAÇÃO DE SESSÃO E SAÍDA =================
+        // ================= VERIFICAÇÃO DE SESSÃO =================
         const usuarioLogado = sessionStorage.getItem('usuarioLogado');
         
         if (!usuarioLogado) {
@@ -315,12 +473,9 @@
             window.location.href = 'index.html';
         }
 
-        // ================= CONFIGURAÇÕES DE BANCO E APIS =================
-        
+        // ================= CONFIGURAÇÕES =================
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         const URL_GOOGLE_SCRIPT = sessionStorage.getItem('urlApi') || "SUA_URL_DO_GOOGLE_AQUI";
-
-        // Variáveis globais para palavras (usadas no modal)
         let listaPalavras = [];
 
         // ================= MUDANÇA DE ABAS =================
@@ -330,45 +485,41 @@
             
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             elementoBtn.classList.add('active');
+
+            // Esconde botões de navegação se não for a aba da Bíblia
+            const navContainer = document.getElementById('navCapituloContainer');
+            if (idAba === 'aba-biblia') {
+                navContainer.style.display = 'flex';
+            } else {
+                navContainer.style.display = 'none';
+            }
         }
 
         // ================= COPIAR PIX =================
-        function copiarPix() {
+        function copiarPix() { /* (inalterado) */
             const input = document.getElementById('chavePix');
             input.select();
             input.setSelectionRange(0, 99999); 
-            
             navigator.clipboard.writeText(input.value).then(() => {
                 const btn = document.getElementById('btnCopiarPix');
-                const htmlOriginal = btn.innerHTML;
-                
                 btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
                 btn.style.background = '#059669';
-                
                 setTimeout(() => {
-                    btn.innerHTML = htmlOriginal;
+                    btn.innerHTML = '<i class="far fa-copy"></i> Copiar';
                     btn.style.background = '#10b981';
                 }, 2000);
-            }).catch(err => {
-                alert("Erro ao copiar. Copie manualmente!");
-            });
+            }).catch(err => alert("Erro ao copiar. Copie manualmente!"));
         }
 
-        // ================= CARREGAMENTO DE DADOS INICIAL =================
+        // ================= CARREGAMENTO DE DADOS =================
         async function carregarDados(icon) {
             if(icon) icon.classList.add('fa-spin');
             
-            // 1. CARREGAR PALAVRAS (SUPABASE)
             try {
-                const { data, error } = await supabaseClient
-                    .from('palavras')
-                    .select('*');
-
+                const { data, error } = await supabaseClient.from('palavras').select('*');
                 if (error) throw error;
-
                 if (data) {
                     listaPalavras = data;
-                    
                     listaPalavras.sort((a, b) => {
                         const pegarTempo = (d) => {
                             if (!d) return 0;
@@ -378,38 +529,146 @@
                         };
                         return pegarTempo(b.data) - pegarTempo(a.data);
                     });
-                    
                     renderizarPalavras(listaPalavras);
                 }
             } catch (e) {
-                console.error("Erro ao carregar palavras:", e);
+                console.error(e);
                 document.getElementById('listaPalavras').innerHTML = '<p style="text-align:center; color:#dc3545;">Erro ao carregar palavras.</p>';
             }
 
-            // 2. CARREGAR AGENDA (GOOGLE SCRIPT)
             try {
-                const respostaAgenda = await fetch(URL_GOOGLE_SCRIPT, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "buscarAgenda" })
-                });
-                
+                const respostaAgenda = await fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify({ action: "buscarAgenda" }) });
                 const responseData = await respostaAgenda.json();
-                
-                if (responseData.status === "sucesso") {
-                    renderizarAgenda(responseData.dados);
-                } else {
-                    console.error("Erro do servidor:", responseData.mensagem);
-                    renderizarAgenda([]); 
-                }
-            } catch(e) {
-                console.error("Erro na comunicação com a Agenda:", e);
-                renderizarAgenda([]);
-            }
+                if (responseData.status === "sucesso") renderizarAgenda(responseData.dados);
+                else renderizarAgenda([]);
+            } catch(e) { console.error(e); renderizarAgenda([]); }
 
             if(icon) icon.classList.remove('fa-spin');
         }
 
-        // ================= RENDERIZAÇÃO =================
+        function renderizarPalavras(lista) { /* (inalterado) */ }
+        function renderizarAgenda(dados) { /* (inalterado) */ }
+        function abrirPalavra(index) { /* (inalterado) */ }
+        function fecharModal(e) { /* (inalterado) */ }
+
+        // ================= SELEÇÃO DE VERSÃO (MODAL) =================
+        let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
+        const siglasVersoes = { msg: 'MSG', nvi: 'NVI', aa: 'ARA', acf: 'ACF', ntlh: 'NTLH' };
+        const nomesCompletos = {
+            msg: 'A Mensagem',
+            nvi: 'Nova Versão Internacional',
+            aa: 'Almeida Revista e Atualizada',
+            acf: 'Almeida Corrigida Fiel',
+            ntlh: 'Nova Tradução na Linguagem de Hoje'
+        };
+
+        function atualizarBotaoVersao() {
+            document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada.toUpperCase();
+        }
+
+        function abrirModalVersao() {
+            const modal = document.getElementById('modalVersao');
+            const listaDiv = document.getElementById('listaVersoes');
+            listaDiv.innerHTML = '';
+            Object.entries(nomesCompletos).forEach(([id, nome]) => {
+                const item = document.createElement('div');
+                item.className = 'versao-item' + (id === versaoSelecionada ? ' selecionada' : '');
+                item.innerHTML = `${nome} <span style="float:right; opacity:0.7;">${siglasVersoes[id]}</span>`;
+                item.onclick = () => selecionarVersao(id);
+                listaDiv.appendChild(item);
+            });
+            modal.classList.remove('hidden');
+        }
+
+        function fecharModalVersao(e) {
+            if (!e || e.target === document.getElementById('modalVersao')) {
+                document.getElementById('modalVersao').classList.add('hidden');
+            }
+        }
+
+        async function selecionarVersao(id) {
+            versaoSelecionada = id;
+            localStorage.setItem('biblia_versao', id);
+            atualizarBotaoVersao();
+            fecharModalVersao();
+            if (typeof Biblia !== 'undefined') {
+                await Biblia.mudarVersao(id);
+            }
+        }
+
+        // ================= NAVEGAÇÃO DE CAPÍTULOS =================
+        function capituloAnterior() {
+            const selectCapitulo = document.getElementById('biblia-capitulo');
+            const currentVal = parseInt(selectCapitulo.value);
+            if (currentVal > 1) {
+                selectCapitulo.value = currentVal - 1;
+                if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
+            } else {
+                // Tenta mudar para livro anterior, último capítulo
+                const selectLivro = document.getElementById('biblia-livro');
+                const currentLivroIndex = selectLivro.selectedIndex;
+                if (currentLivroIndex > 0) {
+                    selectLivro.selectedIndex = currentLivroIndex - 1;
+                    if (typeof Biblia !== 'undefined') {
+                        Biblia.onLivroChange();
+                        // Aguarda o carregamento dos capítulos e seleciona o último
+                        setTimeout(() => {
+                            const selectCapitulo = document.getElementById('biblia-capitulo');
+                            selectCapitulo.value = selectCapitulo.options.length;
+                            Biblia.onCapituloChange();
+                        }, 100);
+                    }
+                }
+            }
+        }
+
+        function capituloProximo() {
+            const selectCapitulo = document.getElementById('biblia-capitulo');
+            const currentVal = parseInt(selectCapitulo.value);
+            const max = selectCapitulo.options.length;
+            if (currentVal < max) {
+                selectCapitulo.value = currentVal + 1;
+                if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
+            } else {
+                // Próximo livro, capítulo 1
+                const selectLivro = document.getElementById('biblia-livro');
+                if (selectLivro.selectedIndex < selectLivro.options.length - 1) {
+                    selectLivro.selectedIndex = selectLivro.selectedIndex + 1;
+                    if (typeof Biblia !== 'undefined') {
+                        Biblia.onLivroChange();
+                        setTimeout(() => {
+                            document.getElementById('biblia-capitulo').value = 1;
+                            Biblia.onCapituloChange();
+                        }, 100);
+                    }
+                }
+            }
+        }
+
+        // ================= INICIALIZAÇÃO =================
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Inicializa a Bíblia
+            if (typeof Biblia !== 'undefined') {
+                await Biblia.inicializar();
+                // Sincroniza a versão do localStorage com o módulo e botão
+                const saved = localStorage.getItem('biblia_versao');
+                if (saved && saved !== Biblia.getVersaoAtiva()) {
+                    await Biblia.mudarVersao(saved);
+                }
+                versaoSelecionada = Biblia.getVersaoAtiva();
+                atualizarBotaoVersao();
+            } else {
+                console.error("Módulo Biblia não encontrado.");
+            }
+
+            // Carrega dados iniciais
+            carregarDados(null);
+            
+            // Garante que os botões de navegação estejam visíveis apenas na aba Bíblia
+            document.getElementById('navCapituloContainer').style.display = 'flex';
+        });
+
+        // (As funções renderizarPalavras, renderizarAgenda, abrirPalavra, fecharModal estão mantidas como no original)
         function renderizarPalavras(lista) {
             const div = document.getElementById('listaPalavras');
             div.innerHTML = '';
@@ -417,25 +676,17 @@
                 div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma palavra cadastrada.</p>';
                 return;
             }
-
             lista.forEach((p, index) => {
                 let dF = p.data || '';
-                try {
-                    if(dF.includes('-')) { const dp = dF.split('-'); dF = `${dp[2]}/${dp[1]}/${dp[0]}`; }
-                } catch(e){}
-
+                try { if(dF.includes('-')) { const dp = dF.split('-'); dF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
                 const iconeYoutube = (p.link_youtube && p.link_youtube.trim() !== "") ? `<i class="fab fa-youtube" style="color: #ff0000; font-size: 1.2rem;"></i>` : "";
-
                 div.innerHTML += `
                     <div class="word-list-item" onclick="abrirPalavra(${index})">
                         <div>
                             <div class="word-date"><i class="far fa-calendar-alt" style="color: var(--ouro-videira); margin-right: 5px;"></i> ${dF}</div>
                             <div class="word-theme">${p.tema}</div>
                         </div>
-                        <div>
-                            ${iconeYoutube}
-                            <i class="fas fa-chevron-right" style="color: #cbd5e1; margin-left: 10px;"></i>
-                        </div>
+                        <div>${iconeYoutube}<i class="fas fa-chevron-right" style="color: #cbd5e1; margin-left: 10px;"></i></div>
                     </div>`;
             });
         }
@@ -443,27 +694,23 @@
         function renderizarAgenda(dados) {
             const div = document.getElementById('listaAgenda');
             div.innerHTML = '';
-            
             if(!dados || dados.length === 0) {
                 div.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px; grid-column: 1 / -1;">Nenhum evento futuro agendado.</p>';
                 return;
             }
-
             dados.forEach(a => {
                 const dataEv = a[0] || '';
                 const tituloEv = a[1] || 'Evento';
                 const descEv = a[2] || '';
                 const tipoEv = a[3] || 'Agenda';
-
                 let corTipo = "#3b82f6";
                 if(tituloEv.toLowerCase().includes('culto')) corTipo = "#600018";
                 if(tituloEv.toLowerCase().includes('célula')) corTipo = "#10b981";
-
                 div.innerHTML += `
                 <div class="member-card">
                     <div class="card-header">
                         <strong style="font-size: 1.1rem; color: #1e293b;">${dataEv}</strong>
-                        <span class="cat-badge" style="background-color: ${corTipo}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;">${tipoEv}</span>
+                        <span style="background-color: ${corTipo}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;">${tipoEv}</span>
                     </div>
                     <div style="font-size: 1rem; color: #334155; margin-top: 8px; font-weight: 600;">
                         <i class="far fa-calendar-check" style="color: ${corTipo}; margin-right: 5px;"></i> ${tituloEv}
@@ -473,19 +720,13 @@
             });
         }
 
-        // ================= MODAL PALAVRAS =================
         function abrirPalavra(index) {
             const p = listaPalavras[index];
             document.getElementById('modalTitulo').innerText = p.tema || '';
-            
             let dataF = p.data || '';
-            try {
-                if(dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; }
-            } catch(e){}
-            
+            try { if(dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
             document.getElementById('modalData').innerText = dataF;
             document.getElementById('modalTexto').innerText = p.texto || '';
-            
             const btn = document.getElementById('btnLinkYoutube');
             if (p.link_youtube && p.link_youtube.trim() !== "") {
                 btn.href = p.link_youtube;
@@ -494,7 +735,6 @@
                 btn.classList.add('hidden');
                 btn.href = "#";
             }
-            
             document.getElementById('modalPalavra').classList.remove('hidden');
         }
 
@@ -503,19 +743,6 @@
                 document.getElementById('modalPalavra').classList.add('hidden');
             }
         }
-
-        // ================= INICIALIZAÇÃO GERAL =================
-        window.addEventListener('DOMContentLoaded', () => {
-            // Inicializa a Bíblia (módulo unificado)
-            if (typeof Biblia !== 'undefined') {
-                Biblia.inicializar().catch(console.error);
-            } else {
-                console.error("Módulo Biblia não encontrado. Verifique se biblia.js foi carregado.");
-            }
-
-            // Carrega os demais dados (agenda e palavras)
-            carregarDados(null);
-        });
     </script>
 </body>
 </html>
