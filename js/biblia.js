@@ -19,17 +19,17 @@ const Biblia = (function() {
             baseUrl: 'https://raw.githubusercontent.com/videirajatai/testes/main/biblia'
         },
         nvi: {
-            nome: 'Nova Versão Internacional',
+            nome: 'NVI - Nova Versão Internacional',
             tipo: 'unico',
             url: 'https://raw.githubusercontent.com/videirajatai/sistema/refs/heads/main/biblias/nvi.json'
         },
         aa: {
-            nome: 'Almeida Revista e Atualizada',
+            nome: 'ARA - Almeida Revista e Atualizada',
             tipo: 'unico',
             url: 'https://raw.githubusercontent.com/videirajatai/sistema/refs/heads/main/biblias/aa.json'
         },
         acf: {
-            nome: 'Almeida Corrigida Fiel',
+            nome: 'ACF - Almeida Corrigida Fiel',
             tipo: 'unico',
             url: 'https://raw.githubusercontent.com/videirajatai/sistema/refs/heads/main/biblias/acf.json'
         }
