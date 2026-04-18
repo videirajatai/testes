@@ -189,13 +189,13 @@
     }
 }
 
-/* Botões flutuantes de navegação (capítulo) */
+/* Botões flutuantes de navegação (capítulo) - ajuste de posição */
 .biblia-floating-nav {
     position: absolute;
-    bottom: 20px;
+    bottom: 40px;          /* Aumentei de 20px para 90px */
     right: 20px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse; /* Inverte a ordem: Próximo em cima, Anterior embaixo */
     gap: 10px;
     z-index: 15;
 }
@@ -382,7 +382,7 @@
       </div>
 
       <button onclick="abrirBiblia()" class="btn-biblia-destaque">
-        <i class="fas fa-bible"></i>Bíblia A Mensagem
+        <i class="fas fa-bible"></i>Abrir Bíblia
       </button>
 
       <div class="nav-menu">
