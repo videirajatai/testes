@@ -761,13 +761,13 @@ async function baixarPalavraWord() {
 
         // ================= SELEÇÃO DE VERSÃO (MODAL) =================
         let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
-        const siglasVersoes = { msg: 'MSG', nvi: 'NVI', aa: 'ARA', acf: 'ACF', ntlh: 'NTLH' };
+        const siglasVersoes = { msg: 'MSGPT', nvi: 'NVI', aa: 'ARA', acf: 'ACF', ntlh: 'NTLH' };
         const nomesCompletos = {
             msg: 'A Mensagem',
             nvi: 'Nova Versão Internacional',
             aa: 'Almeida Revista e Atualizada',
             acf: 'Almeida Corrigida Fiel',
-            ntlh: 'Nova Trad. na Linguagem de Hoje'
+            ntlh: 'Nova Trad. na Ling. de Hoje'
         };
 
         function atualizarBotaoVersao() {
