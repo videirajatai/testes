@@ -7,6 +7,9 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bibliotecas para geração direta de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Módulo centralizado da Bíblia -->
     <script src="js/biblia.js"></script>
@@ -307,6 +310,11 @@
         }
         .modal-download { color: var(--primary); }
         .modal-download:hover, .modal-close:hover { background: var(--primary); color: white; }
+
+        .modal-download.loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
 
         .modal-title { font-size: 1.5rem; color: var(--primary); font-weight: 800; margin-bottom: 5px; margin-top: 10px; padding-right: 30px;}
         .modal-date { color: var(--text-light); font-size: 0.9rem; margin-bottom: 20px; }
@@ -688,10 +696,63 @@
             }
         }
 
-        function baixarPalavraPDF() {
-            if (!palavraAtual) return;
-            window.print();
+        // ================= FUNÇÃO DE DOWNLOAD DIRETO DE PDF =================
+async function baixarPalavraPDF() {
+    if (!palavraAtual) return;
+    
+    const btn = document.querySelector('.modal-download');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.classList.add('loading');
+    
+    try {
+        // Elemento a ser capturado (todo o conteúdo do modal)
+        const element = document.querySelector('.modal-content');
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const width = imgWidth * ratio;
+        const height = imgHeight * ratio;
+        
+        let position = 0;
+        let remainingHeight = height;
+        
+        while (remainingHeight > 0) {
+            pdf.addImage(imgData, 'PNG', 0, position, width, height);
+            remainingHeight -= pdfHeight;
+            position -= pdfHeight;
+            if (remainingHeight > 0) {
+                pdf.addPage();
+            }
         }
+        
+        const nomeArquivo = `${palavraAtual.tema || 'palavra'}_${palavraAtual.data || ''}.pdf`.replace(/\s+/g, '_');
+        pdf.save(nomeArquivo);
+        
+    } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        alert('Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+        btn.innerHTML = originalHTML;
+        btn.classList.remove('loading');
+    }
+}
 
         // ================= SELEÇÃO DE VERSÃO (MODAL) =================
         let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
