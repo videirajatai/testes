@@ -214,35 +214,43 @@
           flex-wrap: nowrap;
       }
       .versao-selector-btn {
-          background: white;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          padding: 10px 12px;
-          font-family: 'Inter', sans-serif;
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: var(--primary);
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          cursor: pointer;
-          width: 80px;
-          justify-content: center;
-          white-space: nowrap;
-      }
-      .biblia-controles select {
-          flex: 1;
-          min-width: 0;
-          padding: 10px 8px;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          outline: none;
-          font-family: 'Inter', sans-serif;
-          background: white;
-          cursor: pointer;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-      }
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    height: 42px; /* Altura fixa ao invés de padding vertical */
+    padding: 0 12px;
+    box-sizing: border-box; /* Garante que todos tenham a mesma caixa */
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    width: 80px;
+    justify-content: center;
+    white-space: nowrap;
+    margin: 0; /* Prevenção contra estilos padrão do navegador */
+}
+
+.biblia-controles select {
+    flex: 1;
+    min-width: 0;
+    height: 42px; /* Mesma altura do botão */
+    padding: 0 8px;
+    margin: 0; /* ISSO MATA O MARGIN-BOTTOM GLOBAL E ALINHA TUDO! */
+    box-sizing: border-box; /* Garante que todos tenham a mesma caixa */
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    background: white;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+      
       @media (max-width: 380px) {
           .versao-selector-btn { width: 70px; padding: 10px 6px; font-size: 0.8rem; }
           .biblia-controles select { padding: 10px 5px; font-size: 0.85rem; }
@@ -724,8 +732,8 @@
             <p class="biblia-placeholder">Selecione o livro e o capítulo para começar a leitura.</p>
         </div>
         <div class="biblia-floating-nav">
-            <button class="nav-capitulo-btn" onclick="capituloProximo()" title="Próximo capítulo"><i class="fas fa-chevron-right"></i></button>
             <button class="nav-capitulo-btn" onclick="capituloAnterior()" title="Capítulo anterior"><i class="fas fa-chevron-left"></i></button>
+            <button class="nav-capitulo-btn" onclick="capituloProximo()" title="Próximo capítulo"><i class="fas fa-chevron-right"></i></button>            
         </div>
     </div>
 
