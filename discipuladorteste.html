@@ -734,7 +734,8 @@
         }
         const check = (val) => (String(val).toLowerCase() === 'sim' || val === true) ? 'active' : '';
         lista.forEach(m => {
-            const telClean = (m.telefone || '').replace(/\D/g, '');
+            const telefoneStr = String(m.telefone ?? '');
+            const telClean = telefoneStr.replace(/\D/g, '');        
             const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : '';
             grid.innerHTML += `
                 <div class="member-card">
@@ -899,8 +900,8 @@
             const nome = m.nome || 'Sem Nome';
             const celula = m.celula || '-';
             const categoria = m.tipo || 'Frequentador';
-            const tel = String(m.telefone || '');
-            const telClean = tel.replace(/\D/g, '');
+            const telefoneStr = String(m.telefone ?? '');
+            const telClean = telefoneStr.replace(/\D/g, '');
             const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
             const nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
             const acoes = isArquivado
