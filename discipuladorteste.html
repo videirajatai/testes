@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel Discipulador - Videira Jataí</title>
@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="config.js"></script>
-    <!-- Módulo unificado da Bíblia -->
     <script src="js/biblia.js"></script>
 
     <link rel="icon" type="image/png" href="logo.png">
@@ -23,281 +22,262 @@
     <link rel="manifest" href="manifest.json">
     
     <style>
-      /* --- ESTILOS ESPECÍFICOS DO PAINEL DISCIPULADOR --- */
-      .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+        /* ESTILOS (mantidos do original, com adição de .btn-add-member) */
+        :root {
+            --primary: #600018;
+            --primary-light: #7a0020;
+            --accent: #b58900;
+            --ouro-videira: #D4AF37;
+            --ouro-escuro: #b5952f;
+            --success-text: #0f5132;
+            --success-bg: #d1e7dd;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #f8fafc;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --radius: 16px;
+        }
 
-      /* HEADER */
-      .header { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; border-left: 5px solid var(--primary); }
-      .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.1rem; }
-      .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
-      .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
+        * { box-sizing: border-box; margin: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: var(--text-main);
+            padding-bottom: 20px;
+        }
 
-      /* BOTÃO BÍBLIA DESTAQUE (não será mais usado, mas mantido para compatibilidade) */
-      .btn-biblia-destaque { width: 100%; background: linear-gradient(135deg, var(--ouro-videira), var(--ouro-escuro)); color: white; border: none; padding: 16px; border-radius: var(--radius); font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); margin-bottom: 20px; transition: 0.3s; }
-      .btn-biblia-destaque:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
+        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
 
-      /* MENU NAVEGAÇÃO */
-      .nav-menu { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-      .nav-btn { flex: 1 1 28%; min-width: 85px; padding: 12px; border: none; border-radius: 10px; background: white; color: var(--text-light); font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); font-size: 0.8rem; }
-      .nav-btn i { font-size: 1.1rem; }
-      .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128, 0, 32, 0.3); }
+        .header { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; border-left: 5px solid var(--primary); }
+        .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.1rem; }
+        .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
+        .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
 
-      /* CARDS DE CÉLULAS (MINHA REDE) */
-      .cell-card {
-          background: #fef9e8;
-          border-radius: var(--radius);
-          padding: 15px;
-          margin-bottom: 12px;
-          box-shadow: var(--shadow);
-          border-left: 4px solid var(--primary);
-          cursor: pointer;
-          transition: 0.2s;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-      }
-      .cell-card:hover {
-          transform: translateY(-2px);
-          background: #fff5e0;
-      }
-      .cell-info {
-          flex: 1;
-      }
-      .cell-nome {
-          font-weight: 700;
-          font-size: 1rem;
-          color: var(--text-main);
-      }
-      .cell-lider {
-          font-size: 0.8rem;
-          color: #92400e;
-          margin-top: 4px;
-      }
-      .badge-membros {
-          background: var(--primary);
-          color: white;
-          border-radius: 20px;
-          padding: 4px 12px;
-          font-size: 0.75rem;
-          font-weight: 600;
-      }
+        .nav-menu { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+        .nav-btn { flex: 1 1 28%; min-width: 85px; padding: 12px; border: none; border-radius: 10px; background: white; color: var(--text-light); font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); font-size: 0.8rem; }
+        .nav-btn i { font-size: 1.1rem; }
+        .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128, 0, 32, 0.3); }
 
-      /* FILTRO */
-      .filtro-lider {
-          background: white;
-          padding: 10px;
-          border-radius: 12px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-      }
-      .filtro-lider label {
-          font-size: 0.85rem;
-          color: var(--text-light);
-          font-weight: 600;
-      }
-      .filtro-lider select {
-          flex: 1;
-          padding: 8px;
-          border-radius: 8px;
-          border: 1px solid #ccc;
-      }
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; }
+        @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+        .member-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0; }
+        .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; text-transform: uppercase; }
+        .card-info { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+        .status-row { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+        .status-pill { flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px; border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600; white-space: nowrap; }
+        .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
+        .card-actions { display: flex; gap: 8px; margin-top: 5px; }
+        .btn-action { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+        .btn-edit { background: #e0f2fe; color: #0284c7; } .btn-edit:hover { background: #bae6fd; }
+        .btn-archive { background: #fee2e2; color: #b91c1c; } .btn-archive:hover { background: #fecaca; }
+        .btn-restore { background: #dcfce7; color: #166534; } .btn-restore:hover { background: #bbf7d0; }
+        .btn-zap { display: block; width: 100%; text-align: center; padding: 10px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
 
-      /* CARDS MEMBROS & AGENDA */
-      .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; }
-      @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
-      .member-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px; }
-      .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-      .card-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0; }
-      .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; text-transform: uppercase; }
-      .card-info { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
-      .status-row { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
-      .status-pill { flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px; border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600; white-space: nowrap; }
-      .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
-      
-      /* AÇÕES CARD */
-      .card-actions { display: flex; gap: 8px; margin-top: 5px; }
-      .btn-action { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
-      .btn-edit { background: #e0f2fe; color: #0284c7; } .btn-edit:hover { background: #bae6fd; }
-      .btn-archive { background: #fee2e2; color: #b91c1c; } .btn-archive:hover { background: #fecaca; }
-      .btn-restore { background: #dcfce7; color: #166534; } .btn-restore:hover { background: #bbf7d0; }
-      .btn-zap { display: block; width: 100%; text-align: center; padding: 10px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .table-clean { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid #ddd; }
+        .table-clean th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; }
+        .table-clean td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-size: 0.9rem; font-weight: 500; }
+        .btn-icon { background: #f1f5f9; border: none; padding: 8px; border-radius: 6px; color: #475569; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 
-      /* TABELA CELULAS (para visualização geral) */
-      .table-clean { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid #ddd; }
-      .table-clean th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; }
-      .table-clean td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-size: 0.9rem; font-weight: 500; }
-      .table-clean tr:nth-child(even) { background-color: #fcfcfc; }
-      .btn-icon { background: #f1f5f9; border: none; padding: 8px; border-radius: 6px; color: #475569; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-      .btn-icon:hover { background: #e2e8f0; color: var(--primary); }
+        .report-list-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border-left: 4px solid var(--primary); }
 
-      /* RELATÓRIOS LISTA (dentro do modal) */
-      .report-list-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border-left: 4px solid var(--primary); }
-      .report-list-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 100%; max-width: 800px; max-height: 85vh; border-radius: 20px 20px 0 0; padding: 25px 20px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        .btn-close-modal { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; z-index: 10; display: flex; align-items: center; justify-content: center;}
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--text-light); font-weight: 600; font-size: 0.85rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; outline: none; box-sizing: border-box; }
+        .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-add-member { background: var(--success-text); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+        
+        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .check-option { display: block; position: relative; cursor: pointer; }
+        .check-option input { position: absolute; opacity: 0; }
+        .checkmark { display: block; padding: 10px; text-align: center; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; color: #777; font-weight: 600; }
+        .check-option input:checked ~ .checkmark { background: var(--success-bg); color: var(--success-text); border-color: #badbcc; }
 
-      /* MODAIS GERAIS */
-      .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
-      .modal-content { background: white; width: 100%; max-width: 800px; max-height: 85vh; border-radius: 20px 20px 0 0; padding: 25px 20px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
-      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      .btn-close-modal { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; z-index: 10; display: flex; align-items: center; justify-content: center;}
-      
-      .form-group { margin-bottom: 15px; }
-      .form-group label { display: block; margin-bottom: 5px; color: var(--text-light); font-weight: 600; font-size: 0.85rem; }
-      .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; outline: none; box-sizing: border-box; }
-      .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-      
-      .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-      .check-option { display: block; position: relative; cursor: pointer; }
-      .check-option input { position: absolute; opacity: 0; }
-      .checkmark { display: block; padding: 10px; text-align: center; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; color: #777; font-weight: 600; }
-      .check-option input:checked ~ .checkmark { background: var(--success-bg); color: var(--success-text); border-color: #badbcc; }
+        .paper-report { background: #fff; border: 1px solid #e0e0e0; border-top: 4px solid var(--accent); padding: 20px; border-radius: 8px; }
+        .paper-header { text-align: center; padding-bottom: 15px; border-bottom: 1px dashed #ddd; margin-bottom: 15px; }
+        .paper-title { font-weight: 800; font-size: 1.1rem; color: var(--primary); display:block; }
+        .paper-date { font-size: 0.85rem; color: #777; }
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .role-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
+        .role-label { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px; }
+        .role-val { font-size: 0.9rem; font-weight: 600; color: #333; }
+        .attend-box { background: var(--success-bg); color: var(--success-text); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px solid #c3e6cb; }
+        .attend-num { font-size: 1.5rem; font-weight: 800; display: block; }
+        .attend-label { font-size: 0.8rem; font-weight: 600; opacity: 0.9; }
+        .list-present { font-size: 0.85rem; color: #555; line-height: 1.6; background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; }
+        .obs-box { margin-top: 15px; background: #fffbf0; padding: 15px; border-radius: 8px; color: #665c3b; font-size: 0.9rem; border: 1px solid #faeace; }
 
-      /* DETALHES DO RELATÓRIO */
-      .paper-report { background: #fff; border: 1px solid #e0e0e0; border-top: 4px solid var(--accent); padding: 20px; border-radius: 8px; }
-      .paper-header { text-align: center; padding-bottom: 15px; border-bottom: 1px dashed #ddd; margin-bottom: 15px; }
-      .paper-title { font-weight: 800; font-size: 1.1rem; color: var(--primary); display:block; }
-      .paper-date { font-size: 0.85rem; color: #777; }
-      .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-      .role-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
-      .role-label { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px; }
-      .role-val { font-size: 0.9rem; font-weight: 600; color: #333; }
-      .attend-box { background: var(--success-bg); color: var(--success-text); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px solid #c3e6cb; }
-      .attend-num { font-size: 1.5rem; font-weight: 800; display: block; }
-      .attend-label { font-size: 0.8rem; font-weight: 600; opacity: 0.9; }
-      .list-present { font-size: 0.85rem; color: #555; line-height: 1.6; background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; }
-      .obs-box { margin-top: 15px; background: #fffbf0; padding: 15px; border-radius: 8px; color: #665c3b; font-size: 0.9rem; border: 1px solid #faeace; }
+        /* BÍBLIA */
+        :root { --ouro-videira: #D4AF37; --ouro-escuro: #b5952f; }
+        .biblia-offcanvas { position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100vh; background-color: #ffffff; box-shadow: -5px 0 25px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+        .biblia-offcanvas.aberto { right: 0; }
+        #biblia-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1999; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .biblia-header { background-color: var(--ouro-videira); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .biblia-titulo-area { display: flex; align-items: center; gap: 10px; }
+        .biblia-header h2 { color: white; margin: 0; font-size: 1.2rem; font-weight: 700; }
+        .btn-fechar-biblia { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; margin: 0; }
+        .biblia-controles { padding: 15px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+        .versao-selector-btn { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; width: 80px; justify-content: center; white-space: nowrap; }
+        .biblia-controles select { flex: 1; min-width: 0; padding: 10px 8px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: 'Inter', sans-serif; background: white; cursor: pointer; text-overflow: ellipsis; white-space: nowrap; }
+        .biblia-floating-nav { position: absolute; bottom: 90px; right: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 15; }
+        .nav-capitulo-btn { background: rgba(96, 0, 24, 0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: white; border: none; border-radius: 40px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.2s ease; opacity: 0.7; }
+        .nav-capitulo-btn:active { opacity: 1; background: var(--primary); transform: scale(1.05); }
+        .biblia-texto-area { padding: 25px 20px; overflow-y: auto; flex: 1; line-height: 1.8; font-size: 1rem; color: #334155; position: relative; }
+        .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 50px; }
 
-      /* ESTILOS DA BÍBLIA */
-      :root { --ouro-videira: #D4AF37; --ouro-escuro: #b5952f; }
-      .biblia-offcanvas { position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100vh; background-color: #ffffff; box-shadow: -5px 0 25px rgba(0,0,0,0.1); z-index: 2000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
-      .biblia-offcanvas.aberto { right: 0; }
-      #biblia-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1999; display: none; opacity: 0; transition: opacity 0.3s ease; }
-      .biblia-header { background-color: var(--ouro-videira); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-      .biblia-titulo-area { display: flex; align-items: center; gap: 10px; }
-      .biblia-header h2 { color: white; margin: 0; font-size: 1.2rem; font-weight: 700; }
-      .btn-fechar-biblia { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; margin: 0; }
-      .biblia-controles { padding: 15px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
-      .versao-selector-btn { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; width: 80px; justify-content: center; white-space: nowrap; }
-      .biblia-controles select { flex: 1; min-width: 0; padding: 10px 8px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: 'Inter', sans-serif; background: white; cursor: pointer; text-overflow: ellipsis; white-space: nowrap; }
-      .biblia-floating-nav { position: absolute; bottom: 90px; right: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 15; }
-      .nav-capitulo-btn { background: rgba(96, 0, 24, 0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: white; border: none; border-radius: 40px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.2s ease; opacity: 0.7; }
-      .nav-capitulo-btn:active { opacity: 1; background: var(--primary); transform: scale(1.05); }
-      .biblia-texto-area { padding: 25px 20px; overflow-y: auto; flex: 1; line-height: 1.8; font-size: 1rem; color: #334155; position: relative; }
-      .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 50px; }
+        .modal-versao-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2100; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+        .modal-versao-overlay.hidden { display: none; }
+        .modal-versao-content { background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        .modal-versao-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-versao-header h3 { margin: 0; color: var(--primary); font-weight: 700; }
+        .modal-versao-close { background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; color: #64748b; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+        .versao-lista { display: flex; flex-direction: column; gap: 8px; }
+        .versao-item { padding: 15px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 500; display: flex; justify-content: space-between; transition: all 0.2s; }
+        .versao-item:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .versao-item.selecionada { background: var(--primary); color: white; }
 
-      /* Modal de versão */
-      .modal-versao-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2100; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
-      .modal-versao-overlay.hidden { display: none; }
-      .modal-versao-content { background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
-      .modal-versao-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-      .modal-versao-header h3 { margin: 0; color: var(--primary); font-weight: 700; }
-      .modal-versao-close { background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; color: #64748b; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
-      .versao-lista { display: flex; flex-direction: column; gap: 8px; }
-      .versao-item { padding: 15px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 500; display: flex; justify-content: space-between; transition: all 0.2s; }
-      .versao-item:hover { background: var(--primary); color: white; border-color: var(--primary); }
-      .versao-item.selecionada { background: var(--primary); color: white; }
+        .modal-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-download { background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #600018; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+        .modal-download:hover { background: var(--primary); color: white; }
+        .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; transition: background 0.2s; box-sizing: border-box; }
 
-      /* Ações do modal palavra (download TXT) */
-      .modal-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-      .modal-download { background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #600018; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
-      .modal-download:hover { background: var(--primary); color: white; }
-      .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; transition: background 0.2s; box-sizing: border-box; }
-      .btn-youtube:hover { background-color: #cc0000; }
-      .hidden { display: none !important; }
+        /* Cards de células (Minha Rede) */
+        .cell-card {
+            background: #fef9e8;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cell-card:hover { transform: translateY(-2px); background: #fff5e0; }
+        .cell-info { flex: 1; }
+        .cell-nome { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+        .cell-lider { font-size: 0.8rem; color: #92400e; margin-top: 4px; }
+        .badge-membros { background: var(--primary); color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
+
+        .filtro-lider { background: white; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .filtro-lider label { font-size: 0.85rem; color: var(--text-light); font-weight: 600; }
+        .filtro-lider select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+
+        .hidden { display: none !important; }
+        .modal-celula-full {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 3000;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // Verificação de autenticação e permissão (apenas discipulador, pastor ou admin)
-        (async () => {
-            const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
-            const { data: { user } } = await supabaseTemp.auth.getUser();
-            if (!user) { window.location.href = "index.html"; return; }
-            const { data: usuario } = await supabaseTemp.from('usuarios').select('categoria').eq('email', user.email).single();
-            const cat = (usuario?.categoria || "membro").toLowerCase();
-            const permitidos = ["discipulador", "pastor", "administrador"];
-            if (!permitidos.includes(cat)) {
-                alert("Acesso negado. Esta área é restrita a Discipuladores e Pastores.");
-                window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
-            }
-            sessionStorage.setItem('discipuladorEmail', user.email);
-        })();
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // Verificação de autenticação e permissão
+    (async () => {
+        const supabaseTemp = supabase.createClient(SB_URL, SB_KEY);
+        const { data: { user } } = await supabaseTemp.auth.getUser();
+        if (!user) { window.location.href = "index.html"; return; }
+        const { data: usuario } = await supabaseTemp.from('usuarios').select('categoria').eq('email', user.email).single();
+        const cat = (usuario?.categoria || "membro").toLowerCase();
+        const permitidos = ["discipulador", "pastor", "administrador"];
+        if (!permitidos.includes(cat)) {
+            alert("Acesso negado. Esta área é restrita a Discipuladores e Pastores.");
+            window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
+        }
+        sessionStorage.setItem('discipuladorEmail', user.email);
+    })();
+</script>
 
-    <div class="container">
-      
-      <div class="header">
+<div class="container">
+    <div class="header">
         <div style="display:flex; align-items:center; gap:12px;">
-          <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 110px;">
-          <h3>Painel Discipulador</h3>
+            <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 110px;">
+            <h3>Painel Discipulador</h3>
         </div>
         <div style="display:flex; align-items:center; gap: 15px;">
-          <button onclick="carregarTudo()" class="btn-refresh" title="Atualizar Dados"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
-          <button onclick="fazerLogout()" class="btn-refresh" style="color: #991b1b;" title="Sair do Sistema"><i class="fas fa-sign-out-alt"></i></button>
+            <button onclick="carregarTudo()" class="btn-refresh" title="Atualizar Dados"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+            <button onclick="fazerLogout()" class="btn-refresh" style="color: #991b1b;" title="Sair do Sistema"><i class="fas fa-sign-out-alt"></i></button>
         </div>
-      </div>
+    </div>
 
-      <!-- MENU DE NAVEGAÇÃO (Relatórios removido, Bíblia adicionada) -->
-      <div class="nav-menu">
+    <div class="nav-menu">
         <button onclick="mudarSecao('minha-rede')" class="nav-btn active" id="btn-minha-rede"><i class="fas fa-network-wired"></i> Minha Rede</button>
         <button onclick="mudarSecao('celulas')" class="nav-btn" id="btn-celulas"><i class="fas fa-church"></i> Células</button>
         <button onclick="mudarSecao('biblia')" class="nav-btn" id="btn-biblia"><i class="fas fa-bible"></i> Bíblia</button>
         <button onclick="mudarSecao('arquivos')" class="nav-btn" id="btn-arquivos"><i class="fas fa-archive"></i> Arquivos</button>
         <button onclick="mudarSecao('agenda')" class="nav-btn" id="btn-agenda"><i class="far fa-calendar-alt"></i> Agenda</button>
         <button onclick="mudarSecao('palavras')" class="nav-btn" id="btn-palavras"><i class="fas fa-book-open"></i> Palavras</button>
-      </div>
+    </div>
 
-      <!-- ================== SEÇÃO MINHA REDE ================== -->
-      <div id="secao-minha-rede">
+    <!-- SEÇÃO MINHA REDE -->
+    <div id="secao-minha-rede">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            <button onclick="abrirModalNovaCelula()" class="btn-add-member"><i class="fas fa-plus"></i> Nova Célula</button>
+        </div>
         <div class="filtro-lider">
-          <label><i class="fas fa-filter"></i> Filtrar por Líder:</label>
-          <select id="filtroLiderRede" onchange="filtrarCelulasRede()">
-            <option value="">Todos os Líderes</option>
-          </select>
+            <label><i class="fas fa-filter"></i> Filtrar por Líder:</label>
+            <select id="filtroLiderRede" onchange="filtrarCelulasRede()">
+                <option value="">Todos os Líderes</option>
+            </select>
         </div>
         <div id="listaCelulasRede"></div>
         <p id="nenhumaCelulaMsg" style="color:#999; text-align:center; display:none;">Nenhuma célula sob sua supervisão.</p>
-      </div>
+    </div>
 
-      <!-- ================== SEÇÃO CÉLULAS (VISUALIZAÇÃO GERAL) ================== -->
-      <div id="secao-celulas" class="hidden">
+    <!-- SEÇÃO CÉLULAS (VISUALIZAÇÃO GERAL) -->
+    <div id="secao-celulas" class="hidden">
         <h4 style="color: var(--primary); margin-top:0; margin-bottom: 15px;">Quadro de Células</h4>
         <div style="overflow-x:auto;">
-          <table class="table-clean" id="tabelaCelulas">
-            <thead><tr><th>Célula</th><th>Líder</th><th>Dia</th><th>✏️</th></tr></thead>
-            <tbody id="corpoCelulas"></tbody>
-          </table>
+            <table class="table-clean" id="tabelaCelulas">
+                <thead><tr><th>Célula</th><th>Líder</th><th>Dia</th><th>✏️</th></tr></thead>
+                <tbody id="corpoCelulas"></tbody>
+            </table>
         </div>
-      </div>
+    </div>
 
-      <!-- ================== SEÇÃO BÍBLIA ================== -->
-      <div id="secao-biblia" class="hidden">
-        <!-- A bíblia será aberta automaticamente ao clicar na aba, não precisa de conteúdo aqui -->
-      </div>
+    <!-- SEÇÃO BÍBLIA -->
+    <div id="secao-biblia" class="hidden"></div>
 
-      <!-- ================== SEÇÃO ARQUIVOS ================== -->
-      <div id="secao-arquivos" class="hidden">
+    <!-- SEÇÃO ARQUIVOS -->
+    <div id="secao-arquivos" class="hidden">
         <h4 style="color: #64748b; margin-top:0; margin-bottom: 15px;"><i class="fas fa-archive"></i> Membros Arquivados</h4>
         <div id="gridArquivos" class="member-grid"></div>
-      </div>
+    </div>
 
-      <!-- ================== SEÇÃO AGENDA ================== -->
-      <div id="secao-agenda" class="hidden">
+    <!-- SEÇÃO AGENDA -->
+    <div id="secao-agenda" class="hidden">
         <h4 style="color: var(--text-light); margin-top:0; margin-bottom: 15px;"><i class="far fa-calendar-alt"></i> Agenda da Igreja</h4>
         <div id="listaAgenda" class="member-grid"></div>
-      </div>
+    </div>
 
-      <!-- ================== SEÇÃO PALAVRAS ================== -->
-      <div id="secao-palavras" class="hidden">
-         <h4 style="color: var(--primary); margin-top:0; margin-bottom: 15px;"><i class="fas fa-book-open"></i> Palavras & Estudos</h4>
-         <div id="listaPalavras"><p style="text-align:center; color:#999;">Carregando...</p></div>
-      </div>
+    <!-- SEÇÃO PALAVRAS -->
+    <div id="secao-palavras" class="hidden">
+        <h4 style="color: var(--primary); margin-top:0; margin-bottom: 15px;"><i class="fas fa-book-open"></i> Palavras & Estudos</h4>
+        <div id="listaPalavras"><p style="text-align:center; color:#999;">Carregando...</p></div>
+    </div>
 
-      <!-- MODAL DE RELATÓRIO (detalhe) - reaproveitado do antigo -->
-      <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
+    <!-- MODAIS -->
+    <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
             <div class="paper-report" style="margin-top: 20px;">
@@ -313,19 +293,17 @@
                 <div class="obs-box" id="detalheRelObs">...</div>
             </div>
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL PARA LISTAR RELATÓRIOS DA CÉLULA -->
-      <div id="modalListaRelatorios" class="modal-overlay hidden" onclick="fecharModal('modalListaRelatorios')">
+    <div id="modalListaRelatorios" class="modal-overlay hidden" onclick="fecharModal('modalListaRelatorios')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="btn-close-modal" onclick="fecharModal('modalListaRelatorios')">&times;</button>
             <h3 style="color:var(--primary); margin-top:0;">Relatórios da Célula <span id="relatorioCelulaNome"></span></h3>
             <div id="listaRelatoriosCelula" style="max-height: 60vh; overflow-y: auto;"></div>
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL PALAVRA (COM DOWNLOAD TXT) -->
-      <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal('modalPalavra')">
+    <div id="modalPalavra" class="modal-overlay hidden" onclick="fecharModal('modalPalavra')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-actions">
                 <button class="modal-download" onclick="baixarPalavraTXT()" title="Baixar TXT"><i class="fas fa-download"></i></button>
@@ -336,10 +314,9 @@
             <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir no YouTube</a>
             <div id="modalTexto" style="line-height:1.6; color:#444; font-size:0.95rem; white-space:pre-wrap; margin-top:15px;"></div>
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL ADICIONAR MEMBRO (inalterado) -->
-      <div id="modalAdicionarMembro" class="modal-overlay hidden" onclick="fecharModal('modalAdicionarMembro')">
+    <div id="modalAdicionarMembro" class="modal-overlay hidden" onclick="fecharModal('modalAdicionarMembro')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="btn-close-modal" onclick="fecharModal('modalAdicionarMembro')">&times;</button>
             <h3 style="color:var(--primary); margin-top:10px; margin-bottom:20px;">Cadastrar Novo Membro</h3>
@@ -363,10 +340,9 @@
                 <button type="submit" id="btnSalvarNovoMembro" class="btn-save">Cadastrar Membro</button>
             </form>
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL EDITAR MEMBRO (inalterado) -->
-      <div id="modalEditarMembro" class="modal-overlay hidden" onclick="fecharModal('modalEditarMembro')">
+    <div id="modalEditarMembro" class="modal-overlay hidden" onclick="fecharModal('modalEditarMembro')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="btn-close-modal" onclick="fecharModal('modalEditarMembro')">&times;</button>
             <h3 style="color:var(--primary); margin-top:10px; margin-bottom:20px;">Editar Membro</h3>
@@ -391,13 +367,12 @@
                 <button type="submit" id="btnSalvarEdicaoMembro" class="btn-save">Salvar Alterações</button>
             </form>
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL EDITAR CÉLULA (inalterado) -->
-      <div id="modalEditarCelula" class="modal-overlay hidden" onclick="fecharModal('modalEditarCelula')">
+    <div id="modalEditarCelula" class="modal-overlay hidden" onclick="fecharModal('modalEditarCelula')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
-            <h3 style="color:var(--primary); margin-top:10px; margin-bottom:20px;">Editar Célula</h3>
+            <h3 style="color:var(--primary); margin-top:10px; margin-bottom:20px;" id="tituloModalCelula">Editar Célula</h3>
             <form id="formEditarCelula">
                 <input type="hidden" id="editCelulaId">
                 <div class="form-group"><label>Nome da Célula</label><input type="text" id="editCelulaNome" required></div>
@@ -407,573 +382,514 @@
                 <button type="submit" id="btnSalvarEdicaoCelula" class="btn-save">Salvar Célula</button>
             </form>
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL DA CÉLULA (TELA CHEIA) - COM BOTÃO DE RELATÓRIOS -->
-      <div id="modalCelula" class="modal-celula-full" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:3000; overflow-y:auto; padding:20px; box-sizing:border-box;">
+    <!-- MODAL DA CÉLULA (TELA CHEIA) -->
+    <div id="modalCelula" class="modal-celula-full">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--primary); padding-bottom:15px;">
             <h2 id="modalCelulaTitulo" style="margin:0; color:var(--primary);"></h2>
             <button class="btn-close-modal" onclick="fecharModalCelula()" style="position:static;">&times;</button>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-            <button class="btn-celula-action" onclick="abrirModalCadastroMembro()" style="flex:1; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; background:var(--success-text); color:white;"><i class="fas fa-plus"></i> Novo Membro</button>
-            <button class="btn-celula-action btn-apascentar-modal" onclick="abrirApascentar()" style="flex:1; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; background:#fef3c7; color:#92400e;"><i class="fas fa-hands-praying"></i> Apascentar</button>
-            <button class="btn-celula-action btn-relatorio-modal" onclick="abrirListaRelatoriosCelula()" style="flex:1; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; background:#e0e7ff; color:#1e40af;"><i class="fas fa-clipboard-list"></i> Ver Relatórios</button>
+            <button onclick="abrirModalCadastroMembro()" style="flex:1; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; background:var(--success-text); color:white;"><i class="fas fa-plus"></i> Novo Membro</button>
+            <button onclick="abrirApascentar()" style="flex:1; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; background:#fef3c7; color:#92400e;"><i class="fas fa-hands-praying"></i> Apascentar</button>
+            <button onclick="abrirListaRelatoriosCelula()" style="flex:1; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; background:#e0e7ff; color:#1e40af;"><i class="fas fa-clipboard-list"></i> Ver Relatórios</button>
         </div>
         <div id="gridMembrosCelulaModal" class="member-grid"></div>
-      </div>
+    </div>
 
-      <!-- OFF CANVAS DA BÍBLIA -->
-      <div id="biblia-overlay" onclick="fecharBiblia()"></div>
-      <div id="painel-biblia" class="biblia-offcanvas">
+    <!-- BÍBLIA -->
+    <div id="biblia-overlay" onclick="fecharBiblia()"></div>
+    <div id="painel-biblia" class="biblia-offcanvas">
         <div class="biblia-header">
             <div class="biblia-titulo-area"><i class="fas fa-bible" style="font-size: 1.2rem;"></i><h2>Bíblia</h2></div>
             <button class="btn-fechar-biblia" onclick="fecharBiblia()"><i class="fas fa-times"></i></button>
         </div>
         <div class="biblia-controles">
-            <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()">
-                <span id="versaoSiglaAtual">MSG</span><i class="fas fa-chevron-down"></i>
-            </button>
+            <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()"><span id="versaoSiglaAtual">MSG</span><i class="fas fa-chevron-down"></i></button>
             <select id="biblia-livro" onchange="Biblia.onLivroChange()"></select>
             <select id="biblia-capitulo" onchange="Biblia.onCapituloChange()"></select>
         </div>
-        <div id="biblia-conteudo" class="biblia-texto-area">
-            <p class="biblia-placeholder">Selecione o livro e o capítulo para começar a leitura.</p>
-        </div>
+        <div id="biblia-conteudo" class="biblia-texto-area"><p class="biblia-placeholder">Selecione o livro e o capítulo para começar a leitura.</p></div>
         <div class="biblia-floating-nav">
-            <button class="nav-capitulo-btn" onclick="capituloAnterior()" title="Capítulo anterior"><i class="fas fa-chevron-left"></i></button>
-            <button class="nav-capitulo-btn" onclick="capituloProximo()" title="Próximo capítulo"><i class="fas fa-chevron-right"></i></button>            
+            <button class="nav-capitulo-btn" onclick="capituloAnterior()"><i class="fas fa-chevron-left"></i></button>
+            <button class="nav-capitulo-btn" onclick="capituloProximo()"><i class="fas fa-chevron-right"></i></button>            
         </div>
-      </div>
+    </div>
 
-      <!-- MODAL DE SELEÇÃO DE VERSÃO -->
-      <div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
+    <div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
         <div class="modal-versao-content" onclick="event.stopPropagation()">
-            <div class="modal-versao-header">
-                <h3>Selecione a Versão</h3>
-                <button class="modal-versao-close" onclick="fecharModalVersao()"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-versao-header"><h3>Selecione a Versão</h3><button class="modal-versao-close" onclick="fecharModalVersao()"><i class="fas fa-times"></i></button></div>
             <div class="versao-lista" id="listaVersoes"></div>
         </div>
-      </div>
+    </div>
 
-    <script>
-      const API_URL = sessionStorage.getItem('urlApi');
-      const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-      let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [], listaPalavras = [], palavraAtual = null;
-      let celulasSupervisionadas = []; // células da rede do discipulador
-      let celulaAtiva = null; // célula atual no modal
-      let membrosDaCelulaAtiva = [];
+<script>
+    const API_URL = sessionStorage.getItem('urlApi');
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+    let dadosMembros = [], dadosCelulas = [], listaAgenda = [], dadosRelatorios = [], listaPalavras = [], palavraAtual = null;
+    let celulasSupervisionadas = [], celulaAtiva = null, membrosDaCelulaAtiva = [];
 
-      window.onload = carregarTudo;
+    // ========== FUNÇÕES GLOBAIS ==========
+    async function registrarLogAcao(acaoRealizada) {
+        const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+        const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+        const dataHoraAtual = new Date().toLocaleString('pt-BR');
+        try {
+            await fetch(`${SB_URL}/rest/v1/log`, {
+                method: 'POST',
+                headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada })
+            });
+        } catch (e) { console.error("Erro no log:", e); }
+    }
 
-      // ========== FUNÇÕES GLOBAIS ==========
-      async function registrarLogAcao(acaoRealizada) {
-          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
-          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
-          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
-          try {
-              await fetch(`${SB_URL}/rest/v1/log`, { method: 'POST', headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }, body: JSON.stringify({ datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada }) });
-          } catch (e) { console.error("Erro no log:", e); }
-      }
-
-      async function fetchGoogle(action, payload = {}) {
+    async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
-          try {
-              let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }) });
-              let json = await res.json();
-              if (json.status === "sucesso") { if (action === 'salvarAgenda') registrarLogAcao(`Cadastrou evento na agenda: ${payload.descricao}`); return json.dados || json.mensagem; }
-              else throw new Error(json.mensagem);
-          } catch(e) { throw e; }
-      }
+        try {
+            let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, payload }) });
+            let json = await res.json();
+            if (json.status === "sucesso") {
+                if (action === 'salvarAgenda') registrarLogAcao(`Cadastrou evento na agenda: ${payload.descricao}`);
+                return json.dados || json.mensagem;
+            } else throw new Error(json.mensagem);
+        } catch(e) { throw e; }
+    }
 
-      async function lerSupabase(tabela) { const { data, error } = await supabaseClient.from(tabela).select('*'); if (error) throw new Error(`Erro ao ler ${tabela}: ${error.message}`); return data; }
-      async function inserirSupabase(tabela, dados) { const { error } = await supabaseClient.from(tabela).insert([dados]); if (error) throw new Error(`Erro ao inserir: ${error.message}`); registrarLogAcao(`Criou item em ${tabela}: ${dados.nome || dados.tema || 'Registro'}`); return "Inserido com sucesso! 🚀"; }
-      async function atualizarSupabase(tabela, id, dados) { const { error } = await supabaseClient.from(tabela).update(dados).eq('id', id); if (error) throw new Error(`Erro ao atualizar: ${error.message}`); registrarLogAcao(`Editou item em ${tabela}: ${dados.nome || 'ID ' + id}`); return "Atualizado com sucesso! ✅"; }
+    async function lerSupabase(tabela) { const { data, error } = await supabaseClient.from(tabela).select('*'); if (error) throw new Error(`Erro ao ler ${tabela}: ${error.message}`); return data; }
+    async function inserirSupabase(tabela, dados) { const { error } = await supabaseClient.from(tabela).insert([dados]); if (error) throw new Error(`Erro ao inserir: ${error.message}`); registrarLogAcao(`Criou item em ${tabela}: ${dados.nome || dados.tema || 'Registro'}`); return "Inserido com sucesso!"; }
+    async function atualizarSupabase(tabela, id, dados) { const { error } = await supabaseClient.from(tabela).update(dados).eq('id', id); if (error) throw new Error(`Erro ao atualizar: ${error.message}`); registrarLogAcao(`Editou item em ${tabela}: ${dados.nome || 'ID ' + id}`); return "Atualizado com sucesso!"; }
 
-      // ========== CARREGAR TUDO (com células supervisionadas) ==========
-      async function carregarTudo() {
+    async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
         const discipuladorEmail = sessionStorage.getItem('discipuladorEmail');
-        
         try {
             dadosMembros = await lerSupabase('membros');
             dadosCelulas = await lerSupabase('celulas');
-            // Filtrar células onde supervisor_email é igual ao email do discipulador
-            // Nota: é necessário ter uma coluna 'supervisor_email' na tabela celulas. Se não existir, criar.
-            // Para compatibilidade, se não existir, pode usar lider_email? Não, melhor criar.
-            // Vamos assumir que existe. Caso contrário, o discipulador verá lista vazia.
+            // Filtra células onde supervisor_email é igual ao email do discipulador
             celulasSupervisionadas = dadosCelulas.filter(c => c.supervisor_email && c.supervisor_email.toLowerCase() === discipuladorEmail.toLowerCase());
-            
             renderizarCelulasRede(celulasSupervisionadas);
             renderizarCelulas(dadosCelulas);
             preencherSelects(dadosCelulas);
             renderizarMembrosEArquivos(dadosMembros);
         } catch (e) { console.error(e); }
-        
         try { dadosRelatorios = await lerSupabase('relatorios'); } catch(e) { console.error(e); }
         try { const agendaRes = await fetchGoogle('buscarAgenda'); listaAgenda = agendaRes || []; renderizarAgenda(listaAgenda); } catch(e) { renderizarAgenda([]); }
-        try { listaPalavras = await lerSupabase('palavras'); listaPalavras.sort((a,b)=> { const da = new Date(a.data), db = new Date(b.data); return db - da; }); renderizarPalavras(listaPalavras); } catch (e) { console.error(e); }
-        
+        try { listaPalavras = await lerSupabase('palavras'); listaPalavras.sort((a,b)=> new Date(b.data) - new Date(a.data)); renderizarPalavras(listaPalavras); } catch(e) { console.error(e); }
         if(icon) icon.classList.remove('fa-spin');
-      }
+    }
 
-      // ========== FUNÇÃO mudarSecao (com abertura automática da Bíblia) ==========
-      function mudarSecao(s) {
-         const secoes = ['minha-rede', 'celulas', 'biblia', 'arquivos', 'agenda', 'palavras'];
-         secoes.forEach(id => {
-            const el = document.getElementById('secao-'+id);
-            if (el) el.classList.add('hidden');
-         });
-         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-         const secaoAtiva = document.getElementById('secao-'+s);
-         if (secaoAtiva) secaoAtiva.classList.remove('hidden');
-         const btnAtivo = document.getElementById('btn-'+s);
-         if (btnAtivo) btnAtivo.classList.add('active');
+    function mudarSecao(s) {
+        const secoes = ['minha-rede','celulas','biblia','arquivos','agenda','palavras'];
+        secoes.forEach(id => document.getElementById('secao-'+id)?.classList.add('hidden'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('secao-'+s)?.classList.remove('hidden');
+        document.getElementById('btn-'+s)?.classList.add('active');
+        if (s === 'biblia') abrirBiblia();
+    }
 
-         if (s === 'biblia') {
-            abrirBiblia();
-         }
-      }
+    function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
 
-      function fecharModal(idModal) { document.getElementById(idModal).classList.add('hidden'); }
+    // ========== MINHA REDE ==========
+    function renderizarCelulasRede(celulas) {
+        const container = document.getElementById('listaCelulasRede');
+        container.innerHTML = '';
+        const filtroSelect = document.getElementById('filtroLiderRede');
+        filtroSelect.innerHTML = '<option value="">Todos os Líderes</option>';
+        if (!celulas || celulas.length === 0) {
+            document.getElementById('nenhumaCelulaMsg').style.display = 'block';
+            return;
+        }
+        document.getElementById('nenhumaCelulaMsg').style.display = 'none';
+        const lideresUnicos = [...new Set(celulas.map(c => c.lider).filter(l => l))];
+        lideresUnicos.forEach(lider => filtroSelect.innerHTML += `<option value="${lider}">${lider}</option>`);
+        window.celulasRedeCompleta = celulas;
+        filtrarCelulasRede();
+    }
 
-      // ========== RENDERIZAÇÃO DA MINHA REDE ==========
-      function renderizarCelulasRede(celulas) {
-          const container = document.getElementById('listaCelulasRede');
-          container.innerHTML = '';
-          const filtroSelect = document.getElementById('filtroLiderRede');
-          filtroSelect.innerHTML = '<option value="">Todos os Líderes</option>';
-          
-          if (!celulas || celulas.length === 0) {
-              document.getElementById('nenhumaCelulaMsg').style.display = 'block';
-              return;
-          }
-          document.getElementById('nenhumaCelulaMsg').style.display = 'none';
-          
-          // Coletar líderes únicos para o filtro
-          const lideresUnicos = [...new Set(celulas.map(c => c.lider).filter(l => l))];
-          lideresUnicos.forEach(lider => {
-              filtroSelect.innerHTML += `<option value="${lider}">${lider}</option>`;
-          });
-          
-          // Armazenar para filtro
-          window.celulasRedeCompleta = celulas;
-          filtrarCelulasRede();
-      }
-      
-      function filtrarCelulasRede() {
-          const filtro = document.getElementById('filtroLiderRede').value;
-          let celulasFiltradas = window.celulasRedeCompleta || [];
-          if (filtro) {
-              celulasFiltradas = celulasFiltradas.filter(c => c.lider === filtro);
-          }
-          const container = document.getElementById('listaCelulasRede');
-          container.innerHTML = '';
-          celulasFiltradas.forEach(cel => {
-              const card = document.createElement('div');
-              card.className = 'cell-card';
-              card.innerHTML = `
-                  <div class="cell-info">
-                      <div class="cell-nome">${cel.nome}</div>
-                      <div class="cell-lider"><i class="fas fa-user"></i> Líder: ${cel.lider || 'Não definido'}</div>
-                  </div>
-                  <div class="badge-membros">
-                      <i class="fas fa-chevron-right"></i>
-                  </div>
-              `;
-              card.onclick = () => abrirModalCelula(cel);
-              container.appendChild(card);
-          });
-      }
+    function filtrarCelulasRede() {
+        const filtro = document.getElementById('filtroLiderRede').value;
+        let celulasFiltradas = window.celulasRedeCompleta || [];
+        if (filtro) celulasFiltradas = celulasFiltradas.filter(c => c.lider === filtro);
+        const container = document.getElementById('listaCelulasRede');
+        container.innerHTML = '';
+        celulasFiltradas.forEach(cel => {
+            const card = document.createElement('div');
+            card.className = 'cell-card';
+            card.innerHTML = `<div class="cell-info"><div class="cell-nome">${cel.nome}</div><div class="cell-lider"><i class="fas fa-user"></i> Líder: ${cel.lider || 'Não definido'}</div></div><div class="badge-membros"><i class="fas fa-chevron-right"></i></div>`;
+            card.onclick = () => abrirModalCelula(cel);
+            container.appendChild(card);
+        });
+    }
 
-      // ========== MODAL DA CÉLULA (COM MEMBROS E RELATÓRIOS) ==========
-      async function abrirModalCelula(cel) {
-          celulaAtiva = cel;
-          document.getElementById('modalCelulaTitulo').innerText = cel.nome;
-          document.getElementById('modalCelula').style.display = 'block';
-          document.getElementById('cadastroModalCelulaHidden').value = cel.nome;
-          
-          await carregarMembrosDaCelula(cel.nome);
-          renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-      }
+    // ========== MODAL DA CÉLULA ==========
+    async function abrirModalCelula(cel) {
+        celulaAtiva = cel;
+        document.getElementById('modalCelulaTitulo').innerText = cel.nome;
+        document.getElementById('modalCelula').style.display = 'block';
+        document.getElementById('cadastroModalCelulaHidden').value = cel.nome;
+        await carregarMembrosDaCelula(cel.nome);
+        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+    }
 
-      function fecharModalCelula() {
-          document.getElementById('modalCelula').style.display = 'none';
-      }
+    function fecharModalCelula() { document.getElementById('modalCelula').style.display = 'none'; }
 
-      async function carregarMembrosDaCelula(nomeCelula) {
-          try {
-              const { data, error } = await supabaseClient
-                  .from('membros')
-                  .select('*')
-                  .eq('celula', nomeCelula)
-                  .eq('arquivado', 'Não');
-              if (error) throw error;
-              membrosDaCelulaAtiva = data || [];
-          } catch (e) {
-              console.error("Erro ao carregar membros:", e);
-              membrosDaCelulaAtiva = [];
-          }
-      }
+    async function carregarMembrosDaCelula(nomeCelula) {
+        try {
+            const { data, error } = await supabaseClient.from('membros').select('*').eq('celula', nomeCelula).eq('arquivado', 'Não');
+            if (error) throw error;
+            membrosDaCelulaAtiva = data || [];
+        } catch(e) { console.error(e); membrosDaCelulaAtiva = []; }
+    }
 
-      function renderizarMembrosCelulaModal(lista) {
-          const grid = document.getElementById('gridMembrosCelulaModal');
-          grid.innerHTML = '';
-          if (!lista.length) {
-              grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#999;">Nenhum membro cadastrado nesta célula.</p>';
-              return;
-          }
-          
-          const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
-          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
-          
-          lista.forEach(m => {
-              let nome = m.nome || 'Sem Nome';
-              let categoria = m.tipo || 'Frequentador';
-              let tel = String(m.telefone || '');
-              let telClean = tel.replace(/\D/g, '');
-              let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap" style="margin-top:10px;"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
-              let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
-              
-              grid.innerHTML += `
-                  <div class="member-card">
-                      <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge">${categoria}</span></div>
-                      <div class="card-info"><i class="fas fa-users"></i> ${celulaAtiva.nome} ${nasc}</div>
-                      <div class="status-row">
-                          <div class="status-pill ${check(m.batizado)}">Batismo</div><div class="status-pill ${check(m.cursao)}">Cursão</div><div class="status-pill ${check(m.ctl)}">CTL</div>
-                          <div class="status-pill ${check(m.encontro)}">Encontro</div><div class="status-pill ${check(m.seminario)}">Seminário</div><div class="status-pill ${check(m.dizimista)}">Dizimista</div>
-                      </div>
-                      <div class="card-actions">
-                          <button onclick="abrirEditarMembro('${m.id}')" class="btn-action btn-edit"><i class="fas fa-edit"></i> Editar</button>
-                          <button onclick="arquivarMembro('${m.id}')" class="btn-action btn-archive"><i class="fas fa-archive"></i> Arquivar</button>
-                      </div>
-                      ${btnZap}
-                  </div>`;
-          });
-      }
+    function renderizarMembrosCelulaModal(lista) {
+        const grid = document.getElementById('gridMembrosCelulaModal');
+        grid.innerHTML = '';
+        if (!lista.length) { grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#999;">Nenhum membro cadastrado nesta célula.</p>'; return; }
+        const check = (val) => (String(val).toLowerCase() === 'sim' || val === true) ? 'active' : '';
+        const formatData = (d) => { if(!d) return ''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+        lista.forEach(m => {
+            const nome = m.nome || 'Sem Nome';
+            const categoria = m.tipo || 'Frequentador';
+            const tel = String(m.telefone || '').replace(/\D/g, '');
+            const btnZap = tel.length > 8 ? `<a href="https://wa.me/55${tel}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
+            const nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+            grid.innerHTML += `
+                <div class="member-card">
+                    <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge">${categoria}</span></div>
+                    <div class="card-info"><i class="fas fa-users"></i> ${celulaAtiva.nome} ${nasc}</div>
+                    <div class="status-row">
+                        <div class="status-pill ${check(m.batizado)}">Batismo</div><div class="status-pill ${check(m.cursao)}">Cursão</div><div class="status-pill ${check(m.ctl)}">CTL</div>
+                        <div class="status-pill ${check(m.encontro)}">Encontro</div><div class="status-pill ${check(m.seminario)}">Seminário</div><div class="status-pill ${check(m.dizimista)}">Dizimista</div>
+                    </div>
+                    <div class="card-actions">
+                        <button onclick="abrirEditarMembro('${m.id}')" class="btn-action btn-edit"><i class="fas fa-edit"></i> Editar</button>
+                        <button onclick="arquivarMembro('${m.id}')" class="btn-action btn-archive"><i class="fas fa-archive"></i> Arquivar</button>
+                    </div>
+                    ${btnZap}
+                </div>`;
+        });
+    }
 
-      function abrirModalCadastroMembro() {
-          if (!celulaAtiva) { alert("Selecione uma célula primeiro."); return; }
-          // Preencher select de células no modal de cadastro
-          const selectAdd = document.getElementById('addMembroCelula');
-          selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
-          dadosCelulas.forEach(c => { if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}" ${c.nome === celulaAtiva.nome ? 'selected' : ''}>${c.nome}</option>`; });
-          document.getElementById('modalAdicionarMembro').classList.remove('hidden');
-      }
+    function abrirModalCadastroMembro() {
+        if (!celulaAtiva) { alert("Selecione uma célula primeiro."); return; }
+        const selectAdd = document.getElementById('addMembroCelula');
+        selectAdd.innerHTML = '<option value="">Selecione a Célula</option>';
+        dadosCelulas.forEach(c => { if(c.nome) selectAdd.innerHTML += `<option value="${c.nome}" ${c.nome === celulaAtiva.nome ? 'selected' : ''}>${c.nome}</option>`; });
+        document.getElementById('modalAdicionarMembro').classList.remove('hidden');
+    }
 
-      // ========== RELATÓRIOS DA CÉLULA (lista) ==========
-      async function abrirListaRelatoriosCelula() {
-          if (!celulaAtiva) return;
-          document.getElementById('relatorioCelulaNome').innerText = celulaAtiva.nome;
-          const listaDiv = document.getElementById('listaRelatoriosCelula');
-          listaDiv.innerHTML = '<p>Carregando...</p>';
-          document.getElementById('modalListaRelatorios').classList.remove('hidden');
-          
-          try {
-              const { data: relatorios, error } = await supabaseClient
-                  .from('relatorios')
-                  .select('*')
-                  .eq('celula', celulaAtiva.nome)
-                  .order('data', { ascending: false });
-              if (error) throw error;
-              if (!relatorios.length) {
-                  listaDiv.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório encontrado para esta célula.</p>';
-                  return;
-              }
-              listaDiv.innerHTML = '';
-              relatorios.forEach(r => {
-                  let dataF = r.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-                  const div = document.createElement('div');
-                  div.className = 'report-list-item';
-                  div.innerHTML = `<div><strong>${dataF}</strong><br><span style="font-size:0.85rem;">${r.quebra_gelo ? 'Quebra-gelo: ' + r.quebra_gelo : ''}</span></div><i class="fas fa-chevron-right"></i>`;
-                  div.onclick = () => abrirDetalheRelatorio(r.id);
-                  listaDiv.appendChild(div);
-              });
-          } catch(e) {
-              listaDiv.innerHTML = '<p style="color:red;">Erro ao carregar relatórios.</p>';
-          }
-      }
+    // ========== RELATÓRIOS DA CÉLULA ==========
+    async function abrirListaRelatoriosCelula() {
+        if (!celulaAtiva) return;
+        document.getElementById('relatorioCelulaNome').innerText = celulaAtiva.nome;
+        const listaDiv = document.getElementById('listaRelatoriosCelula');
+        listaDiv.innerHTML = '<p>Carregando...</p>';
+        document.getElementById('modalListaRelatorios').classList.remove('hidden');
+        try {
+            const { data: relatorios, error } = await supabaseClient.from('relatorios').select('*').eq('celula', celulaAtiva.nome).order('data', { ascending: false });
+            if (error) throw error;
+            if (!relatorios.length) { listaDiv.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório encontrado.</p>'; return; }
+            listaDiv.innerHTML = '';
+            relatorios.forEach(r => {
+                let dataF = r.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+                const div = document.createElement('div');
+                div.className = 'report-list-item';
+                div.innerHTML = `<div><strong>${dataF}</strong><br><span style="font-size:0.85rem;">${r.quebra_gelo ? 'Quebra-gelo: ' + r.quebra_gelo : ''}</span></div><i class="fas fa-chevron-right"></i>`;
+                div.onclick = () => abrirDetalheRelatorio(r.id);
+                listaDiv.appendChild(div);
+            });
+        } catch(e) { listaDiv.innerHTML = '<p style="color:red;">Erro ao carregar relatórios.</p>'; }
+    }
 
-      async function abrirDetalheRelatorio(id) {
-          const r = dadosRelatorios.find(x => String(x.id) === String(id));
-          if (!r) return;
-          let dataF = r.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-          document.getElementById('detalheRelCelula').innerText = r.celula || '-';
-          document.getElementById('detalheRelData').innerText = dataF;
-          let listaNomes = r.presentes || "";
-          let quantidade = listaNomes.split(',').filter(n => n.trim() !== '').length;
-          if (quantidade === 0 && listaNomes.trim().length > 0) quantidade = 1;
-          document.getElementById('detalheRelTotal').innerText = quantidade;
-          document.getElementById('detalheRelPresentes').innerText = listaNomes || 'Nenhum listado';
-          document.getElementById('detalheRelQuebra').innerText = r.quebra_gelo || '-';
-          document.getElementById('detalheRelPalavra').innerText = r.palavra || '-';
-          document.getElementById('detalheRelLouvor').innerText = r.louvor || '-';
-          document.getElementById('detalheRelLanche').innerText = r.lanche || '-';
-          document.getElementById('detalheRelObs').innerText = r.observacoes || 'Nenhuma observação.';
-          document.getElementById('modalRelatorio').classList.remove('hidden');
-      }
+    async function abrirDetalheRelatorio(id) {
+        const r = dadosRelatorios.find(x => String(x.id) === String(id));
+        if (!r) return;
+        let dataF = r.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+        document.getElementById('detalheRelCelula').innerText = r.celula || '-';
+        document.getElementById('detalheRelData').innerText = dataF;
+        const listaNomes = r.presentes || "";
+        const quantidade = listaNomes.split(',').filter(n => n.trim() !== '').length || (listaNomes.trim().length > 0 ? 1 : 0);
+        document.getElementById('detalheRelTotal').innerText = quantidade;
+        document.getElementById('detalheRelPresentes').innerText = listaNomes || 'Nenhum listado';
+        document.getElementById('detalheRelQuebra').innerText = r.quebra_gelo || '-';
+        document.getElementById('detalheRelPalavra').innerText = r.palavra || '-';
+        document.getElementById('detalheRelLouvor').innerText = r.louvor || '-';
+        document.getElementById('detalheRelLanche').innerText = r.lanche || '-';
+        document.getElementById('detalheRelObs').innerText = r.observacoes || 'Nenhuma observação.';
+        document.getElementById('modalRelatorio').classList.remove('hidden');
+    }
 
-      // ========== APASCENTAR (faltosos) ==========
-      async function abrirApascentar() {
-          if (!celulaAtiva) return;
-          const faltosos = await calcularFaltosos();
-          if (faltosos.length === 0) {
-              alert("Nenhum membro faltoso nos últimos 30 dias!");
-              return;
-          }
-          let mensagem = "Membros faltosos:\n\n";
-          faltosos.forEach(m => { mensagem += `${m.nome} - ${m.faltas} falta(s)\n`; });
-          alert(mensagem);
-      }
+    async function abrirApascentar() {
+        if (!celulaAtiva) return;
+        const faltosos = await calcularFaltosos();
+        if (faltosos.length === 0) { alert("Nenhum membro faltoso nos últimos 30 dias!"); return; }
+        let msg = "Membros faltosos:\n\n";
+        faltosos.forEach(m => msg += `${m.nome} - ${m.faltas} falta(s)\n`);
+        alert(msg);
+    }
 
-      async function calcularFaltosos() {
-          const trintaDiasAtras = new Date();
-          trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-          const dataLimite = trintaDiasAtras.toISOString().split('T')[0];
-          const { data: relatorios, error } = await supabaseClient
-              .from('relatorios')
-              .select('id')
-              .eq('celula', celulaAtiva.nome)
-              .gte('data', dataLimite);
-          if (error || !relatorios.length) return [];
-          const relIds = relatorios.map(r => r.id);
-          const { data: presencas } = await supabaseClient
-              .from('presencas')
-              .select('membro_id, presente')
-              .in('relatorio_id', relIds);
-          const faltasPorMembro = {};
-          presencas.forEach(p => {
-              if (!faltasPorMembro[p.membro_id]) faltasPorMembro[p.membro_id] = 0;
-              if (!p.presente) faltasPorMembro[p.membro_id]++;
-          });
-          return membrosDaCelulaAtiva.filter(m => faltasPorMembro[m.id] > 0).map(m => ({ ...m, faltas: faltasPorMembro[m.id] }));
-      }
+    async function calcularFaltosos() {
+        const trintaDiasAtras = new Date(); trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+        const dataLimite = trintaDiasAtras.toISOString().split('T')[0];
+        const { data: relatorios } = await supabaseClient.from('relatorios').select('id').eq('celula', celulaAtiva.nome).gte('data', dataLimite);
+        if (!relatorios?.length) return [];
+        const relIds = relatorios.map(r => r.id);
+        const { data: presencas } = await supabaseClient.from('presencas').select('membro_id, presente').in('relatorio_id', relIds);
+        const faltasPorMembro = {};
+        presencas.forEach(p => { if (!faltasPorMembro[p.membro_id]) faltasPorMembro[p.membro_id] = 0; if (!p.presente) faltasPorMembro[p.membro_id]++; });
+        return membrosDaCelulaAtiva.filter(m => faltasPorMembro[m.id] > 0).map(m => ({ ...m, faltas: faltasPorMembro[m.id] }));
+    }
 
-      // ========== MEMBROS E ARQUIVOS (funções já existentes) ==========
-      function renderizarMembrosEArquivos(lista) {
-          const gridAtivos = document.getElementById('gridMembros'); if(gridAtivos) gridAtivos.innerHTML = '';
-          const gridArquivos = document.getElementById('gridArquivos'); if(gridArquivos) gridArquivos.innerHTML = '';
-          if(!lista || lista.length === 0){ if(gridAtivos) gridAtivos.innerHTML = '<p style="text-align:center; color:#999;">Nenhum membro encontrado.</p>'; return; }
-          let ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
-          let arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
-          const pesoCargos = { "Pastor": 1, "Discipulador": 2, "Líder": 3, "Membro": 4, "Frequentador": 5 };
-          const ordenarPorCargoENome = (a, b) => {
-              let tipoA = a.tipo || "Frequentador"; if (tipoA.toLowerCase() === 'líder') tipoA = 'Líder';
-              let tipoB = b.tipo || "Frequentador"; if (tipoB.toLowerCase() === 'líder') tipoB = 'Líder';
-              let pesoA = pesoCargos[tipoA] || 99, pesoB = pesoCargos[tipoB] || 99;
-              if (pesoA !== pesoB) return pesoA - pesoB;
-              return (a.nome || "").localeCompare(b.nome || "");
-          };
-          ativos.sort(ordenarPorCargoENome); arquivados.sort(ordenarPorCargoENome);
-          if(gridAtivos) document.getElementById('badge-total-membros').innerText = ativos.length;
-          const check = (val) => (String(val).toLowerCase()==='sim' || val===true) ? 'active' : '';
-          const formatData = (d) => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
-          const montarCard = (m, isArquivado) => {
-             let nome = m.nome || 'Sem Nome', celula = m.celula || '-', categoria = m.tipo || 'Frequentador', tel = String(m.telefone || ''), telClean = tel.replace(/\D/g, '');
-             let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap" style="margin-top:10px;"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
-             let nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
-             let acoesHTML = isArquivado 
-                ? `<button onclick="restaurarMembro('${m.id}')" class="btn-icon" title="Restaurar"><i class="fas fa-undo"></i></button>`
-                : `<div style="display:flex; gap:5px;">
-                    <button onclick="abrirEditarMembro('${m.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button onclick="arquivarMembro('${m.id}')" class="btn-icon" title="Arquivar"><i class="fas fa-archive"></i></button>
-                   </div>`;
-             return `<div class="member-card"><div class="card-header"><div><h4 class="card-name">${nome}</h4><span class="cat-badge">${categoria}</span></div>${acoesHTML}</div><div class="card-info"><i class="fas fa-users"></i> ${celula} ${nasc}</div><div class="status-row"><div class="status-pill ${check(m.batizado)}">Batismo</div><div class="status-pill ${check(m.cursao)}">Cursão</div><div class="status-pill ${check(m.ctl)}">CTL</div><div class="status-pill ${check(m.encontro)}">Encontro</div><div class="status-pill ${check(m.seminario)}">Seminário</div><div class="status-pill ${check(m.dizimista)}">Dizimista</div></div>${!isArquivado ? btnZap : ''}</div>`;
-          };
-          ativos.forEach(m => { if(gridAtivos) gridAtivos.innerHTML += montarCard(m, false); });
-          arquivados.forEach(m => { if(gridArquivos) gridArquivos.innerHTML += montarCard(m, true); });
-          if(arquivados.length === 0 && gridArquivos) gridArquivos.innerHTML = '<p style="text-align:center; color:#999;">Nenhum membro arquivado.</p>';
-      }
+    // ========== CÉLULAS (geral) ==========
+    function renderizarCelulas(lista) {
+        const tb = document.getElementById('corpoCelulas'); if(!tb) return;
+        tb.innerHTML = '';
+        if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="4" style="text-align:center;">Nenhuma célula.</td></tr>'; return; }
+        lista.forEach(c => {
+            tb.innerHTML += `<tr><td><div style="font-weight:700;">${c.nome||''}</div><div style="font-size:0.8rem;"><i class="fas fa-map-marker-alt"></i> ${c.endereco||''}</div></td><td>${c.lider||''}</td><td>${c.dia_horario||''}</td><td><button onclick="abrirEditarCelula('${c.id}')" class="btn-icon"><i class="fas fa-edit"></i></button></td></tr>`;
+        });
+    }
 
-      function abrirEditarMembro(id) {
-          const m = dadosMembros.find(x => String(x.id) === String(id)); if(!m) return;
-          document.getElementById('editMembroId').value = m.id;
-          document.getElementById('editMembroNome').value = m.nome || '';
-          document.getElementById('editMembroNasc').value = m.nascimento || '';
-          document.getElementById('editMembroTel').value = m.telefone || '';
-          document.getElementById('editMembroCelula').value = m.celula || '';
-          document.getElementById('editMembroCat').value = m.tipo || 'Frequentador';
-          const chk = (val) => String(val).toLowerCase() === 'sim' || val === true;
-          document.getElementById('editMembroBatizado').checked = chk(m.batizado);
-          document.getElementById('editMembroCursao').checked = chk(m.cursao);
-          document.getElementById('editMembroCtl').checked = chk(m.ctl);
-          document.getElementById('editMembroEncontro').checked = chk(m.encontro);
-          document.getElementById('editMembroSeminario').checked = chk(m.seminario);
-          document.getElementById('editMembroDizimista').checked = chk(m.dizimista);
-          document.getElementById('modalEditarMembro').classList.remove('hidden');
-      }
+    function preencherSelects(celulas) {
+        const s1 = document.getElementById('filtroCelula'); if(s1) s1.innerHTML = '<option value="">Todas</option>';
+        const s2 = document.getElementById('editMembroCelula'); if(s2) s2.innerHTML = '';
+        if(!celulas) return;
+        celulas.forEach(c => { if(c.nome) { if(s1) s1.innerHTML += `<option value="${c.nome}">${c.nome}</option>`; if(s2) s2.innerHTML += `<option value="${c.nome}">${c.nome}</option>`; } });
+    }
 
-      async function arquivarMembro(id) { if(!confirm("Deseja arquivar este membro?")) return; try { await atualizarSupabase('membros', id, { arquivado: "Sim" }); carregarTudo(); } catch(e) { alert("Erro ao arquivar."); } }
-      async function restaurarMembro(id) { if(!confirm("Deseja restaurar este membro?")) return; try { await atualizarSupabase('membros', id, { arquivado: "Não" }); carregarTudo(); } catch(e) { alert("Erro ao restaurar."); } }
+    function abrirEditarCelula(id) {
+        const c = dadosCelulas.find(x => String(x.id) === String(id)); if(!c) return;
+        document.getElementById('editCelulaId').value = c.id;
+        document.getElementById('editCelulaNome').value = c.nome || '';
+        document.getElementById('editCelulaLider').value = c.lider || '';
+        document.getElementById('editCelulaDia').value = c.dia_horario || '';
+        document.getElementById('editCelulaEnd').value = c.endereco || '';
+        document.getElementById('tituloModalCelula').innerText = 'Editar Célula';
+        document.getElementById('modalEditarCelula').classList.remove('hidden');
+    }
 
-      // ========== CÉLULAS (geral) ==========
-      function renderizarCelulas(lista) {
-         const tb = document.getElementById('corpoCelulas'); if(!tb) return;
-         tb.innerHTML = '';
-         if(!lista || !lista.length) { tb.innerHTML='<tr><td colspan="4" style="text-align:center;">Nenhuma célula.</td></tr>'; return; }
-         lista.forEach(c => { tb.innerHTML += `<tr><td><div style="font-weight:700;">${c.nome||''}</div><div style="font-size:0.8rem; color:#64748b;"><i class="fas fa-map-marker-alt"></i> ${c.endereco||''}</div></td><td>${c.lider||''}</td><td>${c.dia_horario||''}</td><td style="text-align:center;"><button onclick="abrirEditarCelula('${c.id}')" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button></td></tr>`; });
-      }
+    function abrirModalNovaCelula() {
+        document.getElementById('editCelulaId').value = '';
+        document.getElementById('editCelulaNome').value = '';
+        document.getElementById('editCelulaLider').value = '';
+        document.getElementById('editCelulaDia').value = '';
+        document.getElementById('editCelulaEnd').value = '';
+        document.getElementById('tituloModalCelula').innerText = 'Nova Célula';
+        document.getElementById('modalEditarCelula').classList.remove('hidden');
+    }
 
-      function preencherSelects(celulas) {
-         const s1=document.getElementById('filtroCelula'), s2=document.getElementById('editMembroCelula');
-         if(s1) s1.innerHTML='<option value="">Todas</option>';
-         if(s2) s2.innerHTML='';
-         if(!celulas) return;
-         celulas.forEach(c => { if(c.nome) { if(s1) s1.innerHTML += `<option value="${c.nome}">${c.nome}</option>`; if(s2) s2.innerHTML += `<option value="${c.nome}">${c.nome}</option>`; } });
-      }
+    document.getElementById('formEditarCelula').onsubmit = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSalvarEdicaoCelula'); btn.disabled = true;
+        const id = document.getElementById('editCelulaId').value;
+        const dados = {
+            nome: document.getElementById('editCelulaNome').value,
+            lider: document.getElementById('editCelulaLider').value,
+            dia_horario: document.getElementById('editCelulaDia').value,
+            endereco: document.getElementById('editCelulaEnd').value,
+            supervisor_email: sessionStorage.getItem('discipuladorEmail')
+        };
+        try {
+            if (id) await atualizarSupabase('celulas', id, dados);
+            else await inserirSupabase('celulas', dados);
+            fecharModal('modalEditarCelula');
+            carregarTudo();
+        } catch(err) { alert("Erro ao salvar célula."); }
+        finally { btn.disabled = false; }
+    };
 
-      function abrirEditarCelula(id) {
-          const c = dadosCelulas.find(x => String(x.id) === String(id)); if(!c) return;
-          document.getElementById('editCelulaId').value = c.id;
-          document.getElementById('editCelulaNome').value = c.nome || '';
-          document.getElementById('editCelulaLider').value = c.lider || '';
-          document.getElementById('editCelulaDia').value = c.dia_horario || '';
-          document.getElementById('editCelulaEnd').value = c.endereco || '';
-          document.getElementById('modalEditarCelula').classList.remove('hidden');
-      }
+    // ========== MEMBROS E ARQUIVOS ==========
+    function renderizarMembrosEArquivos(lista) {
+        const gridAtivos = document.getElementById('gridMembros'); if(gridAtivos) gridAtivos.innerHTML = '';
+        const gridArquivos = document.getElementById('gridArquivos'); if(gridArquivos) gridArquivos.innerHTML = '';
+        if(!lista || lista.length === 0) { if(gridAtivos) gridAtivos.innerHTML = '<p style="text-align:center;">Nenhum membro.</p>'; return; }
+        const ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
+        const arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
+        const peso = { "Pastor":1, "Discipulador":2, "Líder":3, "Membro":4, "Frequentador":5 };
+        const ordenar = (a,b) => {
+            let ta = a.tipo || "Frequentador"; if(ta.toLowerCase()==='líder') ta='Líder';
+            let tb = b.tipo || "Frequentador"; if(tb.toLowerCase()==='líder') tb='Líder';
+            let pa = peso[ta]||99, pb = peso[tb]||99;
+            return pa !== pb ? pa - pb : (a.nome||"").localeCompare(b.nome||"");
+        };
+        ativos.sort(ordenar); arquivados.sort(ordenar);
+        if(gridAtivos) document.getElementById('badge-total-membros').innerText = ativos.length;
+        const check = (val) => (String(val).toLowerCase()==='sim'||val===true) ? 'active' : '';
+        const formatData = (d) => { if(!d) return ''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
+        const montarCard = (m, isArquivado) => {
+            const nome = m.nome || 'Sem Nome';
+            const celula = m.celula || '-';
+            const categoria = m.tipo || 'Frequentador';
+            const tel = String(m.telefone || '').replace(/\D/g, '');
+            const btnZap = tel.length > 8 ? `<a href="https://wa.me/55${tel}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
+            const nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+            const acoes = isArquivado ?
+                `<button onclick="restaurarMembro('${m.id}')" class="btn-icon"><i class="fas fa-undo"></i> Restaurar</button>` :
+                `<div style="display:flex; gap:5px;"><button onclick="abrirEditarMembro('${m.id}')" class="btn-icon"><i class="fas fa-edit"></i></button><button onclick="arquivarMembro('${m.id}')" class="btn-icon"><i class="fas fa-archive"></i></button></div>`;
+            return `<div class="member-card"><div class="card-header"><div><h4 class="card-name">${nome}</h4><span class="cat-badge">${categoria}</span></div>${acoes}</div><div class="card-info"><i class="fas fa-users"></i> ${celula} ${nasc}</div><div class="status-row"><div class="status-pill ${check(m.batizado)}">Batismo</div><div class="status-pill ${check(m.cursao)}">Cursão</div><div class="status-pill ${check(m.ctl)}">CTL</div><div class="status-pill ${check(m.encontro)}">Encontro</div><div class="status-pill ${check(m.seminario)}">Seminário</div><div class="status-pill ${check(m.dizimista)}">Dizimista</div></div>${!isArquivado ? btnZap : ''}</div>`;
+        };
+        ativos.forEach(m => { if(gridAtivos) gridAtivos.innerHTML += montarCard(m, false); });
+        arquivados.forEach(m => { if(gridArquivos) gridArquivos.innerHTML += montarCard(m, true); });
+        if(arquivados.length === 0 && gridArquivos) gridArquivos.innerHTML = '<p style="text-align:center;">Nenhum membro arquivado.</p>';
+    }
 
-      // ========== AGENDA ==========
-      function renderizarAgenda(lista) {
-         const div = document.getElementById('listaAgenda'); if(!div) return;
-         div.innerHTML = '';
-         if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center;">Nenhum evento.</p>'; return; }
-         lista.sort((a,b) => new Date(a[0]) - new Date(b[0]));
-         lista.forEach(a => {
-             let dataF = a[0] || ''; try { if(a[0] && a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-             let corCategoria = '#555'; if(a[4]==='RADICAIS LIVRES') corCategoria='#0056b3'; else if(a[4]==='GOOGLE AGENDA') corCategoria='var(--primary)'; else if(a[4]==='RADICAIS KIDS') corCategoria='#b58900';
-             let corTipo = (a[3]==='Pago')?'#dc3545':'var(--success-text)';
-             div.innerHTML += `<div class="member-card"><div class="card-header"><h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4><span class="cat-badge" style="background:${corCategoria};">${a[4]||''}</span></div><div style="font-weight:700;">${a[1]||''}</div><div style="color:#666;">${a[2]||''}</div><div style="margin-top:10px;"><span style="color:${corTipo};">${a[3]||''}</span></div></div>`;
-         });
-      }
+    function abrirEditarMembro(id) {
+        const m = dadosMembros.find(x => String(x.id) === String(id)); if(!m) return;
+        document.getElementById('editMembroId').value = m.id;
+        document.getElementById('editMembroNome').value = m.nome || '';
+        document.getElementById('editMembroNasc').value = m.nascimento || '';
+        document.getElementById('editMembroTel').value = m.telefone || '';
+        document.getElementById('editMembroCelula').value = m.celula || '';
+        document.getElementById('editMembroCat').value = m.tipo || 'Frequentador';
+        const chk = (val) => String(val).toLowerCase() === 'sim' || val === true;
+        document.getElementById('editMembroBatizado').checked = chk(m.batizado);
+        document.getElementById('editMembroCursao').checked = chk(m.cursao);
+        document.getElementById('editMembroCtl').checked = chk(m.ctl);
+        document.getElementById('editMembroEncontro').checked = chk(m.encontro);
+        document.getElementById('editMembroSeminario').checked = chk(m.seminario);
+        document.getElementById('editMembroDizimista').checked = chk(m.dizimista);
+        document.getElementById('modalEditarMembro').classList.remove('hidden');
+    }
 
-      // ========== PALAVRAS ==========
-      function renderizarPalavras(lista) {
-          const div = document.getElementById('listaPalavras'); if(!div) return;
-          div.innerHTML = '';
-          if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center;">Nenhuma palavra.</p>'; return; }
-          lista.forEach((p, index) => {
-              let dataF = p.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-              div.innerHTML += `<div class="report-list-item" onclick="abrirPalavra(${index})"><div><div style="font-weight:800;"><i class="far fa-calendar-alt"></i> ${dataF}</div><div style="font-size:0.85rem;">${p.tema||'Sem Título'}</div></div><i class="fas fa-chevron-right"></i></div>`;
-          });
-      }
+    async function arquivarMembro(id) { if(confirm("Arquivar?")) { await atualizarSupabase('membros', id, { arquivado: "Sim" }); carregarTudo(); } }
+    async function restaurarMembro(id) { if(confirm("Restaurar?")) { await atualizarSupabase('membros', id, { arquivado: "Não" }); carregarTudo(); } }
 
-      function abrirPalavra(index) {
-          const p = listaPalavras[index]; palavraAtual = p;
-          document.getElementById('modalTitulo').innerText = p.tema || '';
-          let dataF = p.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-          document.getElementById('modalData').innerText = dataF;
-          document.getElementById('modalTexto').innerText = p.texto || '';
-          const btn = document.getElementById('btnLinkYoutube');
-          if (p.link_youtube?.trim()) { btn.href = p.link_youtube; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); btn.href = "#"; }
-          document.getElementById('modalPalavra').classList.remove('hidden');
-      }
+    document.getElementById('formEditarMembro').onsubmit = async function(e) {
+        e.preventDefault(); const btn = document.getElementById('btnSalvarEdicaoMembro'); btn.disabled = true;
+        const id = document.getElementById('editMembroId').value;
+        const dados = {
+            nome: document.getElementById('editMembroNome').value,
+            nascimento: document.getElementById('editMembroNasc').value,
+            telefone: document.getElementById('editMembroTel').value,
+            celula: document.getElementById('editMembroCelula').value,
+            tipo: document.getElementById('editMembroCat').value,
+            batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
+            cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
+            ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
+            encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
+            seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
+            dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
+        };
+        try { await atualizarSupabase('membros', id, dados); fecharModal('modalEditarMembro'); carregarTudo(); } catch(err) { alert("Erro ao atualizar."); } finally { btn.disabled = false; }
+    };
 
-      function baixarPalavraTXT() {
-          if (!palavraAtual) return;
-          const btn = document.querySelector('.modal-download'); const icon = btn.querySelector('i'); icon.className = 'fas fa-spinner fa-spin';
-          try {
-              const titulo = palavraAtual.tema || 'Palavra', data = palavraAtual.data || '', texto = palavraAtual.texto || '';
-              let dataF = data; if(data.includes('-')) { const p=data.split('-'); dataF=`${p[2]}/${p[1]}/${p[0]}`; }
-              const conteudo = `${titulo}\n${dataF}\n\n${texto}`;
-              const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
-              const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${titulo.replace(/\s/g,'_')}.txt`; a.click();
-          } catch(e) { alert('Erro ao gerar TXT.'); }
-          finally { icon.className = 'fas fa-download'; }
-      }
+    document.getElementById('formAdicionarMembro').onsubmit = async function(e) {
+        e.preventDefault(); const btn = document.getElementById('btnSalvarNovoMembro'); btn.disabled = true;
+        const dados = {
+            nome: document.getElementById('addMembroNome').value,
+            nascimento: document.getElementById('addMembroNasc').value || null,
+            telefone: document.getElementById('addMembroTel').value,
+            celula: document.getElementById('addMembroCelula').value,
+            tipo: document.getElementById('addMembroCat').value,
+            batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
+            cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
+            ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
+            encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
+            seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
+            dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
+            arquivado: "Não"
+        };
+        try { await inserirSupabase('membros', dados); fecharModal('modalAdicionarMembro'); carregarTudo(); } catch(err) { alert("Erro ao cadastrar."); } finally { btn.disabled = false; }
+    };
 
-      // ========== SUBMITS ==========
-      document.getElementById('formEditarMembro').onsubmit = async function(e) {
-          e.preventDefault(); const btn = document.getElementById('btnSalvarEdicaoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
-          const id = document.getElementById('editMembroId').value;
-          const dados = {
-              nome: document.getElementById('editMembroNome').value, nascimento: document.getElementById('editMembroNasc').value, telefone: document.getElementById('editMembroTel').value,
-              celula: document.getElementById('editMembroCelula').value, tipo: document.getElementById('editMembroCat').value,
-              batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não", cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
-              ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não", encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
-              seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não", dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
-          };
-          try { await atualizarSupabase('membros', id, dados); fecharModal('modalEditarMembro'); carregarTudo(); } catch(err) { alert("Erro ao atualizar."); } finally { btn.innerText = "Salvar Alterações"; btn.disabled = false; }
-      };
+    // ========== AGENDA ==========
+    function renderizarAgenda(lista) {
+        const div = document.getElementById('listaAgenda'); if(!div) return;
+        div.innerHTML = '';
+        if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center;">Nenhum evento.</p>'; return; }
+        lista.sort((a,b) => new Date(a[0]) - new Date(b[0]));
+        lista.forEach(a => {
+            let dataF = a[0] || ''; try { if(a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+            let corCategoria = '#555'; if(a[4]==='RADICAIS LIVRES') corCategoria='#0056b3'; else if(a[4]==='GOOGLE AGENDA') corCategoria='var(--primary)'; else if(a[4]==='RADICAIS KIDS') corCategoria='#b58900';
+            let corTipo = (a[3]==='Pago')?'#dc3545':'var(--success-text)';
+            div.innerHTML += `<div class="member-card"><div class="card-header"><h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4><span class="cat-badge" style="background:${corCategoria};">${a[4]||''}</span></div><div style="font-weight:700;">${a[1]||''}</div><div style="color:#666;">${a[2]||''}</div><div style="margin-top:10px;"><span style="color:${corTipo};">${a[3]||''}</span></div></div>`;
+        });
+    }
 
-      document.getElementById('formAdicionarMembro').onsubmit = async function(e) {
-          e.preventDefault(); const btn = document.getElementById('btnSalvarNovoMembro'); btn.innerText = "Salvando..."; btn.disabled = true;
-          const dados = {
-              nome: document.getElementById('addMembroNome').value, nascimento: document.getElementById('addMembroNasc').value || null, telefone: document.getElementById('addMembroTel').value,
-              celula: document.getElementById('addMembroCelula').value, tipo: document.getElementById('addMembroCat').value,
-              batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não", cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
-              ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não", encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
-              seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não", dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
-              arquivado: "Não"
-          };
-          try { await inserirSupabase('membros', dados); fecharModal('modalAdicionarMembro'); carregarTudo(); } catch(err) { alert("Erro ao cadastrar."); } finally { btn.innerText = "Cadastrar Membro"; btn.disabled = false; }
-      };
+    // ========== PALAVRAS ==========
+    function renderizarPalavras(lista) {
+        const div = document.getElementById('listaPalavras'); if(!div) return;
+        div.innerHTML = '';
+        if(!lista.length) { div.innerHTML = '<p style="text-align:center;">Nenhuma palavra.</p>'; return; }
+        lista.forEach((p, idx) => {
+            let dataF = p.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+            div.innerHTML += `<div class="report-list-item" onclick="abrirPalavra(${idx})"><div><div style="font-weight:800;"><i class="far fa-calendar-alt"></i> ${dataF}</div><div style="font-size:0.85rem;">${p.tema||'Sem Título'}</div></div><i class="fas fa-chevron-right"></i></div>`;
+        });
+    }
 
-      document.getElementById('formEditarCelula').onsubmit = async function(e) {
-          e.preventDefault(); const btn = document.getElementById('btnSalvarEdicaoCelula'); btn.innerText = "Salvando..."; btn.disabled = true;
-          const id = document.getElementById('editCelulaId').value;
-          const dados = {
-              nome: document.getElementById('editCelulaNome').value, lider: document.getElementById('editCelulaLider').value,
-              dia_horario: document.getElementById('editCelulaDia').value, endereco: document.getElementById('editCelulaEnd').value
-          };
-          try { await atualizarSupabase('celulas', id, dados); fecharModal('modalEditarCelula'); carregarTudo(); } catch(err) { alert("Erro ao atualizar."); } finally { btn.innerText = "Salvar Célula"; btn.disabled = false; }
-      };
+    function abrirPalavra(index) {
+        const p = listaPalavras[index]; palavraAtual = p;
+        document.getElementById('modalTitulo').innerText = p.tema || '';
+        let dataF = p.data || ''; try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
+        document.getElementById('modalData').innerText = dataF;
+        document.getElementById('modalTexto').innerText = p.texto || '';
+        const btn = document.getElementById('btnLinkYoutube');
+        if (p.link_youtube?.trim()) { btn.href = p.link_youtube; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); btn.href = "#"; }
+        document.getElementById('modalPalavra').classList.remove('hidden');
+    }
 
-      function fazerLogout() { if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; } }
+    function baixarPalavraTXT() {
+        if (!palavraAtual) return;
+        const btn = document.querySelector('.modal-download'); const icon = btn.querySelector('i'); icon.className = 'fas fa-spinner fa-spin';
+        try {
+            const titulo = palavraAtual.tema || 'Palavra';
+            const data = palavraAtual.data || '';
+            const texto = palavraAtual.texto || '';
+            let dataF = data; if(data.includes('-')) { const p=data.split('-'); dataF=`${p[2]}/${p[1]}/${p[0]}`; }
+            const blob = new Blob([`${titulo}\n${dataF}\n\n${texto}`], { type: 'text/plain' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${titulo.replace(/\s/g,'_')}.txt`; a.click();
+        } catch(e) { alert('Erro ao gerar TXT.'); } finally { icon.className = 'fas fa-download'; }
+    }
 
-      // ========== BÍBLIA (NOVO MÓDULO) ==========
-      let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
-      const siglasVersoes = { msg:'MSG', nvi:'NVI', aa:'ARA', acf:'ACF', ntlh:'NTLH' };
-      const nomesCompletos = { msg:'A Mensagem', nvi:'Nova Versão Internacional', aa:'Almeida Revista e Atualizada', acf:'Almeida Corrigida Fiel', ntlh:'Nova Tradução na Linguagem de Hoje' };
+    function filtrarMembros() {
+        const b = document.getElementById('inputBusca')?.value.toLowerCase() || '';
+        const c = document.getElementById('filtroCelula')?.value.toLowerCase() || '';
+        document.querySelectorAll('#gridMembros .member-card').forEach(card => {
+            if(card.hasAttribute('data-nome')) {
+                card.style.display = (card.dataset.nome.includes(b) && (c==="" || card.dataset.celula.includes(c))) ? 'flex' : 'none';
+            }
+        });
+    }
 
-      async function abrirBiblia() {
-          document.getElementById('painel-biblia').classList.add('aberto');
-          document.getElementById('biblia-overlay').style.display = 'block';
-          setTimeout(() => document.getElementById('biblia-overlay').style.opacity = '1', 10);
-          if (typeof Biblia !== 'undefined') {
-              if (!Biblia.bibliaCarregada) await Biblia.inicializar();
-              versaoSelecionada = Biblia.getVersaoAtiva();
-              document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada;
-          }
-      }
+    // ========== BÍBLIA ==========
+    let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
+    const siglasVersoes = { msg:'MSG', nvi:'NVI', aa:'ARA', acf:'ACF', ntlh:'NTLH' };
+    const nomesCompletos = { msg:'A Mensagem', nvi:'Nova Versão Internacional', aa:'Almeida Revista e Atualizada', acf:'Almeida Corrigida Fiel', ntlh:'Nova Tradução na Linguagem de Hoje' };
 
-      function fecharBiblia() {
-          document.getElementById('painel-biblia').classList.remove('aberto');
-          const ov = document.getElementById('biblia-overlay'); ov.style.opacity = '0';
-          setTimeout(() => ov.style.display = 'none', 300);
-      }
+    async function abrirBiblia() {
+        document.getElementById('painel-biblia').classList.add('aberto');
+        document.getElementById('biblia-overlay').style.display = 'block';
+        setTimeout(() => document.getElementById('biblia-overlay').style.opacity = '1', 10);
+        if (typeof Biblia !== 'undefined') {
+            if (!Biblia.bibliaCarregada) await Biblia.inicializar();
+            versaoSelecionada = Biblia.getVersaoAtiva();
+            document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada;
+        }
+    }
 
-      function abrirModalVersao() {
-          const modal = document.getElementById('modalVersao'), listaDiv = document.getElementById('listaVersoes'); listaDiv.innerHTML = '';
-          Object.entries(nomesCompletos).forEach(([id, nome]) => {
-              const item = document.createElement('div'); item.className = 'versao-item' + (id === versaoSelecionada ? ' selecionada' : '');
-              item.innerHTML = `${nome} <span style="opacity:0.7; font-size:0.9rem;">${siglasVersoes[id]}</span>`;
-              item.onclick = () => selecionarVersao(id); listaDiv.appendChild(item);
-          });
-          modal.classList.remove('hidden');
-      }
+    function fecharBiblia() {
+        document.getElementById('painel-biblia').classList.remove('aberto');
+        const ov = document.getElementById('biblia-overlay'); ov.style.opacity = '0';
+        setTimeout(() => ov.style.display = 'none', 300);
+    }
 
-      function fecharModalVersao(e) { if (!e || e.target.classList.contains('modal-versao-overlay') || e.target.classList.contains('modal-versao-close')) document.getElementById('modalVersao').classList.add('hidden'); }
-      async function selecionarVersao(id) { versaoSelecionada = id; localStorage.setItem('biblia_versao', id); document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[id]; fecharModalVersao(); if (typeof Biblia !== 'undefined') await Biblia.mudarVersao(id); }
+    function abrirModalVersao() {
+        const modal = document.getElementById('modalVersao'), listaDiv = document.getElementById('listaVersoes'); listaDiv.innerHTML = '';
+        Object.entries(nomesCompletos).forEach(([id, nome]) => {
+            const item = document.createElement('div'); item.className = 'versao-item' + (id === versaoSelecionada ? ' selecionada' : '');
+            item.innerHTML = `${nome} <span style="opacity:0.7; font-size:0.9rem;">${siglasVersoes[id]}</span>`;
+            item.onclick = () => selecionarVersao(id); listaDiv.appendChild(item);
+        });
+        modal.classList.remove('hidden');
+    }
 
-      function capituloAnterior() {
-          const selCap = document.getElementById('biblia-capitulo'); let val = parseInt(selCap.value);
-          if (val > 1) { selCap.value = val - 1; if (typeof Biblia !== 'undefined') Biblia.onCapituloChange(); }
-          else { const selLiv = document.getElementById('biblia-livro'); if (selLiv.selectedIndex > 0) { selLiv.selectedIndex--; Biblia.onLivroChange(); setTimeout(() => { selCap.value = selCap.options.length; Biblia.onCapituloChange(); }, 100); } }
-      }
+    function fecharModalVersao(e) { if (!e || e.target.classList.contains('modal-versao-overlay') || e.target.classList.contains('modal-versao-close')) document.getElementById('modalVersao').classList.add('hidden'); }
+    async function selecionarVersao(id) { versaoSelecionada = id; localStorage.setItem('biblia_versao', id); document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[id]; fecharModalVersao(); if (typeof Biblia !== 'undefined') await Biblia.mudarVersao(id); }
+    function capituloAnterior() { const selCap = document.getElementById('biblia-capitulo'); let val = parseInt(selCap.value); if (val > 1) { selCap.value = val - 1; if (typeof Biblia !== 'undefined') Biblia.onCapituloChange(); } else { const selLiv = document.getElementById('biblia-livro'); if (selLiv.selectedIndex > 0) { selLiv.selectedIndex--; Biblia.onLivroChange(); setTimeout(() => { selCap.value = selCap.options.length; Biblia.onCapituloChange(); }, 100); } } }
+    function capituloProximo() { const selCap = document.getElementById('biblia-capitulo'); let val = parseInt(selCap.value); if (val < selCap.options.length) { selCap.value = val + 1; if (typeof Biblia !== 'undefined') Biblia.onCapituloChange(); } else { const selLiv = document.getElementById('biblia-livro'); if (selLiv.selectedIndex < selLiv.options.length - 1) { selLiv.selectedIndex++; Biblia.onLivroChange(); setTimeout(() => { selCap.value = 1; Biblia.onCapituloChange(); }, 100); } } }
 
-      function capituloProximo() {
-          const selCap = document.getElementById('biblia-capitulo'); let val = parseInt(selCap.value);
-          if (val < selCap.options.length) { selCap.value = val + 1; if (typeof Biblia !== 'undefined') Biblia.onCapituloChange(); }
-          else { const selLiv = document.getElementById('biblia-livro'); if (selLiv.selectedIndex < selLiv.options.length - 1) { selLiv.selectedIndex++; Biblia.onLivroChange(); setTimeout(() => { selCap.value = 1; Biblia.onCapituloChange(); }, 100); } }
-      }
-
-      // ========== FILTRAR MEMBROS NA LISTA GERAL ==========
-      function filtrarMembros() {
-         const b = document.getElementById('inputBusca').value.toLowerCase(), c = document.getElementById('filtroCelula').value.toLowerCase();
-         document.querySelectorAll('#gridMembros .member-card').forEach(card => { if(card.hasAttribute('data-nome')){ card.style.display = (card.dataset.nome.includes(b) && (c==="" || card.dataset.celula.includes(c))) ? 'flex' : 'none'; } });
-      }
-      // Necessário definir inputBusca e filtroCelula para a aba Membros (mas a aba Membros foi removida, então ignore)
-    </script>
-  </body>
+    function fazerLogout() { if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; } }
+</script>
+</body>
 </html>
