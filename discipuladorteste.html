@@ -502,7 +502,7 @@
     // ========== RELATÓRIOS (CORRIGIDO) ==========
 // ========== RELATÓRIOS (CORRIGIDO) ==========
 async function abrirDetalheRelatorio(id) {
-    // Busca o relatório diretamente do banco
+    // Busca o relatório
     const { data: relatorio, error: errRel } = await supabaseClient
         .from('relatorios')
         .select('*')
@@ -523,12 +523,12 @@ async function abrirDetalheRelatorio(id) {
 
     const nomesPresentes = [];
     const nomesAusentes = [];
+
     if (presencas && presencas.length) {
         for (const p of presencas) {
             let isPresente = false;
             if (typeof p.presente === 'boolean') isPresente = p.presente;
             else if (typeof p.presente === 'string') isPresente = p.presente.toLowerCase() === 'sim';
-            // Converte ambos os IDs para string para comparação segura
             const membro = dadosMembros.find(m => String(m.id) === String(p.membro_id));
             if (membro) {
                 if (isPresente) nomesPresentes.push(membro.nome);
@@ -540,33 +540,34 @@ async function abrirDetalheRelatorio(id) {
     let dataF = relatorio.data || '';
     try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
 
-    const celulaSpan = document.getElementById('detalheRelCelula');
-    if (celulaSpan) celulaSpan.innerText = relatorio.celula || '-';
-    const dataSpan = document.getElementById('detalheRelData');
-    if (dataSpan) dataSpan.innerText = dataF;
-    const totalSpan = document.getElementById('detalheRelTotal');
-    if (totalSpan) totalSpan.innerText = nomesPresentes.length;
-    const presentesDiv = document.getElementById('detalheRelPresentes');
-    if (presentesDiv) {
-        presentesDiv.innerHTML = `
-            ${nomesPresentes.length ? `✅ Presentes: ${nomesPresentes.join(', ')}<br>` : ''}
-            ${nomesAusentes.length ? `❌ Ausentes: ${nomesAusentes.join(', ')}` : ''}
-            ${!nomesPresentes.length && !nomesAusentes.length ? 'Nenhum dado de presença.' : ''}
-        `;
-    }
-    const quebraSpan = document.getElementById('detalheRelQuebra');
-    if (quebraSpan) quebraSpan.innerText = relatorio.quebra_gelo || '-';
-    const palavraSpan = document.getElementById('detalheRelPalavra');
-    if (palavraSpan) palavraSpan.innerText = relatorio.palavra || '-';
-    const louvorSpan = document.getElementById('detalheRelLouvor');
-    if (louvorSpan) louvorSpan.innerText = relatorio.louvor || '-';
-    const lancheSpan = document.getElementById('detalheRelLanche');
-    if (lancheSpan) lancheSpan.innerText = relatorio.lanche || '-';
-    const obsDiv = document.getElementById('detalheRelObs');
-    if (obsDiv) obsDiv.innerText = relatorio.observacoes || 'Nenhuma observação.';
+    // Preenche cabeçalho
+    document.getElementById('detalheRelCelula').innerText = relatorio.celula || '-';
+    document.getElementById('detalheRelData').innerText = dataF;
+    document.getElementById('detalheRelTotal').innerText = nomesPresentes.length;
 
-    const modal = document.getElementById('modalRelatorio');
-    if (modal) modal.classList.remove('hidden');
+    // Preenche encargos
+    document.getElementById('detalheRelQuebra').innerText = relatorio.quebra_gelo || '-';
+    document.getElementById('detalheRelPalavra').innerText = relatorio.palavra || '-';
+    document.getElementById('detalheRelLouvor').innerText = relatorio.louvor || '-';
+    document.getElementById('detalheRelLanche').innerText = relatorio.lanche || '-';
+    document.getElementById('detalheRelObs').innerText = relatorio.observacoes || 'Nenhuma observação.';
+
+    // Preenche listas de presentes e ausentes
+    const containerPresentes = document.getElementById('listaPresentes');
+    const containerAusentes = document.getElementById('listaAusentes');
+    
+    if (containerPresentes) {
+        containerPresentes.innerHTML = nomesPresentes.length 
+            ? nomesPresentes.map(nome => `<div>👤 ${nome}</div>`).join('') 
+            : '<div style="color:#999;">Nenhum presente registrado.</div>';
+    }
+    if (containerAusentes) {
+        containerAusentes.innerHTML = nomesAusentes.length 
+            ? nomesAusentes.map(nome => `<div>👤 ${nome}</div>`).join('') 
+            : '<div style="color:#999;">Nenhum ausente registrado.</div>';
+    }
+
+    document.getElementById('modalRelatorio').classList.remove('hidden');
 }
 
 // ========== APASCENTAR (FALTOSOS) ==========
@@ -1197,59 +1198,65 @@ async function abrirApascentar() {
     </div>
 </div>
 
-<!-- MODAL DETALHE DO RELATÓRIO (VERSÃO MELHORADA VISUALMENTE) -->
+<!-- MODAL DETALHE DO RELATÓRIO (NOVO LAYOUT) -->
 <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
-    <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 800px; padding: 20px;">
         <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
-        <div class="paper-report" style="margin-top: 10px;">
-            <!-- Cabeçalho com célula e data -->
-            <div class="paper-header">
-                <span class="paper-title" id="detalheRelCelula">Nome da Célula</span>
-                <span class="paper-date" id="detalheRelData">00/00/0000</span>
+        
+        <!-- Cabeçalho -->
+        <div style="text-align: center; margin-bottom: 25px;">
+            <h2 style="color: var(--primary); margin: 0;" id="detalheRelCelula">Célula</h2>
+            <p style="color: #666; margin-top: 5px;" id="detalheRelData">00/00/0000</p>
+        </div>
+
+        <!-- Total de presentes em destaque -->
+        <div style="background: linear-gradient(135deg, var(--success-bg), #e2f0e6); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 25px;">
+            <span style="font-size: 2.5rem; font-weight: 800; color: var(--success-text);" id="detalheRelTotal">0</span>
+            <span style="font-size: 1rem; font-weight: 600; color: var(--success-text); display: block;">PESSOAS PRESENTES</span>
+        </div>
+
+        <!-- Encargos em grid 2x2 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: #888;">Palavra</div>
+                <div style="font-weight: 700; font-size: 1rem;" id="detalheRelPalavra">-</div>
             </div>
-            
-            <!-- Bloco de quantidade de presentes (destacado) -->
-            <div class="attend-box">
-                <span class="attend-num" id="detalheRelTotal">0</span>
-                <span class="attend-label">PESSOAS PRESENTES</span>
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: #888;">Louvor</div>
+                <div style="font-weight: 700; font-size: 1rem;" id="detalheRelLouvor">-</div>
             </div>
-            
-            <!-- Lista de nomes dos presentes (sem os ausentes) -->
-            <div style="margin-bottom: 20px;">
-                <strong style="display: block; margin-bottom: 8px; color: var(--primary);">📋 Membros Presentes</strong>
-                <div class="list-present" id="detalheRelPresentes" style="background: #f8fafc; padding: 12px; border-radius: 12px; max-height: 200px; overflow-y: auto;">
-                    <!-- Os nomes serão inseridos aqui via JavaScript -->
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: #888;">Lanche</div>
+                <div style="font-weight: 700; font-size: 1rem;" id="detalheRelLanche">-</div>
+            </div>
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: #888;">Quebra-Gelo</div>
+                <div style="font-weight: 700; font-size: 1rem;" id="detalheRelQuebra">-</div>
+            </div>
+        </div>
+
+        <!-- Lista de presentes e ausentes (duas colunas) -->
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="font-weight: 800; color: #2b6e3c; margin-bottom: 8px;"><i class="fas fa-check-circle"></i> Presentes</div>
+                    <div id="listaPresentes" style="background: #f9fff9; border-radius: 12px; padding: 12px; border: 1px solid #d0e6d0; max-height: 200px; overflow-y: auto;">
+                        <!-- nomes dos presentes -->
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="font-weight: 800; color: #a12a2a; margin-bottom: 8px;"><i class="fas fa-times-circle"></i> Ausentes</div>
+                    <div id="listaAusentes" style="background: #fff9f9; border-radius: 12px; padding: 12px; border: 1px solid #f0d0d0; max-height: 200px; overflow-y: auto;">
+                        <!-- nomes dos ausentes -->
+                    </div>
                 </div>
             </div>
-            
-            <!-- Encargos do dia -->
-            <div style="margin-bottom: 15px;">
-                <strong style="display: block; margin-bottom: 8px; color: var(--primary);">🎯 Encargos do Dia</strong>
-                <div class="role-grid">
-                    <div class="role-box">
-                        <span class="role-label">Palavra / Estudo</span>
-                        <span class="role-val" id="detalheRelPalavra">-</span>
-                    </div>
-                    <div class="role-box">
-                        <span class="role-label">Louvor / Oração</span>
-                        <span class="role-val" id="detalheRelLouvor">-</span>
-                    </div>
-                    <div class="role-box">
-                        <span class="role-label">Lanche / Comunhão</span>
-                        <span class="role-val" id="detalheRelLanche">-</span>
-                    </div>
-                    <div class="role-box">
-                        <span class="role-label">Quebra-Gelo</span>
-                        <span class="role-val" id="detalheRelQuebra">-</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Observações -->
-            <div class="obs-box">
-                <strong>📝 Observações / Testemunhos</strong>
-                <div id="detalheRelObs" style="margin-top: 8px;"></div>
-            </div>
+        </div>
+
+        <!-- Observações -->
+        <div style="background: #fffbe6; border-radius: 12px; padding: 15px; border-left: 4px solid #f4b942;">
+            <div style="font-weight: 700; margin-bottom: 5px;">📝 Observações</div>
+            <div id="detalheRelObs" style="color: #555; line-height: 1.4;">...</div>
         </div>
     </div>
 </div>
