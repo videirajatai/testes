@@ -20,10 +20,7 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-        }
+        * { box-sizing: border-box; margin: 0; }
         :root {
             --primary: #600018;
             --primary-light: #7a0020;
@@ -46,508 +43,164 @@
             color: var(--text-main);
             padding-bottom: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 15px;
-        }
+        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            border-left: 5px solid var(--primary);
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius);
+            box-shadow: var(--shadow); margin-bottom: 20px; border-left: 5px solid var(--primary);
         }
-        .header h3 {
-            margin: 0;
-            color: var(--primary);
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 1.1rem;
-        }
-        .btn-refresh {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .btn-refresh:hover {
-            color: var(--primary);
-            transform: rotate(90deg);
-        }
+        .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.1rem; }
+        .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
+        .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
         .nav-menu {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 20px;
+            display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
         }
         .nav-btn {
-            flex: 1 1 28%;
-            min-width: 85px;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background: white;
-            color: var(--text-light);
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            transition: 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            font-size: 0.8rem;
+            flex: 1 1 28%; min-width: 85px; padding: 12px; border: none; border-radius: 10px;
+            background: white; color: var(--text-light); font-weight: 600; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); font-size: 0.8rem;
         }
-        .nav-btn i {
-            font-size: 1.1rem;
-        }
-        .nav-btn.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 10px rgba(128,0,32,0.3);
-        }
+        .nav-btn i { font-size: 1.1rem; }
+        .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128,0,32,0.3); }
         .cell-card {
-            background: #fef9e8;
-            border-radius: var(--radius);
-            padding: 15px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary);
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #fef9e8; border-radius: var(--radius); padding: 15px; margin-bottom: 12px;
+            box-shadow: var(--shadow); border-left: 4px solid var(--primary); cursor: pointer;
+            transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
         }
-        .cell-card:hover {
-            transform: translateY(-2px);
-            background: #fff5e0;
-        }
-        .cell-info {
-            flex: 1;
-        }
-        .cell-nome {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--text-main);
-        }
-        .cell-lider {
-            font-size: 0.8rem;
-            color: #92400e;
-            margin-top: 4px;
-        }
-        .badge-membros {
-            background: var(--primary);
-            color: white;
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .filtro-lider {
-            background: white;
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .filtro-lider label {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            font-weight: 600;
-        }
-        .filtro-lider select {
-            flex: 1;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        .member-grid {
-            display: grid;
-            gap: 15px;
-        }
+        .cell-card:hover { transform: translateY(-2px); background: #fff5e0; }
+        .cell-info { flex: 1; }
+        .cell-nome { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+        .cell-lider { font-size: 0.8rem; color: #92400e; margin-top: 4px; }
+        .badge-membros { background: var(--primary); color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
+        .filtro-lider { background: white; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .filtro-lider label { font-size: 0.85rem; color: var(--text-light); font-weight: 600; }
+        .filtro-lider select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+        .member-grid { display: grid; gap: 15px; }
         .member-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 18px;
-            box-shadow: var(--shadow);
-            border: 1px solid white;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            background: var(--card-bg); border-radius: var(--radius); padding: 18px;
+            box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px;
         }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        .card-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .cat-badge {
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: #eee;
-            color: #555;
-            font-weight: bold;
-        }
-        .status-row {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            margin-top: 5px;
-        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-name { font-size: 1.1rem; font-weight: 700; margin: 0; }
+        .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; }
+        .status-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
         .status-pill {
-            flex: 1 1 auto;
-            text-align: center;
-            font-size: 0.7rem;
-            padding: 5px 8px;
-            border-radius: 6px;
-            background: #f0f0f0;
-            color: #999;
-            font-weight: 600;
+            flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px;
+            border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600;
         }
-        .status-pill.active {
-            background: var(--success-bg);
-            color: var(--success-text);
-            border: 1px solid #c3e6cb;
-        }
+        .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
         .btn-zap {
-            display: block;
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            background: #f0fdf4;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
+            display: block; width: 100%; text-align: center; padding: 10px;
+            background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
+            border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
         }
-        .card-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 5px;
-        }
+        .card-actions { display: flex; gap: 8px; margin-top: 5px; }
         .btn-action {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+            flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600;
+            font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-        .btn-edit {
-            background: #e0f2fe;
-            color: #0284c7;
-        }
-        .btn-archive {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-        .btn-restore {
-            background: #dcfce7;
-            color: #166534;
-        }
-        /* CORREÇÃO 1: Aumentar z-index dos modais sobrepostos */
+        .btn-edit { background: #e0f2fe; color: #0284c7; }
+        .btn-archive { background: #fee2e2; color: #b91c1c; }
+        .btn-restore { background: #dcfce7; color: #166534; }
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 3100;  /* antes 1000 */
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            backdrop-filter: blur(2px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 3100; display: flex;
+            justify-content: center; align-items: flex-end; backdrop-filter: blur(2px);
         }
         .modal-content {
-            background: white;
-            width: 100%;
-            max-width: 800px;
-            max-height: 85vh;
-            border-radius: 20px 20px 0 0;
-            padding: 25px 20px;
-            overflow-y: auto;
-            position: relative;
-            animation: slideUp 0.3s ease-out;
+            background: white; width: 100%; max-width: 800px; max-height: 85vh;
+            border-radius: 20px 20px 0 0; padding: 25px 20px; overflow-y: auto;
+            position: relative; animation: slideUp 0.3s ease-out;
         }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .btn-close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #eee;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: #555;
+            position: absolute; top: 15px; right: 15px; background: #eee; border: none;
+            width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: var(--text-light); }
         input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            outline: none;
-            box-sizing: border-box;
+            width: 100%; padding: 12px; background: var(--input-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; outline: none; box-sizing: border-box;
         }
-        .btn-save {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .check-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .check-option input {
-            position: absolute;
-            opacity: 0;
-        }
+        .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .check-option { display: block; position: relative; cursor: pointer; }
+        .check-option input { position: absolute; opacity: 0; }
         .checkmark {
-            display: block;
-            padding: 10px;
-            text-align: center;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            color: #777;
-            font-weight: 600;
+            display: block; padding: 10px; text-align: center; background: #f9f9f9;
+            border: 1px solid #eee; border-radius: 8px; color: #777; font-weight: 600;
         }
-        .check-option input:checked ~ .checkmark {
-            background: var(--success-bg);
-            color: var(--success-text);
-            border-color: #badbcc;
-        }
+        .check-option input:checked ~ .checkmark { background: var(--success-bg); color: var(--success-text); border-color: #badbcc; }
         .report-list-item {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border-left: 4px solid var(--primary);
+            background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px;
+            border: 1px solid #eee; display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer; border-left: 4px solid var(--primary);
         }
-        .paper-report {
-            background: #fff;
-            border-top: 4px solid var(--accent);
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .paper-header {
-            text-align: center;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed #ddd;
-            margin-bottom: 15px;
-        }
-        .attend-box {
-            background: var(--success-bg);
-            color: var(--success-text);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .attend-num {
-            font-size: 1.5rem;
-            font-weight: 800;
-            display: block;
-        }
-        .role-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .obs-box {
-            background: #fffbf0;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
+        .paper-report { background: #fff; border-top: 4px solid var(--accent); padding: 20px; border-radius: 8px; }
+        .paper-header { text-align: center; padding-bottom: 15px; border-bottom: 1px dashed #ddd; margin-bottom: 15px; }
+        .attend-box { background: var(--success-bg); color: var(--success-text); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        .attend-num { font-size: 1.5rem; font-weight: 800; display: block; }
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .obs-box { background: #fffbf0; padding: 15px; border-radius: 8px; margin-top: 15px; }
         .biblia-offcanvas {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            background: white;
-            z-index: 2000;
-            transition: right 0.4s ease;
-            display: flex;
-            flex-direction: column;
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100vh;
+            background: white; z-index: 2000; transition: right 0.4s ease; display: flex; flex-direction: column;
         }
-        .biblia-offcanvas.aberto {
-            right: 0;
-        }
+        .biblia-offcanvas.aberto { right: 0; }
         #biblia-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 1999;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 1999; display: none; opacity: 0; transition: opacity 0.3s;
         }
-        .biblia-header {
-            background: var(--ouro-videira);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .biblia-controles {
-            padding: 15px;
-            background: #f8fafc;
-            display: flex;
-            gap: 8px;
-        }
-        .versao-selector-btn {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 10px 12px;
-            width: 80px;
-            cursor: pointer;
-        }
-        .biblia-controles select {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .biblia-texto-area {
-            padding: 25px 20px;
-            overflow-y: auto;
-            flex: 1;
-            line-height: 1.8;
-        }
-        .biblia-placeholder {
-            text-align: center;
-            color: #94a3b8;
-            margin-top: 50px;
-        }
+        .biblia-header { background: var(--ouro-videira); color: white; padding: 20px; display: flex; justify-content: space-between; }
+        .biblia-controles { padding: 15px; background: #f8fafc; display: flex; gap: 8px; }
+        .versao-selector-btn { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; width: 80px; cursor: pointer; }
+        .biblia-controles select { flex: 1; padding: 10px; border-radius: 8px; }
+        .biblia-texto-area { padding: 25px 20px; overflow-y: auto; flex: 1; line-height: 1.8; }
+        .biblia-placeholder { text-align: center; color: #94a3b8; margin-top: 50px; }
         .nav-capitulo-btn {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            background: rgba(96,0,24,0.7);
-            backdrop-filter: blur(5px);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            width: 48px;
-            height: 48px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 15;
+            position: fixed; bottom: 90px; right: 20px;
+            background: rgba(96,0,24,0.7); backdrop-filter: blur(5px); color: white;
+            border: none; border-radius: 40px; width: 48px; height: 48px;
+            font-size: 1.5rem; cursor: pointer; z-index: 15;
         }
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
         .table-clean {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1px solid #ddd;
+            width: 100%; border-collapse: collapse; background: white;
+            border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid #ddd;
         }
-        .table-clean th {
-            background: var(--primary);
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .table-clean td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        .btn-icon {
-            background: #f1f5f9;
-            border: none;
-            padding: 8px;
-            border-radius: 6px;
-            color: #475569;
-            cursor: pointer;
-        }
-        .btn-icon:hover {
-            background: #e2e8f0;
-            color: var(--primary);
-        }
-        /* Modal da célula continua com z-index 3000, mas os outros modais agora são 3100 */
+        .table-clean th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; }
+        .table-clean td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-size: 0.9rem; font-weight: 500; }
+        .btn-icon { background: #f1f5f9; border: none; padding: 8px; border-radius: 6px; color: #475569; cursor: pointer; }
+        .btn-icon:hover { background: #e2e8f0; color: var(--primary); }
         .modal-celula-full {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            z-index: 3000;
-            overflow-y: auto;
-            padding: 20px;
-            box-sizing: border-box;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 3000; overflow-y: auto; padding: 20px; box-sizing: border-box;
         }
+        /* Estilo para o modal de versão da Bíblia (já existe, mas garantir que fique visível) */
+        .modal-versao-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2100; display: flex;
+            justify-content: center; align-items: flex-end; backdrop-filter: blur(2px);
+        }
+        .modal-versao-overlay.hidden { display: none; }
+        .modal-versao-content {
+            background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0;
+            padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        .modal-versao-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-versao-header h3 { margin: 0; color: var(--primary); font-weight: 700; }
+        .modal-versao-close { background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; color: #64748b; cursor: pointer; font-size: 1.1rem; }
+        .versao-lista { display: flex; flex-direction: column; gap: 8px; }
+        .versao-item {
+            padding: 15px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;
+            cursor: pointer; font-weight: 500; display: flex; justify-content: space-between; transition: all 0.2s;
+        }
+        .versao-item:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .versao-item.selecionada { background: var(--primary); color: white; }
+        .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; }
+        .btn-youtube:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
@@ -558,16 +211,12 @@
     let supabaseClient;
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
         if (!window.supabaseClientGlobal) {
-            const SB_URL = 'https://ryvfogmfpjyamgqsltks.supabase.co';
-            const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA';
             supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
             window.supabaseClientGlobal = supabaseClient;
         } else {
             supabaseClient = window.supabaseClientGlobal;
         }
     } else {
-        const SB_URL = 'https://ryvfogmfpjyamgqsltks.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dmZvZ21mcGp5YW1ncXNsdGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTI2NTksImV4cCI6MjA4ODU2ODY1OX0.FSqv0YJwJH5-2Cl4ryhz6o3u7dzfzjD1MOjz2Di1_DA';
         supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
         window.supabaseClientGlobal = supabaseClient;
     }
@@ -588,7 +237,6 @@
             window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
         }
         sessionStorage.setItem('discipuladorEmail', user.email);
-        // CORREÇÃO 2: Armazenar nome do usuário logado para logs
         sessionStorage.setItem('usuarioLogado', usuario?.nome || user.email);
         sessionStorage.setItem('loginDigitado', user.email);
         carregarTudo();
@@ -630,7 +278,7 @@
         } catch(e) { console.error(e); throw e; }
     }
 
-    // ========== CARREGAR DADOS ==========
+    // ========== CARREGAR DADOS (sem referências a elementos inexistentes) ==========
     async function carregarTudo() {
         const icon = document.getElementById('iconRefresh');
         if (icon) icon.classList.add('fa-spin');
@@ -640,12 +288,13 @@
             dadosMembros = membros || [];
             const { data: celulas } = await supabaseClient.from('celulas').select('*');
             dadosCelulas = celulas || [];
-            // CORREÇÃO 3: Filtrar células onde supervisor_email é o discipulador
             celulasSupervisionadas = dadosCelulas.filter(c => c.supervisor_email === discipuladorEmail);
             renderizarCelulasRede(celulasSupervisionadas);
             renderizarTabelaCelulas(dadosCelulas);
-            preencherFiltroCelulas(dadosCelulas);
-            renderizarMembrosEArquivos(dadosMembros);
+            // Preencher selects de células (para edição de membro)
+            preencherSelectsCelulas();
+            // Renderizar apenas membros arquivados (não existe grid de membros ativos no discipulador)
+            renderizarMembrosArquivados(dadosMembros);
             const { data: rels } = await supabaseClient.from('relatorios').select('*');
             dadosRelatorios = rels || [];
             const agendaRes = await fetchGoogle('buscarAgenda', {});
@@ -764,120 +413,100 @@
     // ========== RELATÓRIOS DA CÉLULA (CORRIGIDO) ==========
     async function abrirListaRelatoriosCelula() {
         if (!celulaAtiva) return;
-       document.getElementById('formRelatorioModal').onsubmit = async function(e) {
-    e.preventDefault();
-    if (!celulaAtiva) { alert("Selecione uma célula."); return; }
-    const btn = this.querySelector('button[type="submit"]');
-    btn.disabled = true;
+        const modalLista = document.getElementById('modalListaRelatorios');
+        const spanNome = document.getElementById('relatorioCelulaNome');
+        spanNome.innerText = celulaAtiva.nome;
+        const container = document.getElementById('listaRelatoriosCelula');
+        container.innerHTML = '<p>Carregando...</p>';
+        modalLista.classList.remove('hidden');
 
-    const checkboxes = document.querySelectorAll('#checklistMembrosModal input[name="presentes"]:checked');
-    const presentesIds = Array.from(checkboxes).map(cb => cb.value);
-
-    const dadosRelatorio = {
-        data: this.data.value,
-        celula: celulaAtiva.nome,
-        quebra_gelo: this.quebraGelo.value,
-        palavra: this.palavra.value,
-        louvor: this.louvor.value,
-        lanche: this.lanche.value,
-        observacoes: this.observacoes.value
-    };
-
-    try {
-        // 1. Inserir o relatório
-        const { data: rel, error } = await supabaseClient
-            .from('relatorios')
-            .insert([dadosRelatorio])
-            .select();
-        if (error) throw error;
-        const relatorioId = rel[0].id;
-
-        // 2. Preparar e inserir as presenças
-        // Importante: usar os membros da célula (membrosDaCelulaAtiva) para criar os registros
-        const presencas = membrosDaCelulaAtiva.map(m => ({
-            relatorio_id: relatorioId,
-            membro_id: m.id,
-            presente: presentesIds.includes(String(m.id))  // boolean
-        }));
-        
-        const { error: errPres } = await supabaseClient
-            .from('presencas')
-            .insert(presencas);
-        if (errPres) throw errPres;
-
-        alert("Relatório enviado com sucesso!");
-        fecharModalRelatorio();
-        await carregarTudo();  // recarrega dados
-        if (celulaAtiva) {
-            await carregarMembrosDaCelula(celulaAtiva.nome);
-            renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+        try {
+            const { data: relatorios, error } = await supabaseClient
+                .from('relatorios')
+                .select('*')
+                .eq('celula', celulaAtiva.nome)
+                .order('data', { ascending: false });
+            if (error) throw error;
+            if (!relatorios.length) {
+                container.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório encontrado para esta célula.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            for (const r of relatorios) {
+                let dataF = r.data || '';
+                try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
+                const div = document.createElement('div');
+                div.className = 'report-list-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${dataF}</strong><br>
+                        <span style="font-size:0.85rem;">${r.quebra_gelo ? 'Quebra-gelo: ' + r.quebra_gelo : ''}</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                `;
+                div.onclick = () => abrirDetalheRelatorio(r.id);
+                container.appendChild(div);
+            }
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<p style="color:red;">Erro ao carregar relatórios.</p>';
         }
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao salvar relatório: " + err.message);
-    } finally {
-        btn.disabled = false;
-    }
-    };
-}
-
-   async function abrirDetalheRelatorio(id) {
-    // Busca o relatório diretamente do banco para garantir dados atualizados
-    const { data: relatorio, error: errRel } = await supabaseClient
-        .from('relatorios')
-        .select('*')
-        .eq('id', id)
-        .single();
-    if (errRel || !relatorio) {
-        console.error("Erro ao buscar relatório:", errRel);
-        alert("Relatório não encontrado.");
-        return;
     }
 
-    // Busca as presenças
-    const { data: presencas, error: errPres } = await supabaseClient
-        .from('presencas')
-        .select('membro_id, presente')
-        .eq('relatorio_id', id);
-    if (errPres) console.error("Erro ao buscar presenças:", errPres);
+    async function abrirDetalheRelatorio(id) {
+        // Busca o relatório diretamente do banco
+        const { data: relatorio, error: errRel } = await supabaseClient
+            .from('relatorios')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (errRel || !relatorio) {
+            console.error("Erro ao buscar relatório:", errRel);
+            alert("Relatório não encontrado.");
+            return;
+        }
 
-    // Processa presentes/ausentes (opcional, mas mantém a funcionalidade)
-    const nomesPresentes = [];
-    const nomesAusentes = [];
-    if (presencas && presencas.length) {
-        for (const p of presencas) {
-            let isPresente = false;
-            if (typeof p.presente === 'boolean') isPresente = p.presente;
-            else if (typeof p.presente === 'string') isPresente = p.presente.toLowerCase() === 'sim';
-            const membro = dadosMembros.find(m => String(m.id) === String(p.membro_id));
-            if (membro) {
-                if (isPresente) nomesPresentes.push(membro.nome);
-                else nomesAusentes.push(membro.nome);
+        // Busca as presenças
+        const { data: presencas, error: errPres } = await supabaseClient
+            .from('presencas')
+            .select('membro_id, presente')
+            .eq('relatorio_id', id);
+        if (errPres) console.error("Erro ao buscar presenças:", errPres);
+
+        const nomesPresentes = [];
+        const nomesAusentes = [];
+        if (presencas && presencas.length) {
+            for (const p of presencas) {
+                let isPresente = false;
+                if (typeof p.presente === 'boolean') isPresente = p.presente;
+                else if (typeof p.presente === 'string') isPresente = p.presente.toLowerCase() === 'sim';
+                const membro = dadosMembros.find(m => String(m.id) === String(p.membro_id));
+                if (membro) {
+                    if (isPresente) nomesPresentes.push(membro.nome);
+                    else nomesAusentes.push(membro.nome);
+                }
             }
         }
+
+        let dataF = relatorio.data || '';
+        try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
+
+        document.getElementById('detalheRelCelula').innerText = relatorio.celula || '-';
+        document.getElementById('detalheRelData').innerText = dataF;
+        document.getElementById('detalheRelTotal').innerText = nomesPresentes.length;
+        document.getElementById('detalheRelPresentes').innerHTML = `
+            ${nomesPresentes.length ? `✅ Presentes: ${nomesPresentes.join(', ')}<br>` : ''}
+            ${nomesAusentes.length ? `❌ Ausentes: ${nomesAusentes.join(', ')}` : ''}
+            ${!nomesPresentes.length && !nomesAusentes.length ? 'Nenhum dado de presença.' : ''}
+        `;
+        document.getElementById('detalheRelQuebra').innerText = relatorio.quebra_gelo || '-';
+        document.getElementById('detalheRelPalavra').innerText = relatorio.palavra || '-';
+        document.getElementById('detalheRelLouvor').innerText = relatorio.louvor || '-';
+        document.getElementById('detalheRelLanche').innerText = relatorio.lanche || '-';
+        document.getElementById('detalheRelObs').innerText = relatorio.observacoes || 'Nenhuma observação.';
+
+        document.getElementById('modalRelatorio').classList.remove('hidden');
     }
-
-    // Exibe os dados do relatório (AGORA VINDO DO BANCO)
-    let dataF = relatorio.data || '';
-    try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
-
-    document.getElementById('detalheRelCelula').innerText = relatorio.celula || '-';
-    document.getElementById('detalheRelData').innerText = dataF;
-    document.getElementById('detalheRelTotal').innerText = nomesPresentes.length;
-    document.getElementById('detalheRelPresentes').innerHTML = `
-        ${nomesPresentes.length ? `✅ Presentes: ${nomesPresentes.join(', ')}<br>` : ''}
-        ${nomesAusentes.length ? `❌ Ausentes: ${nomesAusentes.join(', ')}` : ''}
-        ${!nomesPresentes.length && !nomesAusentes.length ? 'Nenhum dado de presença.' : ''}
-    `;
-    // CAMPOS QUE ESTAVAM FALTANDO:
-    document.getElementById('detalheRelQuebra').innerText = relatorio.quebra_gelo || '-';
-    document.getElementById('detalheRelPalavra').innerText = relatorio.palavra || '-';
-    document.getElementById('detalheRelLouvor').innerText = relatorio.louvor || '-';
-    document.getElementById('detalheRelLanche').innerText = relatorio.lanche || '-';
-    document.getElementById('detalheRelObs').innerText = relatorio.observacoes || 'Nenhuma observação.';
-
-    document.getElementById('modalRelatorio').classList.remove('hidden');
-}
     
     // ========== APASCENTAR (FALTOSOS) ==========
     async function abrirApascentar() {
@@ -914,30 +543,16 @@
         alert(msg);
     }
 
-    // ========== MEMBROS (CRUD, ARQUIVOS) ==========
-    function renderizarMembrosEArquivos(lista) {
-        const gridAtivos = document.getElementById('gridMembros');
+    // ========== MEMBROS (CRUD, APENAS ARQUIVADOS) ==========
+    function renderizarMembrosArquivados(lista) {
         const gridArquivos = document.getElementById('gridArquivos');
-        if (!gridAtivos || !gridArquivos) return;
-        gridAtivos.innerHTML = '';
+        if (!gridArquivos) return;
         gridArquivos.innerHTML = '';
-        if (!lista || lista.length === 0) {
-            gridAtivos.innerHTML = '<p style="text-align:center;">Nenhum membro encontrado.</p>';
+        const arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
+        if (!arquivados.length) {
+            gridArquivos.innerHTML = '<p style="text-align:center;">Nenhum membro arquivado.</p>';
             return;
         }
-        const ativos = lista.filter(m => String(m.arquivado).toLowerCase() !== 'sim');
-        const arquivados = lista.filter(m => String(m.arquivado).toLowerCase() === 'sim');
-        const pesoCargos = { "Pastor": 1, "Discipulador": 2, "Líder": 3, "Membro": 4, "Frequentador": 5 };
-        const ordenar = (a, b) => {
-            let tipoA = a.tipo || "Frequentador";
-            let tipoB = b.tipo || "Frequentador";
-            let pesoA = pesoCargos[tipoA] || 99;
-            let pesoB = pesoCargos[tipoB] || 99;
-            if (pesoA !== pesoB) return pesoA - pesoB;
-            return (a.nome || "").localeCompare(b.nome || "");
-        };
-        ativos.sort(ordenar);
-        arquivados.sort(ordenar);
         const check = (val) => (String(val).toLowerCase() === 'sim' || val === true) ? 'active' : '';
         const formatData = (d) => {
             if (!d) return '';
@@ -945,25 +560,16 @@
             const p = d.split('-');
             return p.length === 3 ? `${p[2]}/${p[1]}` : d;
         };
-        const montarCard = (m, isArquivado) => {
+        arquivados.forEach(m => {
             const nome = m.nome || 'Sem Nome';
             const celula = m.celula || '-';
             const categoria = m.tipo || 'Frequentador';
-            const telefoneStr = String(m.telefone ?? '');
-            const telClean = telefoneStr.replace(/\D/g, '');
-            const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> Conversar</a>` : '';
             const nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
-            const acoes = isArquivado
-                ? `<button onclick="restaurarMembro('${m.id}')" class="btn-action btn-restore"><i class="fas fa-undo"></i> Restaurar</button>`
-                : `<div class="card-actions">
-                    <button onclick="abrirEditarMembro('${m.id}')" class="btn-action btn-edit"><i class="fas fa-edit"></i> Editar</button>
-                    <button onclick="arquivarMembro('${m.id}')" class="btn-action btn-archive"><i class="fas fa-archive"></i> Arquivar</button>
-                   </div>`;
-            return `
-                <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}">
+            gridArquivos.innerHTML += `
+                <div class="member-card">
                     <div class="card-header">
                         <div><h4 class="card-name">${nome}</h4><span class="cat-badge">${categoria}</span></div>
-                        ${acoes}
+                        <button onclick="restaurarMembro('${m.id}')" class="btn-action btn-restore"><i class="fas fa-undo"></i> Restaurar</button>
                     </div>
                     <div class="card-info"><i class="fas fa-users"></i> ${celula} ${nasc}</div>
                     <div class="status-row">
@@ -974,13 +580,9 @@
                         <div class="status-pill ${check(m.seminario)}">Seminário</div>
                         <div class="status-pill ${check(m.dizimista)}">Dizimista</div>
                     </div>
-                    ${!isArquivado ? btnZap : ''}
                 </div>
             `;
-        };
-        ativos.forEach(m => gridAtivos.innerHTML += montarCard(m, false));
-        arquivados.forEach(m => gridArquivos.innerHTML += montarCard(m, true));
-        if (arquivados.length === 0) gridArquivos.innerHTML = '<p style="text-align:center;">Nenhum membro arquivado.</p>';
+        });
     }
 
     function abrirEditarMembro(id) {
@@ -1126,13 +728,6 @@
                 </tr>
             `;
         });
-    }
-
-    function preencherFiltroCelulas(celulas) {
-        const select = document.getElementById('filtroCelula');
-        if (!select) return;
-        select.innerHTML = '<option value="">Todas as Células</option>';
-        celulas.forEach(c => select.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
     }
 
     function abrirEditarCelula(id) {
@@ -1395,6 +990,13 @@
     function fecharModal(id) {
         document.getElementById(id).classList.add('hidden');
     }
+
+    // ========== INICIALIZAÇÃO ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        preencherSelectsCelulas();
+        const filtroLider = document.getElementById('filtroLiderRede');
+        if (filtroLider) filtroLider.onchange = () => filtrarCelulasRede();
+    });
 </script>
 
 <div class="container">
@@ -1606,30 +1208,5 @@
         <div class="versao-lista" id="listaVersoes"></div>
     </div>
 </div>
-
-<script>
-    // ========== INICIALIZAÇÃO DOS FILTROS E EVENTOS ADICIONAIS ==========
-    document.addEventListener('DOMContentLoaded', () => {
-        preencherSelectsCelulas();
-        const filtroLider = document.getElementById('filtroLiderRede');
-        if (filtroLider) filtroLider.onchange = () => filtrarCelulasRede();
-        const filtroCelula = document.getElementById('filtroCelula');
-        if (filtroCelula) filtroCelula.onchange = () => filtrarMembros();
-        const buscaInput = document.getElementById('inputBusca');
-        if (buscaInput) buscaInput.onkeyup = () => filtrarMembros();
-    });
-
-    function filtrarMembros() {
-        const busca = document.getElementById('inputBusca')?.value.toLowerCase() || '';
-        const celulaFiltro = document.getElementById('filtroCelula')?.value.toLowerCase() || '';
-        const cards = document.querySelectorAll('#gridMembros .member-card');
-        cards.forEach(card => {
-            const nome = card.getAttribute('data-nome') || '';
-            const celula = card.getAttribute('data-celula') || '';
-            const match = nome.includes(busca) && (celulaFiltro === '' || celula.includes(celulaFiltro));
-            card.style.display = match ? 'flex' : 'none';
-        });
-    }
-</script>
 </body>
 </html>
