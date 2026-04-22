@@ -20,6 +20,7 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
+        /* ========== ESTILOS (MANTIDOS IGUAIS) ========== */
         * { box-sizing: border-box; margin: 0; }
         :root {
             --primary: #600018;
@@ -206,7 +207,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // ========== SUPABASE CLIENT ÚNICO ==========
+    // ========== CONFIGURAÇÃO SUPABASE ==========
     let supabaseClient;
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
         if (!window.supabaseClientGlobal) {
@@ -220,28 +221,7 @@
         window.supabaseClientGlobal = supabaseClient;
     }
 
-    // ========== AUTENTICAÇÃO ==========
-    (async () => {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) { window.location.href = "index.html"; return; }
-        const { data: usuario } = await supabaseClient
-            .from('usuarios')
-            .select('categoria')
-            .eq('email', user.email)
-            .single();
-        const cat = (usuario?.categoria || "membro").toLowerCase();
-        const permitidos = ["discipulador", "pastor", "administrador"];
-        if (!permitidos.includes(cat)) {
-            alert("Acesso negado.");
-            window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
-        }
-        sessionStorage.setItem('discipuladorEmail', user.email);
-        sessionStorage.setItem('usuarioLogado', usuario?.nome || user.email);
-        sessionStorage.setItem('loginDigitado', user.email);
-        carregarTudo();
-    })();
-
-    // ========== VARIÁVEIS GLOBAIS ==========
+    // ========== VARIÁVEIS GLOBAIS (DECLARADAS NO INÍCIO) ==========
     let dadosMembros = [];
     let dadosCelulas = [];
     let celulasSupervisionadas = [];
@@ -251,6 +231,11 @@
     let listaPalavras = [];
     let palavraAtual = null;
     let listaAgenda = [];
+
+    // Variáveis da Bíblia
+    let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
+    const siglasVersoes = { msg:'MSG', nvi:'NVI', aa:'ARA', acf:'ACF', ntlh:'NTLH' };
+    const nomesCompletos = { msg:'A Mensagem', nvi:'Nova Versão Internacional', aa:'Almeida Revista e Atualizada', acf:'Almeida Corrigida Fiel', ntlh:'Nova Tradução na Linguagem de Hoje' };
 
     // ========== FUNÇÕES AUXILIARES ==========
     async function registrarLogAcao(acao) {
@@ -277,6 +262,28 @@
         } catch(e) { console.error(e); throw e; }
     }
 
+    // ========== AUTENTICAÇÃO E CARREGAMENTO INICIAL ==========
+    (async () => {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) { window.location.href = "index.html"; return; }
+        const { data: usuario } = await supabaseClient
+            .from('usuarios')
+            .select('categoria')
+            .eq('email', user.email)
+            .single();
+        const cat = (usuario?.categoria || "membro").toLowerCase();
+        const permitidos = ["discipulador", "pastor", "administrador"];
+        if (!permitidos.includes(cat)) {
+            alert("Acesso negado.");
+            window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
+        }
+        sessionStorage.setItem('discipuladorEmail', user.email);
+        sessionStorage.setItem('usuarioLogado', usuario?.nome || user.email);
+        sessionStorage.setItem('loginDigitado', user.email);
+        await carregarTudo();
+        inicializarEventos(); // configura os onsubmit após o DOM estar pronto
+    })();
+
     // ========== CARREGAR DADOS ==========
     async function carregarTudo() {
         const icon = document.getElementById('iconRefresh');
@@ -290,7 +297,7 @@
             celulasSupervisionadas = dadosCelulas.filter(c => c.supervisor_email === discipuladorEmail);
             renderizarCelulasRede(celulasSupervisionadas);
             renderizarTabelaCelulas(dadosCelulas);
-            preencherSelectsCelulas();  // para os selects de célula nos formulários
+            preencherSelectsCelulas();
             renderizarMembrosArquivados(dadosMembros);
             const { data: rels } = await supabaseClient.from('relatorios').select('*');
             dadosRelatorios = rels || [];
@@ -307,25 +314,29 @@
     // ========== MINHA REDE (CÉLULAS SUPERVISIONADAS) ==========
     function renderizarCelulasRede(celulas) {
         const container = document.getElementById('listaCelulasRede');
+        if (!container) return;
         container.innerHTML = '';
         const filtroSelect = document.getElementById('filtroLiderRede');
-        filtroSelect.innerHTML = '<option value="">Todos os Líderes</option>';
+        if (filtroSelect) filtroSelect.innerHTML = '<option value="">Todos os Líderes</option>';
         if (!celulas.length) {
-            document.getElementById('nenhumaCelulaMsg').classList.remove('hidden');
+            const msg = document.getElementById('nenhumaCelulaMsg');
+            if (msg) msg.classList.remove('hidden');
             return;
         }
-        document.getElementById('nenhumaCelulaMsg').classList.add('hidden');
+        const msg = document.getElementById('nenhumaCelulaMsg');
+        if (msg) msg.classList.add('hidden');
         const lideresUnicos = [...new Set(celulas.map(c => c.lider).filter(l => l))];
-        lideresUnicos.forEach(l => filtroSelect.innerHTML += `<option value="${l}">${l}</option>`);
+        lideresUnicos.forEach(l => { if (filtroSelect) filtroSelect.innerHTML += `<option value="${l}">${l}</option>`; });
         window.celulasRedeCompleta = celulas;
         filtrarCelulasRede();
     }
 
     function filtrarCelulasRede() {
-        const filtro = document.getElementById('filtroLiderRede').value;
+        const filtro = document.getElementById('filtroLiderRede')?.value || '';
         let celulasFiltradas = window.celulasRedeCompleta || [];
         if (filtro) celulasFiltradas = celulasFiltradas.filter(c => c.lider === filtro);
         const container = document.getElementById('listaCelulasRede');
+        if (!container) return;
         container.innerHTML = '';
         celulasFiltradas.forEach(cel => {
             const card = document.createElement('div');
@@ -342,18 +353,22 @@
         });
     }
 
-    // ========== MODAL DA CÉLULA (MEMBROS + RELATÓRIOS) ==========
+    // ========== MODAL DA CÉLULA ==========
     async function abrirModalCelula(cel) {
         celulaAtiva = cel;
-        document.getElementById('modalCelulaTitulo').innerText = cel.nome;
-        document.getElementById('modalCelula').style.display = 'block';
-        document.getElementById('cadastroModalCelulaHidden').value = cel.nome;
+        const titulo = document.getElementById('modalCelulaTitulo');
+        if (titulo) titulo.innerText = cel.nome;
+        const modal = document.getElementById('modalCelula');
+        if (modal) modal.style.display = 'block';
+        const hidden = document.getElementById('cadastroModalCelulaHidden');
+        if (hidden) hidden.value = cel.nome;
         await carregarMembrosDaCelula(cel.nome);
         renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
     }
 
     function fecharModalCelula() {
-        document.getElementById('modalCelula').style.display = 'none';
+        const modal = document.getElementById('modalCelula');
+        if (modal) modal.style.display = 'none';
     }
 
     async function carregarMembrosDaCelula(nomeCelula) {
@@ -373,6 +388,7 @@
 
     function renderizarMembrosCelulaModal(lista) {
         const grid = document.getElementById('gridMembrosCelulaModal');
+        if (!grid) return;
         grid.innerHTML = '';
         if (!lista.length) {
             grid.innerHTML = '<p style="text-align:center; color:#999;">Nenhum membro nesta célula.</p>';
@@ -407,15 +423,16 @@
         });
     }
 
-    // ========== RELATÓRIOS DA CÉLULA ==========
+    // ========== RELATÓRIOS ==========
     async function abrirListaRelatoriosCelula() {
         if (!celulaAtiva) return;
         const modalLista = document.getElementById('modalListaRelatorios');
         const spanNome = document.getElementById('relatorioCelulaNome');
-        spanNome.innerText = celulaAtiva.nome;
+        if (spanNome) spanNome.innerText = celulaAtiva.nome;
         const container = document.getElementById('listaRelatoriosCelula');
+        if (!container) return;
         container.innerHTML = '<p>Carregando...</p>';
-        modalLista.classList.remove('hidden');
+        if (modalLista) modalLista.classList.remove('hidden');
 
         try {
             const { data: relatorios, error } = await supabaseClient
@@ -486,24 +503,36 @@
         let dataF = relatorio.data || '';
         try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
 
-        document.getElementById('detalheRelCelula').innerText = relatorio.celula || '-';
-        document.getElementById('detalheRelData').innerText = dataF;
-        document.getElementById('detalheRelTotal').innerText = nomesPresentes.length;
-        document.getElementById('detalheRelPresentes').innerHTML = `
-            ${nomesPresentes.length ? `✅ Presentes: ${nomesPresentes.join(', ')}<br>` : ''}
-            ${nomesAusentes.length ? `❌ Ausentes: ${nomesAusentes.join(', ')}` : ''}
-            ${!nomesPresentes.length && !nomesAusentes.length ? 'Nenhum dado de presença.' : ''}
-        `;
-        document.getElementById('detalheRelQuebra').innerText = relatorio.quebra_gelo || '-';
-        document.getElementById('detalheRelPalavra').innerText = relatorio.palavra || '-';
-        document.getElementById('detalheRelLouvor').innerText = relatorio.louvor || '-';
-        document.getElementById('detalheRelLanche').innerText = relatorio.lanche || '-';
-        document.getElementById('detalheRelObs').innerText = relatorio.observacoes || 'Nenhuma observação.';
+        const celulaSpan = document.getElementById('detalheRelCelula');
+        if (celulaSpan) celulaSpan.innerText = relatorio.celula || '-';
+        const dataSpan = document.getElementById('detalheRelData');
+        if (dataSpan) dataSpan.innerText = dataF;
+        const totalSpan = document.getElementById('detalheRelTotal');
+        if (totalSpan) totalSpan.innerText = nomesPresentes.length;
+        const presentesDiv = document.getElementById('detalheRelPresentes');
+        if (presentesDiv) {
+            presentesDiv.innerHTML = `
+                ${nomesPresentes.length ? `✅ Presentes: ${nomesPresentes.join(', ')}<br>` : ''}
+                ${nomesAusentes.length ? `❌ Ausentes: ${nomesAusentes.join(', ')}` : ''}
+                ${!nomesPresentes.length && !nomesAusentes.length ? 'Nenhum dado de presença.' : ''}
+            `;
+        }
+        const quebraSpan = document.getElementById('detalheRelQuebra');
+        if (quebraSpan) quebraSpan.innerText = relatorio.quebra_gelo || '-';
+        const palavraSpan = document.getElementById('detalheRelPalavra');
+        if (palavraSpan) palavraSpan.innerText = relatorio.palavra || '-';
+        const louvorSpan = document.getElementById('detalheRelLouvor');
+        if (louvorSpan) louvorSpan.innerText = relatorio.louvor || '-';
+        const lancheSpan = document.getElementById('detalheRelLanche');
+        if (lancheSpan) lancheSpan.innerText = relatorio.lanche || '-';
+        const obsDiv = document.getElementById('detalheRelObs');
+        if (obsDiv) obsDiv.innerText = relatorio.observacoes || 'Nenhuma observação.';
 
-        document.getElementById('modalRelatorio').classList.remove('hidden');
+        const modal = document.getElementById('modalRelatorio');
+        if (modal) modal.classList.remove('hidden');
     }
-    
-    // ========== APASCENTAR (FALTOSOS) ==========
+
+    // ========== APASCENTAR ==========
     async function abrirApascentar() {
         if (!celulaAtiva) return;
         const trintaDiasAtras = new Date();
@@ -538,7 +567,7 @@
         alert(msg);
     }
 
-    // ========== MEMBROS (CRUD, APENAS ARQUIVADOS) ==========
+    // ========== MEMBROS (ARQUIVADOS E EDIÇÃO) ==========
     function renderizarMembrosArquivados(lista) {
         const gridArquivos = document.getElementById('gridArquivos');
         if (!gridArquivos) return;
@@ -596,7 +625,8 @@
         document.getElementById('editMembroEncontro').checked = chk(m.encontro);
         document.getElementById('editMembroSeminario').checked = chk(m.seminario);
         document.getElementById('editMembroDizimista').checked = chk(m.dizimista);
-        document.getElementById('modalEditarMembro').classList.remove('hidden');
+        const modal = document.getElementById('modalEditarMembro');
+        if (modal) modal.classList.remove('hidden');
     }
 
     async function arquivarMembro(id) {
@@ -637,83 +667,16 @@
         preencherSelectsCelulas();
         const sel = document.getElementById('addMembroCelula');
         if (sel) sel.value = celulaAtiva.nome;
-        document.getElementById('formAdicionarMembro').reset();
-        document.getElementById('modalAdicionarMembro').classList.remove('hidden');
+        const form = document.getElementById('formAdicionarMembro');
+        if (form) form.reset();
+        const modal = document.getElementById('modalAdicionarMembro');
+        if (modal) modal.classList.remove('hidden');
     }
 
-    document.getElementById('formAdicionarMembro').onsubmit = async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnSalvarNovoMembro');
-        btn.disabled = true;
-        const dados = {
-            nome: document.getElementById('addMembroNome').value,
-            nascimento: document.getElementById('addMembroNasc').value || null,
-            telefone: document.getElementById('addMembroTel').value,
-            celula: document.getElementById('addMembroCelula').value,
-            tipo: document.getElementById('addMembroCat').value,
-            batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
-            cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
-            ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
-            encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
-            seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
-            dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
-            arquivado: "Não"
-        };
-        try {
-            const { error } = await supabaseClient.from('membros').insert([dados]);
-            if (error) throw error;
-            alert("Membro cadastrado com sucesso!");
-            fecharModal('modalAdicionarMembro');
-            carregarTudo();
-            if (celulaAtiva) {
-                await carregarMembrosDaCelula(celulaAtiva.nome);
-                renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-            }
-        } catch (err) {
-            console.error("Erro ao cadastrar membro:", err);
-            alert("Erro ao cadastrar: " + err.message);
-        } finally {
-            btn.disabled = false;
-        }
-    };
-
-    document.getElementById('formEditarMembro').onsubmit = async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnSalvarEdicaoMembro');
-        btn.disabled = true;
-        const id = document.getElementById('editMembroId').value;
-        const dados = {
-            nome: document.getElementById('editMembroNome').value,
-            nascimento: document.getElementById('editMembroNasc').value || null,
-            telefone: document.getElementById('editMembroTel').value,
-            celula: document.getElementById('editMembroCelula').value,
-            tipo: document.getElementById('editMembroCat').value,
-            batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
-            cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
-            ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
-            encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
-            seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
-            dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
-        };
-        try {
-            await supabaseClient.from('membros').update(dados).eq('id', id);
-            alert("Membro atualizado!");
-            fecharModal('modalEditarMembro');
-            carregarTudo();
-            if (celulaAtiva) {
-                await carregarMembrosDaCelula(celulaAtiva.nome);
-                renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-            }
-        } catch (err) {
-            alert("Erro ao atualizar: " + err.message);
-        } finally {
-            btn.disabled = false;
-        }
-    };
-
-    // ========== CÉLULAS (GERAL, TABELA) ==========
+    // ========== CÉLULAS (TABELA GERAL) ==========
     function renderizarTabelaCelulas(celulas) {
         const tbody = document.getElementById('corpoCelulas');
+        if (!tbody) return;
         tbody.innerHTML = '';
         celulas.forEach(c => {
             tbody.innerHTML += `
@@ -735,8 +698,10 @@
         document.getElementById('editCelulaLider').value = cel.lider || '';
         document.getElementById('editCelulaDia').value = cel.dia_horario || '';
         document.getElementById('editCelulaEnd').value = cel.endereco || '';
-        document.getElementById('tituloModalCelula').innerText = 'Editar Célula';
-        document.getElementById('modalEditarCelula').classList.remove('hidden');
+        const titulo = document.getElementById('tituloModalCelula');
+        if (titulo) titulo.innerText = 'Editar Célula';
+        const modal = document.getElementById('modalEditarCelula');
+        if (modal) modal.classList.remove('hidden');
     }
 
     function abrirModalNovaCelula() {
@@ -745,34 +710,11 @@
         document.getElementById('editCelulaLider').value = '';
         document.getElementById('editCelulaDia').value = '';
         document.getElementById('editCelulaEnd').value = '';
-        document.getElementById('tituloModalCelula').innerText = 'Nova Célula';
-        document.getElementById('modalEditarCelula').classList.remove('hidden');
+        const titulo = document.getElementById('tituloModalCelula');
+        if (titulo) titulo.innerText = 'Nova Célula';
+        const modal = document.getElementById('modalEditarCelula');
+        if (modal) modal.classList.remove('hidden');
     }
-
-    document.getElementById('formCelula').onsubmit = async function(e) {
-        e.preventDefault();
-        const id = document.getElementById('editCelulaId').value;
-        const dados = {
-            nome: document.getElementById('editCelulaNome').value,
-            lider: document.getElementById('editCelulaLider').value,
-            dia_horario: document.getElementById('editCelulaDia').value,
-            endereco: document.getElementById('editCelulaEnd').value,
-            supervisor_email: sessionStorage.getItem('discipuladorEmail')
-        };
-        try {
-            if (id) {
-                await supabaseClient.from('celulas').update(dados).eq('id', id);
-                alert("Célula atualizada!");
-            } else {
-                await supabaseClient.from('celulas').insert([dados]);
-                alert("Célula criada!");
-            }
-            fecharModal('modalEditarCelula');
-            carregarTudo();
-        } catch(err) {
-            alert("Erro ao salvar célula: " + err.message);
-        }
-    };
 
     // ========== AGENDA ==========
     function renderizarAgenda(lista) {
@@ -845,14 +787,16 @@
         } else {
             btn.classList.add('hidden');
         }
-        document.getElementById('modalPalavra').classList.remove('hidden');
+        const modal = document.getElementById('modalPalavra');
+        if (modal) modal.classList.remove('hidden');
     }
 
     function baixarPalavraTXT() {
         if (!palavraAtual) return;
         const btn = document.querySelector('.modal-download');
+        if (!btn) return;
         const icon = btn.querySelector('i');
-        icon.className = 'fas fa-spinner fa-spin';
+        if (icon) icon.className = 'fas fa-spinner fa-spin';
         try {
             const titulo = palavraAtual.tema || 'Palavra';
             const data = palavraAtual.data || '';
@@ -869,41 +813,46 @@
         } catch (e) {
             alert('Erro ao gerar TXT.');
         } finally {
-            icon.className = 'fas fa-download';
+            if (icon) icon.className = 'fas fa-download';
         }
     }
 
     // ========== BÍBLIA ==========
-    let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
-    const siglasVersoes = { msg:'MSG', nvi:'NVI', aa:'ARA', acf:'ACF', ntlh:'NTLH' };
-
     async function abrirBiblia() {
-        document.getElementById('painel-biblia').classList.add('aberto');
-        document.getElementById('biblia-overlay').style.display = 'block';
-        setTimeout(() => document.getElementById('biblia-overlay').style.opacity = '1', 10);
+        const offcanvas = document.getElementById('painel-biblia');
+        const overlay = document.getElementById('biblia-overlay');
+        if (offcanvas) offcanvas.classList.add('aberto');
+        if (overlay) {
+            overlay.style.display = 'block';
+            setTimeout(() => overlay.style.opacity = '1', 10);
+        }
         if (typeof Biblia !== 'undefined') {
             if (!Biblia.bibliaCarregada) await Biblia.inicializar();
             versaoSelecionada = Biblia.getVersaoAtiva();
-            document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada;
+            const siglaSpan = document.getElementById('versaoSiglaAtual');
+            if (siglaSpan) siglaSpan.innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada;
         }
     }
 
     function fecharBiblia() {
-        document.getElementById('painel-biblia').classList.remove('aberto');
-        const ov = document.getElementById('biblia-overlay');
-        ov.style.opacity = '0';
-        setTimeout(() => ov.style.display = 'none', 300);
+        const offcanvas = document.getElementById('painel-biblia');
+        if (offcanvas) offcanvas.classList.remove('aberto');
+        const overlay = document.getElementById('biblia-overlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
     }
 
     function abrirModalVersao() {
         const modal = document.getElementById('modalVersao');
         const listaDiv = document.getElementById('listaVersoes');
+        if (!modal || !listaDiv) return;
         listaDiv.innerHTML = '';
-        const versoes = { msg: 'A Mensagem', nvi: 'Nova Versão Internacional', aa: 'Almeida Revista e Atualizada', acf: 'Almeida Corrigida Fiel', ntlh: 'Nova Tradução na Linguagem de Hoje' };
-        Object.entries(versoes).forEach(([id, nome]) => {
+        Object.entries(nomesCompletos).forEach(([id, nome]) => {
             const item = document.createElement('div');
             item.className = 'versao-item' + (id === versaoSelecionada ? ' selecionada' : '');
-            item.innerHTML = `${nome} <span style="opacity:0.7;">${siglasVersoes[id]}</span>`;
+            item.innerHTML = `${nome} <span style="opacity:0.7; font-size:0.9rem;">${siglasVersoes[id]}</span>`;
             item.onclick = () => selecionarVersao(id);
             listaDiv.appendChild(item);
         });
@@ -912,33 +861,38 @@
 
     function fecharModalVersao(e) {
         if (!e || e.target.classList.contains('modal-versao-overlay') || e.target.classList.contains('modal-versao-close')) {
-            document.getElementById('modalVersao').classList.add('hidden');
+            const modal = document.getElementById('modalVersao');
+            if (modal) modal.classList.add('hidden');
         }
     }
 
     async function selecionarVersao(id) {
         versaoSelecionada = id;
         localStorage.setItem('biblia_versao', id);
-        document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[id];
+        const siglaSpan = document.getElementById('versaoSiglaAtual');
+        if (siglaSpan) siglaSpan.innerText = siglasVersoes[id];
         fecharModalVersao();
         if (typeof Biblia !== 'undefined') await Biblia.mudarVersao(id);
     }
 
     function capituloAnterior() {
         const selCap = document.getElementById('biblia-capitulo');
+        if (!selCap) return;
         let val = parseInt(selCap.value);
         if (val > 1) {
             selCap.value = val - 1;
             if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
         } else {
             const selLiv = document.getElementById('biblia-livro');
-            if (selLiv.selectedIndex > 0) {
+            if (selLiv && selLiv.selectedIndex > 0) {
                 selLiv.selectedIndex--;
                 if (typeof Biblia !== 'undefined') Biblia.onLivroChange();
                 setTimeout(() => {
-                    const selCap = document.getElementById('biblia-capitulo');
-                    selCap.value = selCap.options.length;
-                    if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
+                    const selCap2 = document.getElementById('biblia-capitulo');
+                    if (selCap2) {
+                        selCap2.value = selCap2.options.length;
+                        if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
+                    }
                 }, 100);
             }
         }
@@ -946,34 +900,30 @@
 
     function capituloProximo() {
         const selCap = document.getElementById('biblia-capitulo');
+        if (!selCap) return;
         let val = parseInt(selCap.value);
         if (val < selCap.options.length) {
             selCap.value = val + 1;
             if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
         } else {
             const selLiv = document.getElementById('biblia-livro');
-            if (selLiv.selectedIndex < selLiv.options.length - 1) {
+            if (selLiv && selLiv.selectedIndex < selLiv.options.length - 1) {
                 selLiv.selectedIndex++;
                 if (typeof Biblia !== 'undefined') Biblia.onLivroChange();
                 setTimeout(() => {
-                    document.getElementById('biblia-capitulo').value = 1;
-                    if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
+                    const selCap2 = document.getElementById('biblia-capitulo');
+                    if (selCap2) {
+                        selCap2.value = 1;
+                        if (typeof Biblia !== 'undefined') Biblia.onCapituloChange();
+                    }
                 }, 100);
             }
         }
     }
 
-    function fazerLogout() {
-        if (confirm("Deseja sair do sistema?")) {
-            sessionStorage.clear();
-            window.location.href = "index.html";
-        }
-    }
-
-    // ========== MUDAR SEÇÃO (COM FECHAMENTO DA BÍBLIA) ==========
+    // ========== MUDAR SEÇÃO ==========
     function mudarSecao(s) {
-        // Fecha a Bíblia se estiver aberta, para não "vazar" para outras abas
-        fecharBiblia();
+        fecharBiblia(); // fecha a Bíblia ao trocar de aba
         const secoes = ['minha-rede', 'celulas', 'biblia', 'arquivos', 'agenda', 'palavras'];
         secoes.forEach(id => {
             const el = document.getElementById(`secao-${id}`);
@@ -988,14 +938,135 @@
     }
 
     function fecharModal(id) {
-        document.getElementById(id).classList.add('hidden');
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.add('hidden');
     }
 
-    // ========== INICIALIZAÇÃO ==========
+    function fazerLogout() {
+        if (confirm("Deseja sair do sistema?")) {
+            sessionStorage.clear();
+            window.location.href = "index.html";
+        }
+    }
+
+    // ========== INICIALIZAR EVENTOS (onsubmit) ==========
+    function inicializarEventos() {
+        const formAdicionar = document.getElementById('formAdicionarMembro');
+        if (formAdicionar) {
+            formAdicionar.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSalvarNovoMembro');
+                if (btn) btn.disabled = true;
+                const dados = {
+                    nome: document.getElementById('addMembroNome').value,
+                    nascimento: document.getElementById('addMembroNasc').value || null,
+                    telefone: document.getElementById('addMembroTel').value,
+                    celula: document.getElementById('addMembroCelula').value,
+                    tipo: document.getElementById('addMembroCat').value,
+                    batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
+                    cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
+                    ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
+                    encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
+                    seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
+                    dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
+                    arquivado: "Não"
+                };
+                try {
+                    const { error } = await supabaseClient.from('membros').insert([dados]);
+                    if (error) throw error;
+                    alert("Membro cadastrado com sucesso!");
+                    fecharModal('modalAdicionarMembro');
+                    await carregarTudo();
+                    if (celulaAtiva) {
+                        await carregarMembrosDaCelula(celulaAtiva.nome);
+                        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Erro ao cadastrar: " + err.message);
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            };
+        }
+
+        const formEditar = document.getElementById('formEditarMembro');
+        if (formEditar) {
+            formEditar.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSalvarEdicaoMembro');
+                if (btn) btn.disabled = true;
+                const id = document.getElementById('editMembroId').value;
+                const dados = {
+                    nome: document.getElementById('editMembroNome').value,
+                    nascimento: document.getElementById('editMembroNasc').value || null,
+                    telefone: document.getElementById('editMembroTel').value,
+                    celula: document.getElementById('editMembroCelula').value,
+                    tipo: document.getElementById('editMembroCat').value,
+                    batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
+                    cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
+                    ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
+                    encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
+                    seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
+                    dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
+                };
+                try {
+                    await supabaseClient.from('membros').update(dados).eq('id', id);
+                    alert("Membro atualizado!");
+                    fecharModal('modalEditarMembro');
+                    await carregarTudo();
+                    if (celulaAtiva) {
+                        await carregarMembrosDaCelula(celulaAtiva.nome);
+                        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+                    }
+                } catch (err) {
+                    alert("Erro ao atualizar: " + err.message);
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            };
+        }
+
+        const formCelula = document.getElementById('formCelula');
+        if (formCelula) {
+            formCelula.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSalvarEdicaoCelula');
+                if (btn) btn.disabled = true;
+                const id = document.getElementById('editCelulaId').value;
+                const dados = {
+                    nome: document.getElementById('editCelulaNome').value,
+                    lider: document.getElementById('editCelulaLider').value,
+                    dia_horario: document.getElementById('editCelulaDia').value,
+                    endereco: document.getElementById('editCelulaEnd').value,
+                    supervisor_email: sessionStorage.getItem('discipuladorEmail')
+                };
+                try {
+                    if (id) {
+                        await supabaseClient.from('celulas').update(dados).eq('id', id);
+                        alert("Célula atualizada!");
+                    } else {
+                        await supabaseClient.from('celulas').insert([dados]);
+                        alert("Célula criada!");
+                    }
+                    fecharModal('modalEditarCelula');
+                    await carregarTudo();
+                } catch(err) {
+                    alert("Erro ao salvar célula: " + err.message);
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            };
+        }
+    }
+
+    // ========== DOMContentLoaded ==========
     document.addEventListener('DOMContentLoaded', () => {
         preencherSelectsCelulas();
         const filtroLider = document.getElementById('filtroLiderRede');
         if (filtroLider) filtroLider.onchange = () => filtrarCelulasRede();
+        // Garantir que os eventos já estão configurados (chamamos novamente por segurança)
+        inicializarEventos();
     });
 </script>
 
@@ -1060,6 +1131,7 @@
     </div>
 </div>
 
+<!-- MODAL DA CÉLULA (tela cheia) -->
 <div id="modalCelula" class="modal-celula-full">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--primary); padding-bottom:15px;">
         <h2 id="modalCelulaTitulo" style="margin:0; color:var(--primary);"></h2>
@@ -1074,6 +1146,7 @@
     <input type="hidden" id="cadastroModalCelulaHidden">
 </div>
 
+<!-- MODAL LISTA DE RELATÓRIOS -->
 <div id="modalListaRelatorios" class="modal-overlay hidden">
     <div class="modal-content">
         <button class="btn-close-modal" onclick="fecharModal('modalListaRelatorios')">&times;</button>
@@ -1082,6 +1155,7 @@
     </div>
 </div>
 
+<!-- MODAL DETALHE DO RELATÓRIO -->
 <div id="modalRelatorio" class="modal-overlay hidden">
     <div class="modal-content">
         <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
@@ -1100,6 +1174,7 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR CÉLULA -->
 <div id="modalEditarCelula" class="modal-overlay hidden">
     <div class="modal-content">
         <button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
@@ -1110,11 +1185,12 @@
             <div class="form-group"><label>Líder (nome)</label><input type="text" id="editCelulaLider" required></div>
             <div class="form-group"><label>Dia e Horário</label><input type="text" id="editCelulaDia" placeholder="Ex: Terça 20h"></div>
             <div class="form-group"><label>Endereço</label><input type="text" id="editCelulaEnd"></div>
-            <button type="submit" class="btn-save">Salvar</button>
+            <button type="submit" id="btnSalvarEdicaoCelula" class="btn-save">Salvar</button>
         </form>
     </div>
 </div>
 
+<!-- MODAL ADICIONAR MEMBRO -->
 <div id="modalAdicionarMembro" class="modal-overlay hidden">
     <div class="modal-content">
         <button class="btn-close-modal" onclick="fecharModal('modalAdicionarMembro')">&times;</button>
@@ -1141,6 +1217,7 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR MEMBRO -->
 <div id="modalEditarMembro" class="modal-overlay hidden">
     <div class="modal-content">
         <button class="btn-close-modal" onclick="fecharModal('modalEditarMembro')">&times;</button>
@@ -1168,6 +1245,7 @@
     </div>
 </div>
 
+<!-- MODAL PALAVRA -->
 <div id="modalPalavra" class="modal-overlay hidden">
     <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -1181,6 +1259,7 @@
     </div>
 </div>
 
+<!-- BÍBLIA OFF-CANVAS -->
 <div id="biblia-overlay" onclick="fecharBiblia()"></div>
 <div id="painel-biblia" class="biblia-offcanvas">
     <div class="biblia-header">
@@ -1199,8 +1278,9 @@
     </div>
 </div>
 
-<div id="modalVersao" class="modal-versao-overlay hidden">
-    <div class="modal-versao-content">
+<!-- MODAL VERSÃO BÍBLIA -->
+<div id="modalVersao" class="modal-versao-overlay hidden" onclick="fecharModalVersao(event)">
+    <div class="modal-versao-content" onclick="event.stopPropagation()">
         <div class="modal-versao-header">
             <h3>Selecione a Versão</h3>
             <button class="modal-versao-close" onclick="fecharModalVersao()"><i class="fas fa-times"></i></button>
@@ -1208,5 +1288,6 @@
         <div class="versao-lista" id="listaVersoes"></div>
     </div>
 </div>
+
 </body>
 </html>
