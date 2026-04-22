@@ -1197,21 +1197,59 @@ async function abrirApascentar() {
     </div>
 </div>
 
-<!-- MODAL DETALHE DO RELATÓRIO -->
-<div id="modalRelatorio" class="modal-overlay hidden">
-    <div class="modal-content">
+<!-- MODAL DETALHE DO RELATÓRIO (VERSÃO MELHORADA VISUALMENTE) -->
+<div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
-        <div class="paper-report">
-            <div class="paper-header"><span class="paper-title" id="detalheRelCelula"></span><span class="paper-date" id="detalheRelData"></span></div>
-            <div class="attend-box"><span class="attend-num" id="detalheRelTotal"></span><span class="attend-label">PESSOAS PRESENTES</span></div>
-            <div class="role-grid">
-                <div class="role-box"><span class="role-label">Palavra</span><span class="role-val" id="detalheRelPalavra"></span></div>
-                <div class="role-box"><span class="role-label">Louvor</span><span class="role-val" id="detalheRelLouvor"></span></div>
-                <div class="role-box"><span class="role-label">Lanche</span><span class="role-val" id="detalheRelLanche"></span></div>
-                <div class="role-box"><span class="role-label">Quebra-Gelo</span><span class="role-val" id="detalheRelQuebra"></span></div>
+        <div class="paper-report" style="margin-top: 10px;">
+            <!-- Cabeçalho com célula e data -->
+            <div class="paper-header">
+                <span class="paper-title" id="detalheRelCelula">Nome da Célula</span>
+                <span class="paper-date" id="detalheRelData">00/00/0000</span>
             </div>
-            <div><strong>Frequência / Nomes</strong><div class="list-present" id="detalheRelPresentes"></div></div>
-            <div class="obs-box" id="detalheRelObs"></div>
+            
+            <!-- Bloco de quantidade de presentes (destacado) -->
+            <div class="attend-box">
+                <span class="attend-num" id="detalheRelTotal">0</span>
+                <span class="attend-label">PESSOAS PRESENTES</span>
+            </div>
+            
+            <!-- Lista de nomes dos presentes (sem os ausentes) -->
+            <div style="margin-bottom: 20px;">
+                <strong style="display: block; margin-bottom: 8px; color: var(--primary);">📋 Membros Presentes</strong>
+                <div class="list-present" id="detalheRelPresentes" style="background: #f8fafc; padding: 12px; border-radius: 12px; max-height: 200px; overflow-y: auto;">
+                    <!-- Os nomes serão inseridos aqui via JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Encargos do dia -->
+            <div style="margin-bottom: 15px;">
+                <strong style="display: block; margin-bottom: 8px; color: var(--primary);">🎯 Encargos do Dia</strong>
+                <div class="role-grid">
+                    <div class="role-box">
+                        <span class="role-label">Palavra / Estudo</span>
+                        <span class="role-val" id="detalheRelPalavra">-</span>
+                    </div>
+                    <div class="role-box">
+                        <span class="role-label">Louvor / Oração</span>
+                        <span class="role-val" id="detalheRelLouvor">-</span>
+                    </div>
+                    <div class="role-box">
+                        <span class="role-label">Lanche / Comunhão</span>
+                        <span class="role-val" id="detalheRelLanche">-</span>
+                    </div>
+                    <div class="role-box">
+                        <span class="role-label">Quebra-Gelo</span>
+                        <span class="role-val" id="detalheRelQuebra">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Observações -->
+            <div class="obs-box">
+                <strong>📝 Observações / Testemunhos</strong>
+                <div id="detalheRelObs" style="margin-top: 8px;"></div>
+            </div>
         </div>
     </div>
 </div>
