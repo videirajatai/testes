@@ -79,27 +79,32 @@
         .filtro-lider select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
         .member-grid { display: grid; gap: 15px; }
         .member-card {
-            background: var(--card-bg); border-radius: var(--radius); padding: 18px;
-            box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px;
+            background: var(--card-bg); border-radius: var(--radius); padding: 12px;
+            box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 8px;
         }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-name { font-size: 1.1rem; font-weight: 700; margin: 0; }
-        .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; }
-        .status-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .card-name { font-size: 1rem; font-weight: 700; margin: 0; }
+        .cat-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; }
+        .card-info { font-size: 0.75rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+        .status-row {
+            display: flex; gap: 4px; margin-top: 4px; flex-wrap: nowrap;
+            overflow-x: auto; white-space: nowrap; padding-bottom: 4px;
+        }
         .status-pill {
-            flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px;
+            display: inline-block; text-align: center; font-size: 0.65rem; padding: 3px 6px;
             border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600;
         }
         .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
-        .btn-zap {
-            display: block; width: 100%; text-align: center; padding: 10px;
+        .btn-zap-icon {
             background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
-            border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            border-radius: 6px; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; font-size: 1rem;
         }
-        .card-actions { display: flex; gap: 8px; margin-top: 5px; }
+        .card-actions { display: flex; gap: 6px; align-items: center; }
         .btn-action {
-            flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600;
-            font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
+            padding: 6px 8px; border: none; border-radius: 6px; font-weight: 600;
+            font-size: 0.7rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
         }
         .btn-edit { background: #e0f2fe; color: #0284c7; }
         .btn-archive { background: #fee2e2; color: #b91c1c; }
@@ -118,6 +123,7 @@
         .btn-close-modal {
             position: absolute; top: 15px; right: 15px; background: #eee; border: none;
             width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555;
+            display: flex; align-items: center; justify-content: center;
         }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: var(--text-light); }
@@ -154,18 +160,44 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); z-index: 1999; display: none; opacity: 0; transition: opacity 0.3s;
         }
-        .biblia-header { background: var(--ouro-videira); color: white; padding: 20px; display: flex; justify-content: space-between; }
-        .biblia-controles { padding: 15px; background: #f8fafc; display: flex; gap: 8px; }
-        .versao-selector-btn { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; width: 80px; cursor: pointer; }
-        .biblia-controles select { flex: 1; padding: 10px; border-radius: 8px; }
-        .biblia-texto-area { padding: 25px 20px; overflow-y: auto; flex: 1; line-height: 1.8; }
-        .biblia-placeholder { text-align: center; color: #94a3b8; margin-top: 50px; }
-        .nav-capitulo-btn {
-            position: fixed; bottom: 90px; right: 20px;
-            background: rgba(96,0,24,0.7); backdrop-filter: blur(5px); color: white;
-            border: none; border-radius: 40px; width: 48px; height: 48px;
-            font-size: 1.5rem; cursor: pointer; z-index: 15;
+        .biblia-header {
+            background: var(--ouro-videira); color: white; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .biblia-header h2 { margin: 0; font-size: 1.2rem; }
+        .btn-fechar-biblia {
+            background: rgba(0,0,0,0.2); border: none; width: 36px; height: 36px;
+            border-radius: 50%; color: white; font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-fechar-biblia:hover { background: rgba(0,0,0,0.4); }
+        .biblia-controles {
+            padding: 15px; background: #f8fafc; display: flex; gap: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .versao-selector-btn {
+            background: white; border: 1px solid #cbd5e1; border-radius: 8px;
+            padding: 10px 12px; width: 80px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .biblia-controles select { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .biblia-texto-area {
+            padding: 25px 20px; overflow-y: auto; flex: 1;
+            line-height: 1.8; font-size: 1rem; color: #334155;
+        }
+        .biblia-placeholder { text-align: center; color: #94a3b8; margin-top: 50px; }
+        /* Botões de navegação dentro do offcanvas (rodapé fixo) */
+        .biblia-nav-footer {
+            padding: 15px 20px; background: white; border-top: 1px solid #e2e8f0;
+            display: flex; justify-content: space-between; gap: 15px;
+        }
+        .nav-capitulo-btn {
+            flex: 1; background: var(--primary); color: white; border: none;
+            border-radius: 40px; padding: 10px; font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .nav-capitulo-btn:hover { background: var(--primary-light); }
         .hidden { display: none !important; }
         .table-clean {
             width: 100%; border-collapse: collapse; background: white;
@@ -221,7 +253,7 @@
         window.supabaseClientGlobal = supabaseClient;
     }
 
-    // ========== VARIÁVEIS GLOBAIS (DECLARADAS NO INÍCIO) ==========
+    // ========== VARIÁVEIS GLOBAIS ==========
     let dadosMembros = [];
     let dadosCelulas = [];
     let celulasSupervisionadas = [];
@@ -281,7 +313,7 @@
         sessionStorage.setItem('usuarioLogado', usuario?.nome || user.email);
         sessionStorage.setItem('loginDigitado', user.email);
         await carregarTudo();
-        inicializarEventos(); // configura os onsubmit após o DOM estar pronto
+        inicializarEventos();
     })();
 
     // ========== CARREGAR DADOS ==========
@@ -397,27 +429,27 @@
         const check = (val) => (String(val).toLowerCase() === 'sim' || val === true) ? 'active' : '';
         lista.forEach(m => {
             const telefoneStr = String(m.telefone ?? '');
-            const telClean = telefoneStr.replace(/\D/g, '');        
-            const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : '';
+            const telClean = telefoneStr.replace(/\D/g, '');
+            const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap-icon" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
             grid.innerHTML += `
                 <div class="member-card">
                     <div class="card-header">
-                        <h4 class="card-name">${m.nome || 'Sem nome'}</h4>
-                        <span class="cat-badge">${m.tipo || 'Membro'}</span>
+                        <div><h4 class="card-name">${m.nome || 'Sem nome'}</h4><span class="cat-badge">${m.tipo || 'Membro'}</span></div>
+                        <div class="card-actions">
+                            <button onclick="abrirEditarMembro('${m.id}')" class="btn-action btn-edit" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button onclick="arquivarMembro('${m.id}')" class="btn-action btn-archive" title="Arquivar"><i class="fas fa-archive"></i></button>
+                            ${btnZap}
+                        </div>
                     </div>
+                    <div class="card-info"><i class="fas fa-users"></i> ${m.celula || '-'}</div>
                     <div class="status-row">
-                        <div class="status-pill ${check(m.batizado)}">Batismo</div>
-                        <div class="status-pill ${check(m.cursao)}">Cursão</div>
-                        <div class="status-pill ${check(m.ctl)}">CTL</div>
-                        <div class="status-pill ${check(m.encontro)}">Encontro</div>
-                        <div class="status-pill ${check(m.seminario)}">Seminário</div>
-                        <div class="status-pill ${check(m.dizimista)}">Dizimista</div>
+                        <span class="status-pill ${check(m.batizado)}">Batismo</span>
+                        <span class="status-pill ${check(m.cursao)}">Cursão</span>
+                        <span class="status-pill ${check(m.ctl)}">CTL</span>
+                        <span class="status-pill ${check(m.encontro)}">Encontro</span>
+                        <span class="status-pill ${check(m.seminario)}">Seminário</span>
+                        <span class="status-pill ${check(m.dizimista)}">Dizimista</span>
                     </div>
-                    <div class="card-actions">
-                        <button onclick="abrirEditarMembro('${m.id}')" class="btn-action btn-edit"><i class="fas fa-edit"></i> Editar</button>
-                        <button onclick="arquivarMembro('${m.id}')" class="btn-action btn-archive"><i class="fas fa-archive"></i> Arquivar</button>
-                    </div>
-                    ${btnZap}
                 </div>
             `;
         });
@@ -597,12 +629,12 @@
                     </div>
                     <div class="card-info"><i class="fas fa-users"></i> ${celula} ${nasc}</div>
                     <div class="status-row">
-                        <div class="status-pill ${check(m.batizado)}">Batismo</div>
-                        <div class="status-pill ${check(m.cursao)}">Cursão</div>
-                        <div class="status-pill ${check(m.ctl)}">CTL</div>
-                        <div class="status-pill ${check(m.encontro)}">Encontro</div>
-                        <div class="status-pill ${check(m.seminario)}">Seminário</div>
-                        <div class="status-pill ${check(m.dizimista)}">Dizimista</div>
+                        <span class="status-pill ${check(m.batizado)}">Batismo</span>
+                        <span class="status-pill ${check(m.cursao)}">Cursão</span>
+                        <span class="status-pill ${check(m.ctl)}">CTL</span>
+                        <span class="status-pill ${check(m.encontro)}">Encontro</span>
+                        <span class="status-pill ${check(m.seminario)}">Seminário</span>
+                        <span class="status-pill ${check(m.dizimista)}">Dizimista</span>
                     </div>
                 </div>
             `;
@@ -923,7 +955,7 @@
 
     // ========== MUDAR SEÇÃO ==========
     function mudarSecao(s) {
-        fecharBiblia(); // fecha a Bíblia ao trocar de aba
+        fecharBiblia();
         const secoes = ['minha-rede', 'celulas', 'biblia', 'arquivos', 'agenda', 'palavras'];
         secoes.forEach(id => {
             const el = document.getElementById(`secao-${id}`);
@@ -949,7 +981,7 @@
         }
     }
 
-    // ========== INICIALIZAR EVENTOS (onsubmit) ==========
+    // ========== INICIALIZAR EVENTOS ==========
     function inicializarEventos() {
         const formAdicionar = document.getElementById('formAdicionarMembro');
         if (formAdicionar) {
@@ -1065,7 +1097,6 @@
         preencherSelectsCelulas();
         const filtroLider = document.getElementById('filtroLiderRede');
         if (filtroLider) filtroLider.onchange = () => filtrarCelulasRede();
-        // Garantir que os eventos já estão configurados (chamamos novamente por segurança)
         inicializarEventos();
     });
 </script>
@@ -1264,7 +1295,7 @@
 <div id="painel-biblia" class="biblia-offcanvas">
     <div class="biblia-header">
         <div><i class="fas fa-bible"></i><h2>Bíblia</h2></div>
-        <button class="btn-fechar-biblia" onclick="fecharBiblia()">✕</button>
+        <button class="btn-fechar-biblia" onclick="fecharBiblia()"><i class="fas fa-times"></i></button>
     </div>
     <div class="biblia-controles">
         <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()"><span id="versaoSiglaAtual">MSG</span><i class="fas fa-chevron-down"></i></button>
@@ -1272,9 +1303,9 @@
         <select id="biblia-capitulo" onchange="Biblia.onCapituloChange()"></select>
     </div>
     <div id="biblia-conteudo" class="biblia-texto-area"><p class="biblia-placeholder">Selecione livro e capítulo</p></div>
-    <div class="biblia-floating-nav">
-        <button class="nav-capitulo-btn" onclick="capituloAnterior()"><i class="fas fa-chevron-left"></i></button>
-        <button class="nav-capitulo-btn" onclick="capituloProximo()"><i class="fas fa-chevron-right"></i></button>
+    <div class="biblia-nav-footer">
+        <button class="nav-capitulo-btn" onclick="capituloAnterior()"><i class="fas fa-chevron-left"></i> Anterior</button>
+        <button class="nav-capitulo-btn" onclick="capituloProximo()">Próximo <i class="fas fa-chevron-right"></i></button>
     </div>
 </div>
 
