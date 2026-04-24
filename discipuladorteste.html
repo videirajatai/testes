@@ -326,6 +326,8 @@
             dadosMembros = membros || [];
             const { data: celulas } = await supabaseClient.from('celulas').select('*');
             dadosCelulas = celulas || [];
+            window.celulaMap = {};
+            dadosCelulas.forEach(c => { window.celulaMap[c.id] = c.nome; });
             celulasSupervisionadas = dadosCelulas.filter(c => c.supervisor_email === discipuladorEmail);
             renderizarCelulasRede(celulasSupervisionadas);
             renderizarTabelaCelulas(dadosCelulas);
@@ -393,8 +395,8 @@
         const modal = document.getElementById('modalCelula');
         if (modal) modal.style.display = 'block';
         const hidden = document.getElementById('cadastroModalCelulaHidden');
-        if (hidden) hidden.value = cel.nome;
-        await carregarMembrosDaCelula(cel.nome);
+        if (hidden) hidden.value = cel.id;               // antes: cel.nome
+        await carregarMembrosDaCelula(cel.id);           // antes: cel.nome
         renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
     }
 
@@ -403,12 +405,12 @@
         if (modal) modal.style.display = 'none';
     }
 
-    async function carregarMembrosDaCelula(nomeCelula) {
+   async function carregarMembrosDaCelula(celulaId) {
         try {
             const { data, error } = await supabaseClient
                 .from('membros')
                 .select('*')
-                .eq('celula', nomeCelula)
+                .eq('celula_id', celulaId)
                 .eq('arquivado', 'Não');
             if (error) throw error;
             membrosDaCelulaAtiva = data || [];
@@ -431,6 +433,7 @@
             const telefoneStr = String(m.telefone ?? '');
             const telClean = telefoneStr.replace(/\D/g, '');
             const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap-icon" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
+            const nomeCelula = window.celulaMap[m.celula_id] || m.celula || '-';
             grid.innerHTML += `
                 <div class="member-card">
                     <div class="card-header">
@@ -441,7 +444,7 @@
                             ${btnZap}
                         </div>
                     </div>
-                    <div class="card-info"><i class="fas fa-users"></i> ${m.celula || '-'}</div>
+                    <div class="card-info"><i class="fas fa-users"></i> ${nomeCelula}</div>
                     <div class="status-row">
                         <span class="status-pill ${check(m.batizado)}">Batismo</span>
                         <span class="status-pill ${check(m.cursao)}">Cursão</span>
@@ -698,11 +701,10 @@ async function abrirApascentar() {
             if (!sel) return;
             sel.innerHTML = '<option value="">Selecione a Célula</option>';
             dadosCelulas.forEach(c => {
-                if (c.nome) sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+                if (c.nome) sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
             });
         });
     }
-
     function abrirModalCadastroMembro() {
         if (!celulaAtiva) {
             alert("Selecione uma célula primeiro.");
@@ -710,7 +712,7 @@ async function abrirApascentar() {
         }
         preencherSelectsCelulas();
         const sel = document.getElementById('addMembroCelula');
-        if (sel) sel.value = celulaAtiva.nome;
+        if (sel) sel.value = celulaAtiva.id;          // antes: celulaAtiva.nome
         const form = document.getElementById('formAdicionarMembro');
         if (form) form.reset();
         const modal = document.getElementById('modalAdicionarMembro');
@@ -738,6 +740,7 @@ async function abrirApascentar() {
         const cel = dadosCelulas.find(c => c.id == id);
         if (!cel) return;
         document.getElementById('editCelulaId').value = cel.id;
+        document.getElementById('editCelulaNomeOriginal').value = cel.nome;  // NOVO
         document.getElementById('editCelulaNome').value = cel.nome || '';
         document.getElementById('editCelulaLider').value = cel.lider || '';
         document.getElementById('editCelulaDia').value = cel.dia_horario || '';
@@ -749,16 +752,17 @@ async function abrirApascentar() {
     }
 
     function abrirModalNovaCelula() {
-        document.getElementById('editCelulaId').value = '';
-        document.getElementById('editCelulaNome').value = '';
-        document.getElementById('editCelulaLider').value = '';
-        document.getElementById('editCelulaDia').value = '';
-        document.getElementById('editCelulaEnd').value = '';
-        const titulo = document.getElementById('tituloModalCelula');
-        if (titulo) titulo.innerText = 'Nova Célula';
-        const modal = document.getElementById('modalEditarCelula');
-        if (modal) modal.classList.remove('hidden');
-    }
+            document.getElementById('editCelulaId').value = '';
+            document.getElementById('editCelulaNomeOriginal').value = '';   // NOVO
+            document.getElementById('editCelulaNome').value = '';
+            document.getElementById('editCelulaLider').value = '';
+            document.getElementById('editCelulaDia').value = '';
+            document.getElementById('editCelulaEnd').value = '';
+            const titulo = document.getElementById('tituloModalCelula');
+            if (titulo) titulo.innerText = 'Nova Célula';
+            const modal = document.getElementById('modalEditarCelula');
+            if (modal) modal.classList.remove('hidden');
+        }
 
     // ========== AGENDA ==========
     function renderizarAgenda(lista) {
@@ -997,111 +1001,114 @@ async function abrirApascentar() {
     function inicializarEventos() {
         const formAdicionar = document.getElementById('formAdicionarMembro');
         if (formAdicionar) {
-            formAdicionar.onsubmit = async function(e) {
-                e.preventDefault();
-                const btn = document.getElementById('btnSalvarNovoMembro');
-                if (btn) btn.disabled = true;
-                const dados = {
-                    nome: document.getElementById('addMembroNome').value,
-                    nascimento: document.getElementById('addMembroNasc').value || null,
-                    telefone: document.getElementById('addMembroTel').value,
-                    celula: document.getElementById('addMembroCelula').value,
-                    tipo: document.getElementById('addMembroCat').value,
-                    batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
-                    cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
-                    ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
-                    encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
-                    seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
-                    dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
-                    arquivado: "Não"
-                };
-                try {
-                    const { error } = await supabaseClient.from('membros').insert([dados]);
-                    if (error) throw error;
-                    alert("Membro cadastrado com sucesso!");
-                    fecharModal('modalAdicionarMembro');
-                    await carregarTudo();
-                    if (celulaAtiva) {
-                        await carregarMembrosDaCelula(celulaAtiva.nome);
-                        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("Erro ao cadastrar: " + err.message);
-                } finally {
-                    if (btn) btn.disabled = false;
-                }
+            formAdicionarMembro.onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarNovoMembro');
+            if (btn) btn.disabled = true;
+            const dados = {
+                nome: document.getElementById('addMembroNome').value,
+                nascimento: document.getElementById('addMembroNasc').value || null,
+                telefone: document.getElementById('addMembroTel').value,
+                celula_id: document.getElementById('addMembroCelula').value,   // antes: celula: ...
+                tipo: document.getElementById('addMembroCat').value,
+                batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
+                cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
+                ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
+                encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
+                seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
+                dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
+                arquivado: "Não"
             };
+            try {
+                const { error } = await supabaseClient.from('membros').insert([dados]);
+                if (error) throw error;
+                alert("Membro cadastrado com sucesso!");
+                fecharModal('modalAdicionarMembro');
+                await carregarTudo();
+                if (celulaAtiva) {
+                    await carregarMembrosDaCelula(celulaAtiva.id);
+                    renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao cadastrar: " + err.message);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
         }
 
-        const formEditar = document.getElementById('formEditarMembro');
-        if (formEditar) {
-            formEditar.onsubmit = async function(e) {
-                e.preventDefault();
-                const btn = document.getElementById('btnSalvarEdicaoMembro');
-                if (btn) btn.disabled = true;
-                const id = document.getElementById('editMembroId').value;
-                const dados = {
-                    nome: document.getElementById('editMembroNome').value,
-                    nascimento: document.getElementById('editMembroNasc').value || null,
-                    telefone: document.getElementById('editMembroTel').value,
-                    celula: document.getElementById('editMembroCelula').value,
-                    tipo: document.getElementById('editMembroCat').value,
-                    batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
-                    cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
-                    ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
-                    encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
-                    seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
-                    dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
-                };
-                try {
-                    await supabaseClient.from('membros').update(dados).eq('id', id);
-                    alert("Membro atualizado!");
-                    fecharModal('modalEditarMembro');
-                    await carregarTudo();
-                    if (celulaAtiva) {
-                        await carregarMembrosDaCelula(celulaAtiva.nome);
-                        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-                    }
-                } catch (err) {
-                    alert("Erro ao atualizar: " + err.message);
-                } finally {
-                    if (btn) btn.disabled = false;
-                }
-            };
+        formEditarMembro.onsubmit = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSalvarEdicaoMembro');
+        if (btn) btn.disabled = true;
+        const id = document.getElementById('editMembroId').value;
+        const dados = {
+            nome: document.getElementById('editMembroNome').value,
+            nascimento: document.getElementById('editMembroNasc').value || null,
+            telefone: document.getElementById('editMembroTel').value,
+            celula_id: document.getElementById('editMembroCelula').value,  // antes: celula: ...
+            tipo: document.getElementById('editMembroCat').value,
+            batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
+            cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
+            ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
+            encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
+            seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
+            dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
+        };
+        try {
+            await supabaseClient.from('membros').update(dados).eq('id', id);
+            alert("Membro atualizado!");
+            fecharModal('modalEditarMembro');
+            await carregarTudo();
+            if (celulaAtiva) {
+                await carregarMembrosDaCelula(celulaAtiva.id);
+                renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+            }
+        } catch (err) {
+            alert("Erro ao atualizar: " + err.message);
+        } finally {
+            if (btn) btn.disabled = false;
         }
+    };
+        
 
-        const formCelula = document.getElementById('formCelula');
-        if (formCelula) {
-            formCelula.onsubmit = async function(e) {
-                e.preventDefault();
-                const btn = document.getElementById('btnSalvarEdicaoCelula');
-                if (btn) btn.disabled = true;
-                const id = document.getElementById('editCelulaId').value;
-                const dados = {
-                    nome: document.getElementById('editCelulaNome').value,
-                    lider: document.getElementById('editCelulaLider').value,
-                    dia_horario: document.getElementById('editCelulaDia').value,
-                    endereco: document.getElementById('editCelulaEnd').value,
-                    supervisor_email: sessionStorage.getItem('discipuladorEmail')
-                };
-                try {
-                    if (id) {
-                        await supabaseClient.from('celulas').update(dados).eq('id', id);
-                        alert("Célula atualizada!");
-                    } else {
-                        await supabaseClient.from('celulas').insert([dados]);
-                        alert("Célula criada!");
-                    }
-                    fecharModal('modalEditarCelula');
-                    await carregarTudo();
-                } catch(err) {
-                    alert("Erro ao salvar célula: " + err.message);
-                } finally {
-                    if (btn) btn.disabled = false;
-                }
+       formCelula.onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarEdicaoCelula');
+            if (btn) btn.disabled = true;
+            const id = document.getElementById('editCelulaId').value;
+            const dados = {
+                nome: document.getElementById('editCelulaNome').value,
+                lider: document.getElementById('editCelulaLider').value,
+                dia_horario: document.getElementById('editCelulaDia').value,
+                endereco: document.getElementById('editCelulaEnd').value,
+                supervisor_email: sessionStorage.getItem('discipuladorEmail')
             };
-        }
+            try {
+                if (id) {
+                    await supabaseClient.from('celulas').update(dados).eq('id', id);
+                    // Atualiza o nome nos membros, se mudou
+                    const nomeOriginal = document.getElementById('editCelulaNomeOriginal').value;
+                    if (dados.nome !== nomeOriginal) {
+                        await supabaseClient
+                            .from('membros')
+                            .update({ celula: dados.nome })
+                            .eq('celula_id', id);   // usa celula_id, mais seguro
+                    }
+                    alert("Célula atualizada!");
+                } else {
+                    await supabaseClient.from('celulas').insert([dados]);
+                    alert("Célula criada!");
+                }
+                fecharModal('modalEditarCelula');
+                await carregarTudo();
+            } catch(err) {
+                alert("Erro ao salvar célula: " + err.message);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };    
     }
 
     // ========== DOMContentLoaded ==========
@@ -1268,6 +1275,7 @@ async function abrirApascentar() {
         <h3 id="tituloModalCelula">Nova Célula</h3>
         <form id="formCelula">
             <input type="hidden" id="editCelulaId">
+            <input type="hidden" id="editCelulaNomeOriginal">
             <div class="form-group"><label>Nome da Célula</label><input type="text" id="editCelulaNome" required></div>
             <div class="form-group"><label>Líder (nome)</label><input type="text" id="editCelulaLider" required></div>
             <div class="form-group"><label>Dia e Horário</label><input type="text" id="editCelulaDia" placeholder="Ex: Terça 20h"></div>
