@@ -63,21 +63,7 @@
         .nav-btn i { font-size: 1.2rem; }
         .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128, 0, 32, 0.3); }
 
-        /* CARDS MEMBROS & AGENDA 
-        .member-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
-        .member-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid white; display: flex; flex-direction: column; gap: 10px; }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0; }
-        .cat-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #eee; color: #555; font-weight: bold; text-transform: uppercase; }
-        .card-info { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
-        .status-row { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
-        .status-pill { flex: 1 1 auto; text-align: center; font-size: 0.7rem; padding: 5px 8px; border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600; white-space: nowrap; }
-        .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
-        .btn-zap { display: block; width: 100%; text-align: center; padding: 10px; margin-top: 5px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; box-sizing: border-box; }
-*/
-
-
+       
         /* CARDS MEMBROS & AGENDA - VERSÃO COMPACTA */
             .member-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
             @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
@@ -642,6 +628,10 @@
             dadosCelulas = todasCelulas;
             celulasDoLider = todasCelulas.filter(c => c.lider_email && c.lider_email.toLowerCase() === liderEmail.toLowerCase());
             
+            // Mapear id -> nome para uso futuro
+            window.celulaMap = {};
+            dadosCelulas.forEach(c => { window.celulaMap[c.id] = c.nome; });
+            
             renderizarCelulas(dadosCelulas);
             renderizarSelectorCelulas(celulasDoLider);
             
@@ -715,9 +705,9 @@
         celulaAtiva = cel;
         document.getElementById('modalCelulaTitulo').innerText = cel.nome;
         document.getElementById('modalCelula').classList.remove('hidden');
-        document.getElementById('cadastroModalCelulaHidden').value = cel.nome;
+        document.getElementById('cadastroModalCelulaHidden').value = cel.id;  // agora envia o ID
         
-        await carregarMembrosDaCelula(cel.nome);
+        await carregarMembrosDaCelula(cel.id);      // consulta por celula_id
         renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
     }
 
@@ -725,12 +715,12 @@
         document.getElementById('modalCelula').classList.add('hidden');
     }
 
-    async function carregarMembrosDaCelula(nomeCelula) {
+    async function carregarMembrosDaCelula(celulaId) {
         try {
             const { data, error } = await supabaseClient
                 .from('membros')
                 .select('*')
-                .eq('celula', nomeCelula)
+                .eq('celula_id', celulaId)
                 .eq('arquivado', 'Não');
             if (error) throw error;
             membrosDaCelulaAtiva = data || [];
@@ -756,21 +746,20 @@
         let categoria = m.tipo || 'Frequentador';
         let telefoneStr = String(m.telefone ?? '');
         let telClean = telefoneStr.replace(/\D/g, '');
-        // Botão WhatsApp apenas ícone
         let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap-icon" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
         let nasc = m.nascimento ? `<span style="font-size:0.7rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
+        // Exibe o nome da célula usando celulaAtiva (já que estamos no modal dela)
+        let nomeCelula = celulaAtiva ? celulaAtiva.nome : '';
         
         grid.innerHTML += `
             <div class="member-card">
                 <div class="card-header">
                     <div><h4 class="card-name">${nome}</h4><span class="cat-badge">${categoria}</span></div>
                     <div class="card-actions">
-                       <!--<button onclick="abrirEditarMembro('${m.id}')" class="btn-action btn-edit" title="Editar"><i class="fas fa-edit"></i></button>-->
-                        <!--<button onclick="arquivarMembro('${m.id}')" class="btn-action btn-archive" title="Arquivar"><i class="fas fa-archive"></i></button>-->
                         ${btnZap}
                     </div>
                 </div>
-                <div class="card-info" style="flex-wrap: wrap;"><i class="fas fa-users" style="color:#bbb;"></i> ${celulaAtiva.nome} ${nasc}</div>
+                <div class="card-info" style="flex-wrap: wrap;"><i class="fas fa-users" style="color:#bbb;"></i> ${nomeCelula} ${nasc}</div>
                 <div class="status-row">
                     <span class="status-pill ${check(m.batizado)}">Batismo</span>
                     <span class="status-pill ${check(m.cursao)}">Cursão</span>
@@ -789,6 +778,7 @@
             alert("Selecione uma célula primeiro.");
             return;
         }
+        document.getElementById('cadastroModalCelulaHidden').value = celulaAtiva.id;
         document.getElementById('modalCadastroMembro').classList.remove('hidden');
     }
 
@@ -807,7 +797,7 @@
             nome: this.nome.value,
             nascimento: this.nascimento.value || null,
             tipo: this.categoria.value,
-            celula: this.celula.value,
+            celula_id: this.celula.value,   // usando o ID vindo do hidden
             telefone: this.telefone.value,
             batizado: this.batizado.checked ? "Sim" : "Não",
             cursao: this.cursao.checked ? "Sim" : "Não",
@@ -824,7 +814,7 @@
             this.reset();
             fecharModalCadastro();
             if (celulaAtiva) {
-                await carregarMembrosDaCelula(celulaAtiva.nome);
+                await carregarMembrosDaCelula(celulaAtiva.id);
                 renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
             }
         } catch (err) {
@@ -885,7 +875,7 @@
             return;
         }
         document.getElementById('relModalCelulaNome').innerText = celulaAtiva.nome;
-        document.getElementById('relModalCelulaHidden').value = celulaAtiva.nome;
+        document.getElementById('relModalCelulaHidden').value = celulaAtiva.nome;  // relatório ainda usa nome
         document.getElementById('relModalData').valueAsDate = new Date();
         prepararChecklistRelatorioModal();
         document.getElementById('modalRelatorio').classList.remove('hidden');
@@ -943,7 +933,7 @@
             const presencas = membrosDaCelulaAtiva.map(m => ({
                 relatorio_id: relatorioId,
                 membro_id: m.id,
-                presente: presentesIds.includes(String(m.id))  // converte m.id para string
+                presente: presentesIds.includes(String(m.id))
             }));
             const { error: errPres } = await supabaseClient
                 .from('presencas')
@@ -977,70 +967,8 @@
             try { if(dataF.includes('-')) { const dp=dataF.split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
             div.innerHTML += `<div class="word-list-item" onclick="abrirPalavra(${index})"><div><div class="word-date"><i class="far fa-calendar-alt"></i> ${dataF}</div><div class="word-theme">${p.tema||'Sem Título'}</div></div><i class="fas fa-chevron-right"></i></div>`;
         });
-    }
-
-    
-   /* function renderizarAgenda(lista) {
-    const div = document.getElementById('listaAgenda');
-    div.innerHTML = '';
-    if (!lista || lista.length === 0) {
-        div.innerHTML = '<p style="text-align:center;">Nenhum evento na agenda.</p>';
-        return;
-    }
-
-    // Função auxiliar para converter a string da data em timestamp (ms)
-    const parseDate = (str) => {
-        if (!str) return 0;
-        // Se tem hífen, assume ISO "yyyy-mm-dd"
-        if (str.includes('-')) {
-            const [y, m, d] = str.split('-').map(Number);
-            return new Date(y, m - 1, d).getTime();
-        }
-        // Se tem barra, assume "dd/mm/yyyy"
-        if (str.includes('/')) {
-            const [d, m, y] = str.split('/').map(Number);
-            return new Date(y, m - 1, d).getTime();
-        }
-        // Última tentativa
-        const t = Date.parse(str);
-        return isNaN(t) ? 0 : t;
-    };
-
-    // Ordena do MAIS ANTIGO para o MAIS RECENTE (ascendente)
-    lista.sort((a, b) => parseDate(a[0]) - parseDate(b[0]));
-
-    lista.forEach(a => {
-        let rawDate = a[0] || '';
-        let dataF = rawDate;
-        // Formata para dd/mm/yyyy se o formato original for ISO
-        try {
-            if (rawDate.includes('-')) {
-                const [y, m, d] = rawDate.split('-');
-                dataF = `${d}/${m}/${y}`;
-            }
-        } catch (e) {}
-
-        let corCategoria = '#555';
-        if (a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3';
-        else if (a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)';
-        else if (a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
-
-        let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
-
-        div.innerHTML += `
-        <div class="member-card">
-            <div class="card-header">
-                <h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
-                <span class="cat-badge" style="background:${corCategoria};">${a[4] || ''}</span>
-            </div>
-            <div style="font-weight:700;">${a[1] || ''}</div>
-            <div style="color:#666;">${a[2] || ''}</div>
-            <div style="margin-top:10px;">
-                <span style="color:${corTipo};">${a[3] || ''}</span>
-            </div>
-        </div>`;
-    });
-}*/
+    }    
+  
 
     function renderizarAgenda(lista) {
     const div = document.getElementById('listaAgenda'); div.innerHTML = '';
@@ -1110,6 +1038,11 @@
         </div>`;
     });
 }
+
+    document.getElementById('formSugestao').onsubmit = async function(e) {
+        e.preventDefault(); const btn = document.getElementById('btnSugestao'); btn.disabled = true;
+        try { alert(await salvarSupabase('sugestoes', { mensagem: this.mensagem.value })); this.reset(); mudarSecao('minha-celula'); } catch(err) { alert(err.message); } finally { btn.disabled = false; }
+    };
 
     function fazerLogout() { if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; } }
 
