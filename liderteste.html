@@ -979,27 +979,8 @@
         });
     }
 
-    /*function renderizarAgenda(lista) {
-        const div = document.getElementById('listaAgenda'); div.innerHTML = '';
-        if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center;">Nenhum evento na agenda.</p>'; return; }
-        lista.sort((a,b) => (new Date(a[0]) - new Date(b[0])));
-        lista.forEach(a => {
-            let dataF = a[0] || '';
-            try { if(a[0] && a[0].includes('-')) { const dp=a[0].split('-'); dataF=`${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e){}
-            let corCategoria = '#555';
-            if(a[4]==='RADICAIS LIVRES') corCategoria='#0056b3'; else if(a[4]==='GOOGLE AGENDA') corCategoria='var(--primary)'; else if(a[4]==='RADICAIS KIDS') corCategoria='#b58900';
-            let corTipo = (a[3]==='Pago')?'#dc3545':'var(--success-text)';
-            div.innerHTML += `<div class="member-card"><div class="card-header"><h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4><span class="cat-badge" style="background:${corCategoria};">${a[4]||''}</span></div><div style="font-weight:700;">${a[1]||''}</div><div style="color:#666;">${a[2]||''}</div><div style="margin-top:10px;"><span style="color:${corTipo};">${a[3]||''}</span></div></div>`;
-        });
-    }
-
-    document.getElementById('formSugestao').onsubmit = async function(e) {
-        e.preventDefault(); const btn = document.getElementById('btnSugestao'); btn.disabled = true;
-        try { alert(await salvarSupabase('sugestoes', { mensagem: this.mensagem.value })); this.reset(); mudarSecao('minha-celula'); } catch(err) { alert(err.message); } finally { btn.disabled = false; }
-    };*/
-
-
-    function renderizarAgenda(lista) {
+    
+   /* function renderizarAgenda(lista) {
     const div = document.getElementById('listaAgenda');
     div.innerHTML = '';
     if (!lista || lista.length === 0) {
@@ -1051,6 +1032,75 @@
             <div class="card-header">
                 <h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
                 <span class="cat-badge" style="background:${corCategoria};">${a[4] || ''}</span>
+            </div>
+            <div style="font-weight:700;">${a[1] || ''}</div>
+            <div style="color:#666;">${a[2] || ''}</div>
+            <div style="margin-top:10px;">
+                <span style="color:${corTipo};">${a[3] || ''}</span>
+            </div>
+        </div>`;
+    });
+}*/
+
+    function renderizarAgenda(lista) {
+    const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+    if(!lista || lista.length === 0) { 
+        div.innerHTML = '<p style="text-align:center;">Nenhum evento na agenda.</p>'; 
+        return; 
+    }
+
+    // Função para parse confiável de data
+    const parseDate = (str) => {
+        if (!str) return 0;
+        if (str.includes('-')) {
+            const [y, m, d] = str.split('-').map(Number);
+            return new Date(y, m - 1, d).getTime();
+        }
+        if (str.includes('/')) {
+            const [d, m, y] = str.split('/').map(Number);
+            return new Date(y, m - 1, d).getTime();
+        }
+        const t = Date.parse(str);
+        return isNaN(t) ? 0 : t;
+    };
+
+    // Ordena do mais antigo para o mais recente (próximos eventos primeiro)
+    lista.sort((a, b) => parseDate(a[0]) - parseDate(b[0]));
+
+    lista.forEach(a => {
+        let rawDate = a[0] || '';
+        let dataF = rawDate;
+        try {
+            if (rawDate.includes('-')) {
+                const [y, m, d] = rawDate.split('-');
+                dataF = `${d}/${m}/${y}`;
+            }
+        } catch(e){}
+
+        // Define cor de fundo e estilo do texto para cada categoria
+        let bgColor = '#555';
+        let textColor = 'white';
+        let borderStyle = 'none';
+
+        if (a[4] === 'RADICAIS LIVRES') {
+            bgColor = '#0056b3';
+        } else if (a[4] === 'GOOGLE AGENDA') {
+            bgColor = '#600018';             // vinho primário
+            textColor = 'white';             // texto branco para contraste
+        } else if (a[4] === 'RADICAIS KIDS') {
+            bgColor = '#b58900';
+        }
+
+        let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+
+        // Usa inline style completo para garantir legibilidade
+        const badgeStyle = `background:${bgColor}; color:${textColor}; border:${borderStyle};`;
+
+        div.innerHTML += `
+        <div class="member-card">
+            <div class="card-header">
+                <h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                <span class="cat-badge" style="${badgeStyle}">${a[4] || ''}</span>
             </div>
             <div style="font-weight:700;">${a[1] || ''}</div>
             <div style="color:#666;">${a[2] || ''}</div>
