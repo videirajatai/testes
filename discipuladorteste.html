@@ -20,7 +20,7 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        /* ========== ESTILOS (MANTIDOS IGUAIS) ========== */
+        /* ========== ESTILOS ========== */
         * { box-sizing: border-box; margin: 0; }
         :root {
             --primary: #600018;
@@ -186,7 +186,6 @@
             line-height: 1.8; font-size: 1rem; color: #334155;
         }
         .biblia-placeholder { text-align: center; color: #94a3b8; margin-top: 50px; }
-        /* Botões de navegação dentro do offcanvas (rodapé fixo) */
         .biblia-nav-footer {
             padding: 15px 20px; background: white; border-top: 1px solid #e2e8f0;
             display: flex; justify-content: space-between; gap: 15px;
@@ -326,12 +325,16 @@
             dadosMembros = membros || [];
             const { data: celulas } = await supabaseClient.from('celulas').select('*');
             dadosCelulas = celulas || [];
+            celulasSupervisionadas = dadosCelulas.filter(c => c.supervisor_email === discipuladorEmail);
+            
+            // Mapa id -> nome
             window.celulaMap = {};
             dadosCelulas.forEach(c => { window.celulaMap[c.id] = c.nome; });
-            celulasSupervisionadas = dadosCelulas.filter(c => c.supervisor_email === discipuladorEmail);
+
             renderizarCelulasRede(celulasSupervisionadas);
             renderizarTabelaCelulas(dadosCelulas);
             preencherSelectsCelulas();
+            preencherSelectLideres(); // Nova função para o select de líderes
             renderizarMembrosArquivados(dadosMembros);
             const { data: rels } = await supabaseClient.from('relatorios').select('*');
             dadosRelatorios = rels || [];
@@ -343,6 +346,20 @@
             renderizarPalavras(listaPalavras);
         } catch(err) { console.error(err); }
         if (icon) icon.classList.remove('fa-spin');
+    }
+
+    // ========== PREENCHER SELECT DE LÍDERES (PARA FORMULÁRIO DE CÉLULA) ==========
+    function preencherSelectLideres() {
+        const selectLider = document.getElementById('editCelulaLider');
+        if (!selectLider) return;
+        // Pega membros que são Líder, Pastor ou Discipulador (podem liderar células)
+        const lideres = dadosMembros.filter(m => 
+            ['Líder', 'Pastor', 'Discipulador'].includes(m.tipo) // m.tipo é o campo de categoria do membro
+        );
+        selectLider.innerHTML = '<option value="">Selecione um líder</option>';
+        lideres.forEach(m => {
+            selectLider.innerHTML += `<option value="${m.nome}">${m.nome}</option>`;
+        });
     }
 
     // ========== MINHA REDE (CÉLULAS SUPERVISIONADAS) ==========
@@ -395,8 +412,8 @@
         const modal = document.getElementById('modalCelula');
         if (modal) modal.style.display = 'block';
         const hidden = document.getElementById('cadastroModalCelulaHidden');
-        if (hidden) hidden.value = cel.id;               // antes: cel.nome
-        await carregarMembrosDaCelula(cel.id);           // antes: cel.nome
+        if (hidden) hidden.value = cel.id;
+        await carregarMembrosDaCelula(cel.id);
         renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
     }
 
@@ -405,7 +422,7 @@
         if (modal) modal.style.display = 'none';
     }
 
-   async function carregarMembrosDaCelula(celulaId) {
+    async function carregarMembrosDaCelula(celulaId) {
         try {
             const { data, error } = await supabaseClient
                 .from('membros')
@@ -433,7 +450,7 @@
             const telefoneStr = String(m.telefone ?? '');
             const telClean = telefoneStr.replace(/\D/g, '');
             const btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-zap-icon" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
-            const nomeCelula = window.celulaMap[m.celula_id] || m.celula || '-';
+            const nomeCelula = celulaAtiva ? celulaAtiva.nome : '';
             grid.innerHTML += `
                 <div class="member-card">
                     <div class="card-header">
@@ -456,6 +473,51 @@
                 </div>
             `;
         });
+    }
+
+    // ========== CÉLULAS (TABELA GERAL) ==========
+    function renderizarTabelaCelulas(celulas) {
+        const tbody = document.getElementById('corpoCelulas');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        celulas.forEach(c => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${c.nome}</strong><br><small>${c.endereco || ''}</small></td>
+                    <td>${c.lider || ''}</td>
+                    <td>${c.dia_horario || ''}</td>
+                    <td><button onclick="abrirEditarCelula(${c.id})" class="btn-icon"><i class="fas fa-edit"></i></button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function abrirEditarCelula(id) {
+        const cel = dadosCelulas.find(c => c.id == id);
+        if (!cel) return;
+        document.getElementById('editCelulaId').value = cel.id;
+        document.getElementById('editCelulaNomeOriginal').value = cel.nome;
+        document.getElementById('editCelulaNome').value = cel.nome || '';
+        document.getElementById('editCelulaLider').value = cel.lider || '';
+        document.getElementById('editCelulaDia').value = cel.dia_horario || '';
+        document.getElementById('editCelulaEnd').value = cel.endereco || '';
+        const titulo = document.getElementById('tituloModalCelula');
+        if (titulo) titulo.innerText = 'Editar Célula';
+        const modal = document.getElementById('modalEditarCelula');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function abrirModalNovaCelula() {
+        document.getElementById('editCelulaId').value = '';
+        document.getElementById('editCelulaNomeOriginal').value = '';
+        document.getElementById('editCelulaNome').value = '';
+        document.getElementById('editCelulaLider').value = '';
+        document.getElementById('editCelulaDia').value = '';
+        document.getElementById('editCelulaEnd').value = '';
+        const titulo = document.getElementById('tituloModalCelula');
+        if (titulo) titulo.innerText = 'Nova Célula';
+        const modal = document.getElementById('modalEditarCelula');
+        if (modal) modal.classList.remove('hidden');
     }
 
     // ========== RELATÓRIOS ==========
@@ -502,117 +564,110 @@
         }
     }
 
-    // ========== RELATÓRIOS (CORRIGIDO) ==========
-// ========== RELATÓRIOS (CORRIGIDO) ==========
-async function abrirDetalheRelatorio(id) {
-    // Busca o relatório
-    const { data: relatorio, error: errRel } = await supabaseClient
-        .from('relatorios')
-        .select('*')
-        .eq('id', id)
-        .single();
-    if (errRel || !relatorio) {
-        console.error("Erro ao buscar relatório:", errRel);
-        alert("Relatório não encontrado.");
-        return;
+    async function abrirDetalheRelatorio(id) {
+        const { data: relatorio, error: errRel } = await supabaseClient
+            .from('relatorios')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (errRel || !relatorio) {
+            console.error("Erro ao buscar relatório:", errRel);
+            alert("Relatório não encontrado.");
+            return;
+        }
+
+        const { data: presencas, error: errPres } = await supabaseClient
+            .from('presencas')
+            .select('membro_id, presente')
+            .eq('relatorio_id', id);
+        if (errPres) console.error("Erro ao buscar presenças:", errPres);
+
+        const nomesPresentes = [];
+        const nomesAusentes = [];
+
+        if (presencas && presencas.length) {
+            for (const p of presencas) {
+                let isPresente = false;
+                if (typeof p.presente === 'boolean') isPresente = p.presente;
+                else if (typeof p.presente === 'string') isPresente = p.presente.toLowerCase() === 'sim';
+                const membro = dadosMembros.find(m => String(m.id) === String(p.membro_id));
+                if (membro) {
+                    if (isPresente) nomesPresentes.push(membro.nome);
+                    else nomesAusentes.push(membro.nome);
+                }
+            }
+        }
+
+        let dataF = relatorio.data || '';
+        try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
+
+        document.getElementById('detalheRelCelula').innerText = relatorio.celula || '-';
+        document.getElementById('detalheRelData').innerText = dataF;
+        document.getElementById('detalheRelTotal').innerText = nomesPresentes.length;
+
+        document.getElementById('detalheRelQuebra').innerText = relatorio.quebra_gelo || '-';
+        document.getElementById('detalheRelPalavra').innerText = relatorio.palavra || '-';
+        document.getElementById('detalheRelLouvor').innerText = relatorio.louvor || '-';
+        document.getElementById('detalheRelLanche').innerText = relatorio.lanche || '-';
+        document.getElementById('detalheRelObs').innerText = relatorio.observacoes || 'Nenhuma observação.';
+
+        const containerPresentes = document.getElementById('listaPresentes');
+        const containerAusentes = document.getElementById('listaAusentes');
+        
+        if (containerPresentes) {
+            containerPresentes.innerHTML = nomesPresentes.length 
+                ? nomesPresentes.map(nome => `<div>👤 ${nome}</div>`).join('') 
+                : '<div style="color:#999;">Nenhum presente registrado.</div>';
+        }
+        if (containerAusentes) {
+            containerAusentes.innerHTML = nomesAusentes.length 
+                ? nomesAusentes.map(nome => `<div>👤 ${nome}</div>`).join('') 
+                : '<div style="color:#999;">Nenhum ausente registrado.</div>';
+        }
+
+        document.getElementById('modalRelatorio').classList.remove('hidden');
     }
 
-    // Busca as presenças
-    const { data: presencas, error: errPres } = await supabaseClient
-        .from('presencas')
-        .select('membro_id, presente')
-        .eq('relatorio_id', id);
-    if (errPres) console.error("Erro ao buscar presenças:", errPres);
-
-    const nomesPresentes = [];
-    const nomesAusentes = [];
-
-    if (presencas && presencas.length) {
-        for (const p of presencas) {
+    // ========== APASCENTAR (FALTOSOS) ==========
+    async function abrirApascentar() {
+        if (!celulaAtiva) return;
+        const trintaDiasAtras = new Date();
+        trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+        const dataLimite = trintaDiasAtras.toISOString().split('T')[0];
+        const { data: relatorios, error } = await supabaseClient
+            .from('relatorios')
+            .select('id')
+            .eq('celula', celulaAtiva.nome)
+            .gte('data', dataLimite);
+        if (error || !relatorios.length) {
+            alert("Nenhum relatório nos últimos 30 dias.");
+            return;
+        }
+        const relIds = relatorios.map(r => r.id);
+        const { data: presencas } = await supabaseClient
+            .from('presencas')
+            .select('membro_id, presente')
+            .in('relatorio_id', relIds);
+        
+        const faltasPorMembro = {};
+        presencas.forEach(p => {
+            const membroIdStr = String(p.membro_id);
+            if (!faltasPorMembro[membroIdStr]) faltasPorMembro[membroIdStr] = 0;
             let isPresente = false;
             if (typeof p.presente === 'boolean') isPresente = p.presente;
             else if (typeof p.presente === 'string') isPresente = p.presente.toLowerCase() === 'sim';
-            const membro = dadosMembros.find(m => String(m.id) === String(p.membro_id));
-            if (membro) {
-                if (isPresente) nomesPresentes.push(membro.nome);
-                else nomesAusentes.push(membro.nome);
-            }
+            if (!isPresente) faltasPorMembro[membroIdStr]++;
+        });
+        
+        const faltosos = membrosDaCelulaAtiva.filter(m => faltasPorMembro[String(m.id)] > 0);
+        if (faltosos.length === 0) {
+            alert("Nenhum membro faltoso nos últimos 30 dias!");
+            return;
         }
+        let msg = "Membros faltosos:\n\n";
+        faltosos.forEach(m => msg += `${m.nome} - ${faltasPorMembro[String(m.id)]} falta(s)\n`);
+        alert(msg);
     }
-
-    let dataF = relatorio.data || '';
-    try { if (dataF.includes('-')) { const dp = dataF.split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
-
-    // Preenche cabeçalho
-    document.getElementById('detalheRelCelula').innerText = relatorio.celula || '-';
-    document.getElementById('detalheRelData').innerText = dataF;
-    document.getElementById('detalheRelTotal').innerText = nomesPresentes.length;
-
-    // Preenche encargos
-    document.getElementById('detalheRelQuebra').innerText = relatorio.quebra_gelo || '-';
-    document.getElementById('detalheRelPalavra').innerText = relatorio.palavra || '-';
-    document.getElementById('detalheRelLouvor').innerText = relatorio.louvor || '-';
-    document.getElementById('detalheRelLanche').innerText = relatorio.lanche || '-';
-    document.getElementById('detalheRelObs').innerText = relatorio.observacoes || 'Nenhuma observação.';
-
-    // Preenche listas de presentes e ausentes
-    const containerPresentes = document.getElementById('listaPresentes');
-    const containerAusentes = document.getElementById('listaAusentes');
-    
-    if (containerPresentes) {
-        containerPresentes.innerHTML = nomesPresentes.length 
-            ? nomesPresentes.map(nome => `<div>👤 ${nome}</div>`).join('') 
-            : '<div style="color:#999;">Nenhum presente registrado.</div>';
-    }
-    if (containerAusentes) {
-        containerAusentes.innerHTML = nomesAusentes.length 
-            ? nomesAusentes.map(nome => `<div>👤 ${nome}</div>`).join('') 
-            : '<div style="color:#999;">Nenhum ausente registrado.</div>';
-    }
-
-    document.getElementById('modalRelatorio').classList.remove('hidden');
-}
-
-// ========== APASCENTAR (FALTOSOS) ==========
-async function abrirApascentar() {
-    if (!celulaAtiva) return;
-    const trintaDiasAtras = new Date();
-    trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-    const dataLimite = trintaDiasAtras.toISOString().split('T')[0];
-    const { data: relatorios, error } = await supabaseClient
-        .from('relatorios')
-        .select('id')
-        .eq('celula', celulaAtiva.nome)
-        .gte('data', dataLimite);
-    if (error || !relatorios.length) {
-        alert("Nenhum relatório nos últimos 30 dias.");
-        return;
-    }
-    const relIds = relatorios.map(r => r.id);
-    const { data: presencas } = await supabaseClient
-        .from('presencas')
-        .select('membro_id, presente')
-        .in('relatorio_id', relIds);
-    
-    const faltasPorMembro = {};
-    presencas.forEach(p => {
-        const membroIdStr = String(p.membro_id);
-        if (!faltasPorMembro[membroIdStr]) faltasPorMembro[membroIdStr] = 0;
-        let isPresente = false;
-        if (typeof p.presente === 'boolean') isPresente = p.presente;
-        else if (typeof p.presente === 'string') isPresente = p.presente.toLowerCase() === 'sim';
-        if (!isPresente) faltasPorMembro[membroIdStr]++;
-    });
-    
-    const faltosos = membrosDaCelulaAtiva.filter(m => faltasPorMembro[String(m.id)] > 0);
-    if (faltosos.length === 0) {
-        alert("Nenhum membro faltoso nos últimos 30 dias!");
-        return;
-    }
-    let msg = "Membros faltosos:\n\n";
-    faltosos.forEach(m => msg += `${m.nome} - ${faltasPorMembro[String(m.id)]} falta(s)\n`);
-    alert(msg);
-}
 
     // ========== MEMBROS (ARQUIVADOS E EDIÇÃO) ==========
     function renderizarMembrosArquivados(lista) {
@@ -633,7 +688,7 @@ async function abrirApascentar() {
         };
         arquivados.forEach(m => {
             const nome = m.nome || 'Sem Nome';
-            const celula = m.celula || '-';
+            const celula = window.celulaMap[m.celula_id] || m.celula || '-';
             const categoria = m.tipo || 'Frequentador';
             const nasc = m.nascimento ? `<span style="font-size:0.8rem; margin-left:auto;"><i class="fas fa-birthday-cake"></i> ${formatData(m.nascimento)}</span>` : '';
             gridArquivos.innerHTML += `
@@ -663,7 +718,7 @@ async function abrirApascentar() {
         document.getElementById('editMembroNome').value = m.nome || '';
         document.getElementById('editMembroNasc').value = m.nascimento || '';
         document.getElementById('editMembroTel').value = m.telefone || '';
-        document.getElementById('editMembroCelula').value = m.celula || '';
+        document.getElementById('editMembroCelula').value = m.celula_id || '';
         document.getElementById('editMembroCat').value = m.tipo || 'Frequentador';
         const chk = (val) => String(val).toLowerCase() === 'sim' || val === true;
         document.getElementById('editMembroBatizado').checked = chk(m.batizado);
@@ -705,6 +760,7 @@ async function abrirApascentar() {
             });
         });
     }
+
     function abrirModalCadastroMembro() {
         if (!celulaAtiva) {
             alert("Selecione uma célula primeiro.");
@@ -712,57 +768,12 @@ async function abrirApascentar() {
         }
         preencherSelectsCelulas();
         const sel = document.getElementById('addMembroCelula');
-        if (sel) sel.value = celulaAtiva.id;          // antes: celulaAtiva.nome
+        if (sel) sel.value = celulaAtiva.id;
         const form = document.getElementById('formAdicionarMembro');
         if (form) form.reset();
         const modal = document.getElementById('modalAdicionarMembro');
         if (modal) modal.classList.remove('hidden');
     }
-
-    // ========== CÉLULAS (TABELA GERAL) ==========
-    function renderizarTabelaCelulas(celulas) {
-        const tbody = document.getElementById('corpoCelulas');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-        celulas.forEach(c => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${c.nome}</strong><br><small>${c.endereco || ''}</small></td>
-                    <td>${c.lider || ''}</td>
-                    <td>${c.dia_horario || ''}</td>
-                    <td><button onclick="abrirEditarCelula(${c.id})" class="btn-icon"><i class="fas fa-edit"></i></button></td>
-                </tr>
-            `;
-        });
-    }
-
-    function abrirEditarCelula(id) {
-        const cel = dadosCelulas.find(c => c.id == id);
-        if (!cel) return;
-        document.getElementById('editCelulaId').value = cel.id;
-        document.getElementById('editCelulaNomeOriginal').value = cel.nome;  // NOVO
-        document.getElementById('editCelulaNome').value = cel.nome || '';
-        document.getElementById('editCelulaLider').value = cel.lider || '';
-        document.getElementById('editCelulaDia').value = cel.dia_horario || '';
-        document.getElementById('editCelulaEnd').value = cel.endereco || '';
-        const titulo = document.getElementById('tituloModalCelula');
-        if (titulo) titulo.innerText = 'Editar Célula';
-        const modal = document.getElementById('modalEditarCelula');
-        if (modal) modal.classList.remove('hidden');
-    }
-
-    function abrirModalNovaCelula() {
-            document.getElementById('editCelulaId').value = '';
-            document.getElementById('editCelulaNomeOriginal').value = '';   // NOVO
-            document.getElementById('editCelulaNome').value = '';
-            document.getElementById('editCelulaLider').value = '';
-            document.getElementById('editCelulaDia').value = '';
-            document.getElementById('editCelulaEnd').value = '';
-            const titulo = document.getElementById('tituloModalCelula');
-            if (titulo) titulo.innerText = 'Nova Célula';
-            const modal = document.getElementById('modalEditarCelula');
-            if (modal) modal.classList.remove('hidden');
-        }
 
     // ========== AGENDA ==========
     function renderizarAgenda(lista) {
@@ -773,20 +784,34 @@ async function abrirApascentar() {
             div.innerHTML = '<p style="text-align:center;">Nenhum evento na agenda.</p>';
             return;
         }
-        lista.sort((a,b) => new Date(a[0]) - new Date(b[0]));
+        const parseDate = (str) => {
+            if (!str) return 0;
+            if (str.includes('-')) {
+                const [y, m, d] = str.split('-').map(Number);
+                return new Date(y, m - 1, d).getTime();
+            }
+            if (str.includes('/')) {
+                const [d, m, y] = str.split('/').map(Number);
+                return new Date(y, m - 1, d).getTime();
+            }
+            return Date.parse(str) || 0;
+        };
+        lista.sort((a,b) => parseDate(a[0]) - parseDate(b[0]));
         lista.forEach(a => {
             let dataF = a[0] || '';
             try { if (a[0] && a[0].includes('-')) { const dp = a[0].split('-'); dataF = `${dp[2]}/${dp[1]}/${dp[0]}`; } } catch(e) {}
             let corCategoria = '#555';
             if (a[4] === 'RADICAIS LIVRES') corCategoria = '#0056b3';
-            else if (a[4] === 'GOOGLE AGENDA') corCategoria = 'var(--primary)';
+            else if (a[4] === 'GOOGLE AGENDA') corCategoria = '#600018';
             else if (a[4] === 'RADICAIS KIDS') corCategoria = '#b58900';
             let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+            let textColor = (a[4] === 'GOOGLE AGENDA') ? 'white' : 'white';
+            const badgeStyle = `background:${corCategoria}; color:${textColor}; border:none;`;
             div.innerHTML += `
                 <div class="member-card">
                     <div class="card-header">
                         <h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
-                        <span class="cat-badge" style="background:${corCategoria};">${a[4] || ''}</span>
+                        <span class="cat-badge" style="${badgeStyle}">${a[4] || ''}</span>
                     </div>
                     <div style="font-weight:700;">${a[1] || ''}</div>
                     <div style="color:#666;">${a[2] || ''}</div>
@@ -1001,114 +1026,119 @@ async function abrirApascentar() {
     function inicializarEventos() {
         const formAdicionar = document.getElementById('formAdicionarMembro');
         if (formAdicionar) {
-            formAdicionarMembro.onsubmit = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSalvarNovoMembro');
-            if (btn) btn.disabled = true;
-            const dados = {
-                nome: document.getElementById('addMembroNome').value,
-                nascimento: document.getElementById('addMembroNasc').value || null,
-                telefone: document.getElementById('addMembroTel').value,
-                celula_id: document.getElementById('addMembroCelula').value,   // antes: celula: ...
-                tipo: document.getElementById('addMembroCat').value,
-                batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
-                cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
-                ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
-                encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
-                seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
-                dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
-                arquivado: "Não"
-            };
-            try {
-                const { error } = await supabaseClient.from('membros').insert([dados]);
-                if (error) throw error;
-                alert("Membro cadastrado com sucesso!");
-                fecharModal('modalAdicionarMembro');
-                await carregarTudo();
-                if (celulaAtiva) {
-                    await carregarMembrosDaCelula(celulaAtiva.id);
-                    renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Erro ao cadastrar: " + err.message);
-            } finally {
-                if (btn) btn.disabled = false;
-            }
-        };
-        }
-
-        formEditarMembro.onsubmit = async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnSalvarEdicaoMembro');
-        if (btn) btn.disabled = true;
-        const id = document.getElementById('editMembroId').value;
-        const dados = {
-            nome: document.getElementById('editMembroNome').value,
-            nascimento: document.getElementById('editMembroNasc').value || null,
-            telefone: document.getElementById('editMembroTel').value,
-            celula_id: document.getElementById('editMembroCelula').value,  // antes: celula: ...
-            tipo: document.getElementById('editMembroCat').value,
-            batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
-            cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
-            ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
-            encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
-            seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
-            dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
-        };
-        try {
-            await supabaseClient.from('membros').update(dados).eq('id', id);
-            alert("Membro atualizado!");
-            fecharModal('modalEditarMembro');
-            await carregarTudo();
-            if (celulaAtiva) {
-                await carregarMembrosDaCelula(celulaAtiva.id);
-                renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
-            }
-        } catch (err) {
-            alert("Erro ao atualizar: " + err.message);
-        } finally {
-            if (btn) btn.disabled = false;
-        }
-    };
-        
-
-       formCelula.onsubmit = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSalvarEdicaoCelula');
-            if (btn) btn.disabled = true;
-            const id = document.getElementById('editCelulaId').value;
-            const dados = {
-                nome: document.getElementById('editCelulaNome').value,
-                lider: document.getElementById('editCelulaLider').value,
-                dia_horario: document.getElementById('editCelulaDia').value,
-                endereco: document.getElementById('editCelulaEnd').value,
-                supervisor_email: sessionStorage.getItem('discipuladorEmail')
-            };
-            try {
-                if (id) {
-                    await supabaseClient.from('celulas').update(dados).eq('id', id);
-                    // Atualiza o nome nos membros, se mudou
-                    const nomeOriginal = document.getElementById('editCelulaNomeOriginal').value;
-                    if (dados.nome !== nomeOriginal) {
-                        await supabaseClient
-                            .from('membros')
-                            .update({ celula: dados.nome })
-                            .eq('celula_id', id);   // usa celula_id, mais seguro
+            formAdicionar.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSalvarNovoMembro');
+                if (btn) btn.disabled = true;
+                const dados = {
+                    nome: document.getElementById('addMembroNome').value,
+                    nascimento: document.getElementById('addMembroNasc').value || null,
+                    telefone: document.getElementById('addMembroTel').value,
+                    celula_id: document.getElementById('addMembroCelula').value,
+                    tipo: document.getElementById('addMembroCat').value,
+                    batizado: document.getElementById('addMembroBatizado').checked ? "Sim" : "Não",
+                    cursao: document.getElementById('addMembroCursao').checked ? "Sim" : "Não",
+                    ctl: document.getElementById('addMembroCtl').checked ? "Sim" : "Não",
+                    encontro: document.getElementById('addMembroEncontro').checked ? "Sim" : "Não",
+                    seminario: document.getElementById('addMembroSeminario').checked ? "Sim" : "Não",
+                    dizimista: document.getElementById('addMembroDizimista').checked ? "Sim" : "Não",
+                    arquivado: "Não"
+                };
+                try {
+                    const { error } = await supabaseClient.from('membros').insert([dados]);
+                    if (error) throw error;
+                    alert("Membro cadastrado com sucesso!");
+                    fecharModal('modalAdicionarMembro');
+                    await carregarTudo();
+                    if (celulaAtiva) {
+                        await carregarMembrosDaCelula(celulaAtiva.id);
+                        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
                     }
-                    alert("Célula atualizada!");
-                } else {
-                    await supabaseClient.from('celulas').insert([dados]);
-                    alert("Célula criada!");
+                } catch (err) {
+                    console.error(err);
+                    alert("Erro ao cadastrar: " + err.message);
+                } finally {
+                    if (btn) btn.disabled = false;
                 }
-                fecharModal('modalEditarCelula');
-                await carregarTudo();
-            } catch(err) {
-                alert("Erro ao salvar célula: " + err.message);
-            } finally {
-                if (btn) btn.disabled = false;
-            }
-        };    
+            };
+        }
+
+        const formEditar = document.getElementById('formEditarMembro');
+        if (formEditar) {
+            formEditar.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSalvarEdicaoMembro');
+                if (btn) btn.disabled = true;
+                const id = document.getElementById('editMembroId').value;
+                const dados = {
+                    nome: document.getElementById('editMembroNome').value,
+                    nascimento: document.getElementById('editMembroNasc').value || null,
+                    telefone: document.getElementById('editMembroTel').value,
+                    celula_id: document.getElementById('editMembroCelula').value,
+                    tipo: document.getElementById('editMembroCat').value,
+                    batizado: document.getElementById('editMembroBatizado').checked ? "Sim" : "Não",
+                    cursao: document.getElementById('editMembroCursao').checked ? "Sim" : "Não",
+                    ctl: document.getElementById('editMembroCtl').checked ? "Sim" : "Não",
+                    encontro: document.getElementById('editMembroEncontro').checked ? "Sim" : "Não",
+                    seminario: document.getElementById('editMembroSeminario').checked ? "Sim" : "Não",
+                    dizimista: document.getElementById('editMembroDizimista').checked ? "Sim" : "Não"
+                };
+                try {
+                    await supabaseClient.from('membros').update(dados).eq('id', id);
+                    alert("Membro atualizado!");
+                    fecharModal('modalEditarMembro');
+                    await carregarTudo();
+                    if (celulaAtiva) {
+                        await carregarMembrosDaCelula(celulaAtiva.id);
+                        renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
+                    }
+                } catch (err) {
+                    alert("Erro ao atualizar: " + err.message);
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            };
+        }
+
+        const formCelula = document.getElementById('formCelula');
+        if (formCelula) {
+            formCelula.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btnSalvarEdicaoCelula');
+                if (btn) btn.disabled = true;
+                const id = document.getElementById('editCelulaId').value;
+                const dados = {
+                    nome: document.getElementById('editCelulaNome').value,
+                    lider: document.getElementById('editCelulaLider').value,
+                    dia_horario: document.getElementById('editCelulaDia').value,
+                    endereco: document.getElementById('editCelulaEnd').value,
+                    supervisor_email: sessionStorage.getItem('discipuladorEmail')
+                };
+                try {
+                    if (id) {
+                        await supabaseClient.from('celulas').update(dados).eq('id', id);
+                        // Se o nome mudou, atualiza também nos membros (caso ainda exista campo 'celula' texto)
+                        const nomeOriginal = document.getElementById('editCelulaNomeOriginal').value;
+                        if (dados.nome !== nomeOriginal) {
+                            await supabaseClient
+                                .from('membros')
+                                .update({ celula: dados.nome })
+                                .eq('celula_id', id);
+                        }
+                        alert("Célula atualizada!");
+                    } else {
+                        await supabaseClient.from('celulas').insert([dados]);
+                        alert("Célula criada!");
+                    }
+                    fecharModal('modalEditarCelula');
+                    await carregarTudo();
+                } catch(err) {
+                    alert("Erro ao salvar célula: " + err.message);
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            };
+        }
     }
 
     // ========== DOMContentLoaded ==========
@@ -1205,24 +1235,21 @@ async function abrirApascentar() {
     </div>
 </div>
 
-<!-- MODAL DETALHE DO RELATÓRIO (NOVO LAYOUT) -->
+<!-- MODAL DETALHE DO RELATÓRIO -->
 <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
     <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 800px; padding: 20px;">
         <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
         
-        <!-- Cabeçalho -->
         <div style="text-align: center; margin-bottom: 25px;">
             <h2 style="color: var(--primary); margin: 0;" id="detalheRelCelula">Célula</h2>
             <p style="color: #666; margin-top: 5px;" id="detalheRelData">00/00/0000</p>
         </div>
 
-        <!-- Total de presentes em destaque -->
         <div style="background: linear-gradient(135deg, var(--success-bg), #e2f0e6); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 25px;">
             <span style="font-size: 2.5rem; font-weight: 800; color: var(--success-text);" id="detalheRelTotal">0</span>
             <span style="font-size: 1rem; font-weight: 600; color: var(--success-text); display: block;">PESSOAS PRESENTES</span>
         </div>
 
-        <!-- Encargos em grid 2x2 -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
             <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary);">
                 <div style="font-size: 0.7rem; text-transform: uppercase; color: #888;">Palavra</div>
@@ -1242,25 +1269,19 @@ async function abrirApascentar() {
             </div>
         </div>
 
-        <!-- Lista de presentes e ausentes (duas colunas) -->
         <div style="margin-bottom: 20px;">
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 200px;">
                     <div style="font-weight: 800; color: #2b6e3c; margin-bottom: 8px;"><i class="fas fa-check-circle"></i> Presentes</div>
-                    <div id="listaPresentes" style="background: #f9fff9; border-radius: 12px; padding: 12px; border: 1px solid #d0e6d0; max-height: 200px; overflow-y: auto;">
-                        <!-- nomes dos presentes -->
-                    </div>
+                    <div id="listaPresentes" style="background: #f9fff9; border-radius: 12px; padding: 12px; border: 1px solid #d0e6d0; max-height: 200px; overflow-y: auto;"></div>
                 </div>
                 <div style="flex: 1; min-width: 200px;">
                     <div style="font-weight: 800; color: #a12a2a; margin-bottom: 8px;"><i class="fas fa-times-circle"></i> Ausentes</div>
-                    <div id="listaAusentes" style="background: #fff9f9; border-radius: 12px; padding: 12px; border: 1px solid #f0d0d0; max-height: 200px; overflow-y: auto;">
-                        <!-- nomes dos ausentes -->
-                    </div>
+                    <div id="listaAusentes" style="background: #fff9f9; border-radius: 12px; padding: 12px; border: 1px solid #f0d0d0; max-height: 200px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Observações -->
         <div style="background: #fffbe6; border-radius: 12px; padding: 15px; border-left: 4px solid #f4b942;">
             <div style="font-weight: 700; margin-bottom: 5px;">📝 Observações</div>
             <div id="detalheRelObs" style="color: #555; line-height: 1.4;">...</div>
@@ -1277,8 +1298,18 @@ async function abrirApascentar() {
             <input type="hidden" id="editCelulaId">
             <input type="hidden" id="editCelulaNomeOriginal">
             <div class="form-group"><label>Nome da Célula</label><input type="text" id="editCelulaNome" required></div>
-            <div class="form-group"><label>Líder (nome)</label><input type="text" id="editCelulaLider" required></div>
-            <div class="form-group"><label>Dia e Horário</label><input type="text" id="editCelulaDia" placeholder="Ex: Terça 20h"></div>
+            <div class="form-group"><label>Líder</label><select id="editCelulaLider" required></select></div>
+            <div class="form-group"><label>Dia e Horário</label>
+                <select id="editCelulaDia">
+                    <option value="">Selecione</option>
+                    <option value="Terça">Terça</option>
+                    <option value="Quarta">Quarta</option>
+                    <option value="Quinta">Quinta</option>
+                    <option value="Sexta">Sexta</option>
+                    <option value="Sábado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
+                </select>
+            </div>
             <div class="form-group"><label>Endereço</label><input type="text" id="editCelulaEnd"></div>
             <button type="submit" id="btnSalvarEdicaoCelula" class="btn-save">Salvar</button>
         </form>
