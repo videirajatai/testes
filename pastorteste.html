@@ -5,21 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel Pastoral • Videira Jataí</title>
     
-    <!-- CSS e Fontes -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas externas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
-    <!-- Configurações e módulo da Bíblia -->
     <script src="config.js"></script>
-    <script src="js/biblia.js"></script>
+    <!-- Módulo da Bíblia removido por decisão do pastor -->
 
-    <!-- Ícones e PWA -->
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="shortcut icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
@@ -31,7 +27,6 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        /* ===== VARIÁVEIS E RESET ===== */
         :root {
             --primary: #600018;
             --primary-light: #7a0020;
@@ -51,15 +46,10 @@
         }
 
         * { box-sizing: border-box; margin: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f1f5f9;
-            color: var(--text-main);
-            padding-bottom: 20px;
-        }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--text-main); padding-bottom: 20px; }
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
 
-        /* ===== HEADER ===== */
+        /* HEADER */
         .header {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius);
@@ -69,10 +59,8 @@
         .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
         .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
 
-        /* ===== MENU DE NAVEGAÇÃO (TABS) ===== */
-        .nav-menu {
-            display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
-        }
+        /* NAV */
+        .nav-menu { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
         .nav-btn {
             flex: 1 1 90px; min-width: 85px; padding: 12px 5px; border: none; border-radius: 10px;
             background: white; color: var(--text-light); font-weight: 600; cursor: pointer;
@@ -82,7 +70,7 @@
         .nav-btn i { font-size: 1.2rem; }
         .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128,0,32,0.3); }
 
-        /* ===== CARDS DE MEMBRO (COMPACTO, COMO NO DISCIPULADOR/LÍDER) ===== */
+        /* CARDS */
         .member-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
         .member-card {
@@ -117,7 +105,7 @@
         .btn-zap { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
         .btn-card:hover { background: #f5f5f5; }
 
-        /* ===== TABELAS ===== */
+        /* TABELAS E LISTAS */
         .table-clean {
             width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius);
             overflow: hidden; box-shadow: var(--shadow); border: 1px solid #ddd; margin-top: 10px;
@@ -125,42 +113,20 @@
         .table-clean th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
         .table-clean td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-size: 0.9rem; }
 
-        /* ===== FINANCEIRO ===== */
-        .fin-dashboard {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;
-        }
-        .fin-card { padding: 20px; border-radius: var(--radius); color: white; text-align: center; box-shadow: var(--shadow); }
-        .fin-card.blue { background: linear-gradient(135deg, #0056b3, #003d80); }
-        .fin-card.green { background: linear-gradient(135deg, #1e8e3e, #135c27); }
-        .fin-card.red { background: linear-gradient(135deg, #c5221f, #8a1513); }
-        .fin-val { font-size: 1.4rem; font-weight: 800; margin-top: 5px; }
-
-        /* ===== RELATÓRIOS (PAPER) ===== */
         .report-list-item {
             background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px;
             border: 1px solid #eee; display: flex; justify-content: space-between;
             align-items: center; cursor: pointer; border-left: 4px solid var(--primary);
         }
-        .paper-report { background: #fff; border-top: 4px solid var(--accent); padding: 20px; border-radius: 8px; }
-        .paper-header { text-align: center; padding-bottom: 15px; border-bottom: 1px dashed #ddd; margin-bottom: 15px; }
-        .paper-title { font-weight: 800; font-size: 1.1rem; color: var(--primary); display:block; }
-        .paper-date { font-size: 0.85rem; color: #777; }
-        .attend-box {
-            background: var(--success-bg); color: var(--success-text); padding: 15px;
-            border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px solid #c3e6cb;
+        .word-list-item {
+            background: white; border-radius: var(--radius); padding: 15px; margin-bottom: 10px;
+            box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; border-left: 4px solid var(--accent); transition: 0.2s;
         }
-        .attend-num { font-size: 1.5rem; font-weight: 800; display: block; }
-        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .role-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
-        .role-label { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px; }
-        .role-val { font-size: 0.9rem; font-weight: 600; color: #333; }
-        .list-present {
-            font-size: 0.85rem; color: #555; line-height: 1.6; background: #fff;
-            border: 1px solid #eee; padding: 10px; border-radius: 8px;
-        }
-        .obs-box { margin-top: 15px; background: #fffbf0; padding: 15px; border-radius: 8px; color: #665c3b; font-size: 0.9rem; border: 1px solid #faeace; }
+        .word-date { font-weight: 800; color: var(--text-main); font-size: 1rem; }
+        .word-theme { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
 
-        /* ===== MODAIS ===== */
+        /* MODAIS */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 3100; display: flex;
@@ -178,55 +144,44 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* ===== BÍBLIA OFF-CANVAS ===== */
-        .biblia-offcanvas {
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100vh;
-            background-color: #ffffff; box-shadow: -5px 0 25px rgba(0,0,0,0.1);
-            z-index: 2000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column;
+        /* CÉLULA CARD (REDE) */
+        .cell-card {
+            background: #fef9e8; border-radius: var(--radius); padding: 15px; margin-bottom: 12px;
+            box-shadow: var(--shadow); border-left: 4px solid var(--primary); cursor: pointer;
+            transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
         }
-        .biblia-offcanvas.aberto { right: 0; }
-        #biblia-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); z-index: 1999; display: none; opacity: 0; transition: opacity 0.3s ease;
+        .cell-info { flex: 1; }
+        .cell-nome { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+        .cell-lider { font-size: 0.8rem; color: #92400e; margin-top: 4px; }
+        .badge-membros { background: var(--primary); color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
+        .filtro-lider {
+            background: white; padding: 10px; border-radius: 12px; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 10px;
         }
-        .biblia-header {
-            background-color: var(--ouro-videira); color: white; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
+        .filtro-lider select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+
+        /* MULTI-SELECT (CARGOS E STATUS) */
+        .multi-select {
+            position: relative; display: inline-block; min-width: 120px; flex: 1;
         }
-        .biblia-titulo-area { display: flex; align-items: center; gap: 10px; }
-        .biblia-header h2 { color: white; margin: 0; font-size: 1.2rem; font-weight: 700; }
-        .btn-fechar-biblia { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; margin: 0; }
-        .biblia-controles {
-            padding: 15px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;
-            display: flex; gap: 10px;
+        .multi-select .trigger {
+            background: white; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.85rem; color: var(--text-main);
         }
-        .versao-selector-btn {
-            background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;
-            width: 80px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+        .multi-select .dropdown {
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            background: white; border: 1px solid var(--border-color); border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; padding: 10px;
+            max-height: 200px; overflow-y: auto;
         }
-        .biblia-controles select {
-            flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none;
-            font-family: 'Inter', sans-serif;
-        }
-        .biblia-texto-area {
-            padding: 25px 20px; overflow-y: auto; flex: 1;
-            line-height: 1.8; font-size: 1rem; color: #334155;
-        }
-        .biblia-placeholder { text-align: center; color: #94a3b8; font-style: italic; margin-top: 50px; }
-        .biblia-nav-footer {
-            padding: 15px 20px; background: white; border-top: 1px solid #e2e8f0;
-            display: flex; justify-content: space-between; gap: 15px;
-        }
-        .nav-capitulo-btn {
-            flex: 1; background: var(--primary); color: white; border: none;
-            border-radius: 40px; padding: 10px; font-size: 1rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s;
+        .multi-select.open .dropdown { display: block; }
+        .multi-select .dropdown label {
+            display: flex; align-items: center; gap: 6px; margin-bottom: 5px; cursor: pointer;
+            font-size: 0.8rem; color: var(--text-main);
         }
 
-        /* ===== UTILITÁRIOS ===== */
-        .hidden { display: none !important; }
+        /* FORMULÁRIOS */
         .form-box { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); }
         label { display: block; margin-bottom: 5px; color: var(--text-light); font-weight: 600; font-size: 0.85rem; }
         input, select, textarea {
@@ -240,7 +195,7 @@
         .btn-add-member {
             background: var(--success-text); color: white; border: none; padding: 8px 15px;
             border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
-            display: flex; align-items: center; gap: 5px;
+            display: inline-flex; align-items: center; gap: 5px;
         }
         .switch-container {
             display: flex; align-items: center; justify-content: space-between; padding: 12px;
@@ -252,69 +207,39 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--success-text); }
         input:checked + .slider:before { transform: translateX(22px); }
+
+        .hidden { display: none !important; }
+
         .btn-youtube {
             display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
             padding: 12px; background-color: #FF0000; color: white; font-weight: bold;
             text-decoration: none; border-radius: 8px; margin-bottom: 15px;
         }
-
-        /* ===== CÉLULA CARD (REDE) ===== */
-        .cell-card {
-            background: #fef9e8; border-radius: var(--radius); padding: 15px; margin-bottom: 12px;
-            box-shadow: var(--shadow); border-left: 4px solid var(--primary); cursor: pointer;
-            transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
-        }
-        .cell-card:hover { transform: translateY(-2px); background: #fff5e0; }
-        .cell-info { flex: 1; }
-        .cell-nome { font-weight: 700; font-size: 1rem; color: var(--text-main); }
-        .cell-lider { font-size: 0.8rem; color: #92400e; margin-top: 4px; }
-        .badge-membros { background: var(--primary); color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
-        .filtro-lider {
-            background: white; padding: 10px; border-radius: 12px; margin-bottom: 15px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .filtro-lider select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // ========== CONFIGURAÇÃO INICIAL E AUTENTICAÇÃO ==========
+    // ========== CONFIGURAÇÃO ==========
     const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
     const API_URL = sessionStorage.getItem('urlApi');
 
-    // Variáveis globais
-    let dadosMembros = [];          // array com estrutura: [id, nome, categoria, celula, telefone, _, batismo, cursao, ctl, encontro, nascimento, seminario, dizimista]
-    let dadosCelulas = [];          // [nome, lider, dia_horario, endereco, supervisor_email]
-    let dadosFinanceiros = [];
+    let dadosMembros = [];        // [id, nome, categoria, celula, telefone, _, bat, cur, ctl, enc, nasc, sem, diz, celula_id, arquivado]
+    let dadosCelulas = [];        // [id, nome, lider, dia_horario, endereco, supervisor_email]
     let dadosRelatorios = [];
     let listaPalavras = [];
     let listaAgenda = [];
     let celulaAtiva = null;
     let membrosDaCelulaAtiva = [];
-    let palavraAtual = null;
-
-    // Bíblia
-    let versaoSelecionada = localStorage.getItem('biblia_versao') || 'msg';
-    const siglasVersoes = { msg:'MSG', nvi:'NVI', aa:'ARA', acf:'ACF', ntlh:'NTLH' };
-    const nomesCompletos = {
-        msg:'A Mensagem', nvi:'Nova Versão Internacional', aa:'Almeida Revista e Atualizada',
-        acf:'Almeida Corrigida Fiel', ntlh:'Nova Tradução na Linguagem de Hoje'
-    };
 
     // ========== VERIFICAÇÃO DE ACESSO ==========
     (async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (!user) { window.location.href = "index.html"; return; }
-        const { data: usuario } = await supabaseClient
-            .from('usuarios')
-            .select('categoria, nome')
-            .eq('email', user.email)
-            .single();
+        const { data: usuario } = await supabaseClient.from('usuarios').select('categoria, nome').eq('email', user.email).single();
         const cat = (usuario?.categoria || "membro").toLowerCase();
-        const permitidos = ["pastor", "administrador"];
-        if (!permitidos.includes(cat)) {
+        if (!["pastor", "administrador"].includes(cat)) {
             alert("Acesso restrito.");
             window.location.href = (cat === "membro") ? "membro.html" : "lider.html";
             return;
@@ -326,7 +251,6 @@
         inicializarEventos();
     })();
 
-    // ========== LOG ==========
     async function registrarLogAcao(acao) {
         try {
             await supabaseClient.from('log').insert([{
@@ -338,7 +262,6 @@
         } catch(e) { console.error("Log:", e); }
     }
 
-    // ========== API GOOGLE (AGENDA) ==========
     async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
         try {
@@ -353,27 +276,21 @@
     async function carregarTudo() {
         const icon = document.getElementById('iconRefresh');
         if (icon) icon.classList.add('fa-spin');
-
         try {
-            // Membros (ativos por padrão, mas podemos incluir arquivados depois)
-            const { data: memData } = await supabaseClient
-                .from('membros')
-                .select('*')
-                .or('arquivado.eq.Não,arquivado.is.null');
-            
+            // Membros (todos, ativos e arquivados)
+            const { data: memData } = await supabaseClient.from('membros').select('*');
             dadosMembros = memData ? memData.map(m => {
-                let tipoBanco = m.tipo ? m.tipo.trim().toLowerCase() : 'membro';
-                let tipoCorreto = 'Membro';
-                if (tipoBanco === 'lider' || tipoBanco === 'líder') tipoCorreto = 'Líder';
-                else if (tipoBanco === 'pastor') tipoCorreto = 'Pastor';
-                else if (tipoBanco === 'discipulador') tipoCorreto = 'Discipulador';
-                else if (tipoBanco === 'frequentador') tipoCorreto = 'Frequentador';
-                else tipoCorreto = m.tipo;
+                let tipo = m.tipo?.trim().toLowerCase();
+                let categoria = 'Membro';
+                if (tipo === 'lider' || tipo === 'líder') categoria = 'Líder';
+                else if (tipo === 'pastor') categoria = 'Pastor';
+                else if (tipo === 'discipulador') categoria = 'Discipulador';
+                else if (tipo === 'frequentador') categoria = 'Frequentador';
                 return [
                     m.id,
                     m.nome || 'Sem Nome',
-                    tipoCorreto,
-                    m.celula || 'Sem Célula',
+                    categoria,
+                    window.celulaMap?.[m.celula_id] || m.celula || 'Sem Célula', // exibição
                     m.telefone || '',
                     '',
                     m.batizado || 'Não',
@@ -382,7 +299,9 @@
                     m.encontro || 'Não',
                     m.nascimento || '',
                     m.seminario || 'Não',
-                    m.dizimista || 'Não'
+                    m.dizimista || 'Não',
+                    m.celula_id || null,
+                    m.arquivado || 'Não'
                 ];
             }) : [];
 
@@ -390,18 +309,24 @@
             const peso = { "Pastor":1, "Discipulador":2, "Líder":3, "Membro":4, "Frequentador":5 };
             dadosMembros.sort((a,b) => (peso[a[2]]||99) - (peso[b[2]]||99) || a[1].localeCompare(b[1]));
 
-            document.getElementById('totalMembros').innerText = dadosMembros.length;
-            renderizarCards(dadosMembros);
-            preencherSelects();
-
             // Células
             const { data: celData } = await supabaseClient.from('celulas').select('*');
-            dadosCelulas = celData ? celData.map(c => [c.nome, c.lider, c.dia_horario || '-', c.endereco || '', c.supervisor_email || '']) : [];
-            renderizarTabelaCelulas(dadosCelulas);
-            renderizarCelulasRede(dadosCelulas); // para a aba "Minha Rede"
+            dadosCelulas = celData ? celData.map(c => [c.id, c.nome, c.lider, c.dia_horario || '-', c.endereco || '', c.supervisor_email || '']) : [];
+            window.celulaMap = {};
+            dadosCelulas.forEach(c => window.celulaMap[c[0]] = c[1]);
 
-            // Financeiro
-            await carregarFinanceiro();
+            // Atualiza nome da célula nos membros que têm celula_id
+            dadosMembros.forEach(m => {
+                if (m[13]) m[3] = window.celulaMap[m[13]] || m[3];
+            });
+
+            document.getElementById('totalMembros').innerText = obterAtivos().length;
+            renderizarCards(obterAtivos());
+            preencherSelects();
+            renderizarCelulasRede(dadosCelulas);
+
+            // Relatórios
+            await carregarRelatorios();
 
             // Agenda
             try {
@@ -416,7 +341,10 @@
         finally { if(icon) icon.classList.remove('fa-spin'); }
     }
 
-    // ========== RENDERIZAÇÃO DE CARDS (MEMBROS) ==========
+    function obterAtivos() { return dadosMembros.filter(m => m[14] === 'Não' || !m[14] || m[14].toLowerCase() === 'não'); }
+    function obterInativos() { return dadosMembros.filter(m => m[14] === 'Sim' || (typeof m[14] === 'string' && m[14].toLowerCase() === 'sim')); }
+
+    // ========== RENDER CARDS ==========
     function renderizarCards(lista) {
         const grid = document.getElementById('gridMembros'); grid.innerHTML = '';
         const check = (val) => (val === 'Sim' || val === true) ? 'active' : '';
@@ -424,7 +352,7 @@
         lista.forEach(m => {
             let nome=m[1], categoria=m[2], celula=m[3], tel=String(m[4]||'');
             let telClean = tel.replace(/\D/g, '');
-            let btnZap = (telClean.length > 8) ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
+            let btnZap = telClean.length > 8 ? `<a href="https://wa.me/55${telClean}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
             let nasc = m[10] ? `<span style="font-size:0.8rem; margin-left:auto; color:#999;"><i class="fas fa-birthday-cake"></i> ${formatData(m[10])}</span>` : '';
             let tags = [];
             if(m[6]==='Sim') tags.push('batizado');
@@ -436,10 +364,7 @@
             let tagsStr = tags.join(' ');
             grid.innerHTML += `
                 <div class="member-card" data-nome="${nome.toLowerCase()}" data-celula="${celula.toLowerCase()}" data-categoria="${categoria.toLowerCase()}" data-tags="${tagsStr}">
-                    <div class="card-header">
-                        <h4 class="card-name">${nome}</h4>
-                        <span class="cat-badge ${categoria}">${categoria}</span>
-                    </div>
+                    <div class="card-header"><h4 class="card-name">${nome}</h4><span class="cat-badge ${categoria}">${categoria}</span></div>
                     <div class="card-info"><i class="fas fa-users"></i> ${celula} ${nasc}</div>
                     <div class="status-row">
                         <span class="status-pill ${check(m[6])}">Batismo</span>
@@ -452,131 +377,78 @@
                     <div class="card-actions">
                         ${btnZap}
                         <button onclick="editarMembro('${m[0]}')" class="btn-card"><i class="fas fa-edit"></i></button>
-                        <button onclick="arquivarMembro('${m[0]}', '${nome}')" class="btn-card" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>
+                        ${m[14] === 'Sim' ? `<button onclick="restaurarMembro('${m[0]}')" class="btn-card" style="color:var(--success-text);"><i class="fas fa-undo"></i></button>` : `<button onclick="arquivarMembro('${m[0]}', '${nome}')" class="btn-card" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>`}
                     </div>
                 </div>`;
         });
     }
 
-    // ========== FILTROS DE MEMBROS ==========
-    function filtrarMembros() {
+    function atualizarContagemTotal() {
+        const ativos = document.getElementById('filtroStatusGeral').value;
+        let total;
+        if (ativos === 'ativos') total = obterAtivos().length;
+        else if (ativos === 'inativos') total = obterInativos().length;
+        else total = dadosMembros.length;
+        document.getElementById('totalMembros').innerText = total;
+    }
+
+    function aplicarFiltrosMembros() {
+        const ativos = document.getElementById('filtroStatusGeral').value;
+        let base;
+        if (ativos === 'ativos') base = obterAtivos();
+        else if (ativos === 'inativos') base = obterInativos();
+        else base = [...dadosMembros];
+
         const busca = document.getElementById('inputBusca').value.toLowerCase();
-        const cel = document.getElementById('filtroCelula').value.toLowerCase();
-        const cat = document.getElementById('filtroCategoria').value.toLowerCase();
-        const tag = document.getElementById('filtroTag').value.toLowerCase();
-        let visiveis = 0;
-        document.querySelectorAll('#gridMembros .member-card').forEach(card => {
-            const match = card.dataset.nome.includes(busca) &&
-                          (cel==="" || card.dataset.celula.includes(cel)) &&
-                          (cat==="" || card.dataset.categoria === cat) &&
-                          (tag==="" || card.dataset.tags.includes(tag));
-            card.style.display = match ? 'flex' : 'none';
-            if(match) visiveis++;
-        });
-        const span = document.getElementById('contagemFiltrados');
-        if(busca||cel||cat||tag) {
-            span.innerHTML = `(${visiveis} filtrados) <i class="fas fa-times-circle" style="cursor:pointer; color:#ef4444;" onclick="limparFiltrosMembros()"></i>`;
-            span.style.display = 'inline-block';
-        } else span.style.display = 'none';
-    }
+        const celulasSelecionadas = Array.from(document.querySelectorAll('#multiCelula input:checked')).map(cb => cb.value);
+        const cargosSelecionados = Array.from(document.querySelectorAll('#multiCargo input:checked')).map(cb => cb.value.toLowerCase());
+        const statusSelecionados = Array.from(document.querySelectorAll('#multiStatus input:checked')).map(cb => cb.value);
 
-    function limparFiltrosMembros() {
-        document.getElementById('inputBusca').value = '';
-        document.getElementById('filtroCelula').value = '';
-        document.getElementById('filtroCategoria').value = '';
-        document.getElementById('filtroTag').value = '';
-        filtrarMembros();
-    }
-
-    // ========== EXPORTAÇÃO ==========
-    async function exportarExcel() {
-        const lista = obterMembrosFiltrados();
-        if(!lista.length) return alert("Nenhum dado.");
-        const dados = lista.map(m => ({
-            Nome: m[1], Categoria: m[2], Célula: m[3], WhatsApp: m[4],
-            Batismo: m[6], Cursão: m[7], CTL: m[8], Encontro: m[9],
-            Seminário: m[11], Dizimista: m[12], Nascimento: m[10]
-        }));
-        const ws = XLSX.utils.json_to_sheet(dados);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Membros");
-        XLSX.writeFile(wb, `Membros_Videira_${new Date().toLocaleDateString()}.xlsx`);
-        registrarLogAcao("Exportou membros para Excel");
-    }
-
-    async function exportarPDF() {
-        const lista = obterMembrosFiltrados();
-        if(!lista.length) return alert("Nenhum dado.");
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        // cabeçalho com logo
-        try {
-            const resp = await fetch('logo.png');
-            const blob = await resp.blob();
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            await new Promise(r => reader.onload = r);
-            doc.addImage(reader.result, 'PNG', 14, 10, 16, 16);
-        } catch(e) {}
-        doc.setFontSize(16);
-        doc.text("Relatório de Membros - Videira Jataí", 34, 16);
-        doc.setFontSize(9);
-        doc.text(`Gerado em ${new Date().toLocaleString()} | Total: ${lista.length}`, 34, 22);
-        doc.autoTable({
-            head: [["Nome","Categoria","Célula","WhatsApp","Bat.","Cur.","CTL","Enc.","Sem.","Diz."]],
-            body: lista.map(m => [m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[11], m[12]]),
-            startY: 30,
-            theme: 'grid',
-            headStyles: { fillColor: [128,0,32] },
-            styles: { fontSize: 8 }
-        });
-        doc.save(`Membros_Videira_${new Date().toLocaleDateString()}.pdf`);
-        registrarLogAcao("Exportou membros para PDF");
-    }
-
-    function obterMembrosFiltrados() {
-        const busca = document.getElementById('inputBusca').value.toLowerCase();
-        const cel = document.getElementById('filtroCelula').value.toLowerCase();
-        const cat = document.getElementById('filtroCategoria').value.toLowerCase();
-        const tag = document.getElementById('filtroTag').value.toLowerCase();
-        return dadosMembros.filter(m => {
-            let tags = [];
+        const filtrados = base.filter(m => {
+            const matchBusca = !busca || m[1].toLowerCase().includes(busca);
+            const matchCelula = celulasSelecionadas.length === 0 || celulasSelecionadas.includes(String(m[13]));
+            const matchCargo = cargosSelecionados.length === 0 || cargosSelecionados.includes(m[2].toLowerCase());
+            const tags = [];
             if(m[6]==='Sim') tags.push('batizado');
             if(m[7]==='Sim') tags.push('cursão');
             if(m[8]==='Sim') tags.push('ctl');
             if(m[9]==='Sim') tags.push('encontro');
             if(m[11]==='Sim') tags.push('seminário');
             if(m[12]==='Sim') tags.push('dizimista');
-            return m[1].toLowerCase().includes(busca) &&
-                   (cel==="" || m[3].toLowerCase().includes(cel)) &&
-                   (cat==="" || m[2].toLowerCase() === cat) &&
-                   (tag==="" || tags.includes(tag));
+            const matchStatus = statusSelecionados.length === 0 || statusSelecionados.some(s => tags.includes(s));
+            return matchBusca && matchCelula && matchCargo && matchStatus;
+        });
+        renderizarCards(filtrados);
+        atualizarContagemTotal();
+    }
+
+    // ========== MULTISELECT ==========
+    function setupMultiselects() {
+        document.querySelectorAll('.multi-select .trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const parent = trigger.closest('.multi-select');
+                parent.classList.toggle('open');
+            });
+        });
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.multi-select.open').forEach(ms => {
+                if (!ms.contains(e.target)) ms.classList.remove('open');
+            });
+        });
+        document.querySelectorAll('#multiCelula input, #multiCargo input, #multiStatus input').forEach(cb => {
+            cb.addEventListener('change', aplicarFiltrosMembros);
         });
     }
 
-    // ========== CÉLULAS (TABELA) ==========
-    function renderizarTabelaCelulas(lista) {
-        const tbody = document.getElementById('corpoCelulas');
-        tbody.innerHTML = '';
-        lista.forEach((c, i) => {
-            tbody.innerHTML += `<tr>
-                <td><strong>${c[0]}</strong><br><small>${c[3]||''}</small></td>
-                <td>${c[1]||''}</td>
-                <td>${c[2]||''}</td>
-                <td><button onclick="editarCelula(${i})" class="btn-card" style="padding:5px;"><i class="fas fa-edit"></i></button></td>
-            </tr>`;
-        });
-    }
-
-    // ========== MINHA REDE (CÉLULAS SUPERVISIONADAS) ==========
+    // ========== CÉLULAS (REDE) ==========
     function renderizarCelulasRede(celulas) {
         const container = document.getElementById('listaCelulasRede');
         const filtroLider = document.getElementById('filtroLiderRede');
         const filtroSupervisor = document.getElementById('filtroSupervisorRede');
         container.innerHTML = '';
-        // Preencher filtros
-        const lideresUnicos = [...new Set(celulas.map(c => c[1]).filter(l => l))];
-        const supervisoresUnicos = [...new Set(celulas.map(c => c[4]).filter(s => s))];
+        const lideresUnicos = [...new Set(celulas.map(c => c[2]).filter(l => l))];
+        const supervisoresUnicos = [...new Set(celulas.map(c => c[5]).filter(s => s))];
         if(filtroLider) {
             filtroLider.innerHTML = '<option value="">Todos os Líderes</option>';
             lideresUnicos.forEach(l => filtroLider.innerHTML += `<option>${l}</option>`);
@@ -593,10 +465,11 @@
         const lider = document.getElementById('filtroLiderRede')?.value || '';
         const supervisor = document.getElementById('filtroSupervisorRede')?.value || '';
         let celulas = window.celulasRedeCompleta || [];
-        if(lider) celulas = celulas.filter(c => c[1] === lider);
-        if(supervisor) celulas = celulas.filter(c => c[4] === supervisor);
+        if(lider) celulas = celulas.filter(c => c[2] === lider);
+        if(supervisor) celulas = celulas.filter(c => c[5] === supervisor);
         const container = document.getElementById('listaCelulasRede');
         container.innerHTML = '';
+        document.getElementById('contagemCelulasRede').innerText = celulas.length;
         if(!celulas.length) {
             container.innerHTML = '<p style="text-align:center; color:#999;">Nenhuma célula encontrada.</p>';
             return;
@@ -606,9 +479,9 @@
             card.className = 'cell-card';
             card.innerHTML = `
                 <div class="cell-info">
-                    <div class="cell-nome">${cel[0]}</div>
-                    <div class="cell-lider"><i class="fas fa-user"></i> Líder: ${cel[1] || 'Não definido'}</div>
-                    <div class="cell-lider"><i class="fas fa-user-tie"></i> Supervisor: ${cel[4] || 'Não definido'}</div>
+                    <div class="cell-nome">${cel[1]}</div>
+                    <div class="cell-lider"><i class="fas fa-user"></i> Líder: ${cel[2] || 'Não definido'}</div>
+                    <div class="cell-lider"><i class="fas fa-user-tie"></i> Supervisor: ${cel[5] || 'Não definido'}</div>
                 </div>
                 <div class="badge-membros"><i class="fas fa-chevron-right"></i></div>
             `;
@@ -617,79 +490,89 @@
         });
     }
 
-    // ========== MODAL DA CÉLULA (TELA CHEIA) ==========
+    function exportarListaCelulasPDF() {
+        const celulas = window.celulasRedeCompleta || [];
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Lista de Células - Videira Jataí", 14, 20);
+        doc.autoTable({
+            head: [["Nome", "Líder", "Dia/Horário", "Endereço", "Supervisor"]],
+            body: celulas.map(c => [c[1], c[2], c[3], c[4], c[5]]),
+            startY: 30,
+            theme: 'grid',
+            headStyles: { fillColor: [128,0,32] },
+            styles: { fontSize: 9 }
+        });
+        doc.save(`Celulas_${new Date().toLocaleDateString()}.pdf`);
+    }
+
+    // ========== MODAL CÉLULA ==========
     async function abrirModalCelula(cel) {
         celulaAtiva = cel;
-        document.getElementById('modalCelulaTitulo').innerText = cel[0];
+        document.getElementById('modalCelulaTitulo').innerText = cel[1];
         document.getElementById('modalCelula').classList.remove('hidden');
         document.getElementById('cadastroModalCelulaHidden').value = cel[0];
         await carregarMembrosDaCelula(cel[0]);
         renderizarMembrosCelulaModal(membrosDaCelulaAtiva);
     }
 
-    function fecharModalCelula() {
-        document.getElementById('modalCelula').classList.add('hidden');
-    }
+    function fecharModalCelula() { document.getElementById('modalCelula').classList.add('hidden'); }
 
-    async function carregarMembrosDaCelula(nomeCelula) {
-        const { data } = await supabaseClient.from('membros').select('*').eq('celula', nomeCelula).eq('arquivado', 'Não');
+    async function carregarMembrosDaCelula(celulaId) {
+        const { data } = await supabaseClient.from('membros').select('*').eq('celula_id', celulaId).eq('arquivado', 'Não');
         membrosDaCelulaAtiva = data || [];
     }
 
     function renderizarMembrosCelulaModal(lista) {
-        const grid = document.getElementById('gridMembrosCelulaModal');
-        grid.innerHTML = '';
-        if(!lista.length) {
-            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center;">Nenhum membro nesta célula.</p>';
-            return;
-        }
-        const check = (v) => (String(v).toLowerCase()==='sim'||v===true)?'active':'';
+        const grid = document.getElementById('gridMembrosCelulaModal'); grid.innerHTML = '';
+        if(!lista.length) { grid.innerHTML = '<p style="text-align:center;">Nenhum membro.</p>'; return; }
+        const check = (v) => String(v).toLowerCase()==='sim' ? 'active' : '';
         lista.forEach(m => {
             const tel = String(m.telefone||'').replace(/\D/g,'');
-            const btnZap = tel.length>8 ? `<a href="https://wa.me/55${tel}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>` : '';
-            grid.innerHTML += `
-                <div class="member-card">
-                    <div class="card-header">
-                        <div><h4 class="card-name">${m.nome}</h4><span class="cat-badge">${m.tipo||'Membro'}</span></div>
-                        <div class="card-actions">
-                            <button onclick="editarMembro('${m.id}')" class="btn-card"><i class="fas fa-edit"></i></button>
-                            <button onclick="arquivarMembro('${m.id}','${m.nome}')" class="btn-card" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>
-                            ${btnZap}
-                        </div>
-                    </div>
-                    <div class="status-row">
-                        <span class="status-pill ${check(m.batizado)}">Batismo</span>
-                        <span class="status-pill ${check(m.cursao)}">Cursão</span>
-                        <span class="status-pill ${check(m.ctl)}">CTL</span>
-                        <span class="status-pill ${check(m.encontro)}">Encontro</span>
-                        <span class="status-pill ${check(m.seminario)}">Seminário</span>
-                        <span class="status-pill ${check(m.dizimista)}">Dizimista</span>
-                    </div>
-                </div>`;
+            grid.innerHTML += `<div class="member-card">
+                <div class="card-header"><h4 class="card-name">${m.nome}</h4><span class="cat-badge">${m.tipo||'Membro'}</span></div>
+                <div class="status-row">
+                    <span class="status-pill ${check(m.batizado)}">Batismo</span>
+                    <span class="status-pill ${check(m.cursao)}">Cursão</span>
+                    <span class="status-pill ${check(m.ctl)}">CTL</span>
+                    <span class="status-pill ${check(m.encontro)}">Encontro</span>
+                    <span class="status-pill ${check(m.seminario)}">Seminário</span>
+                    <span class="status-pill ${check(m.dizimista)}">Dizimista</span>
+                </div>
+                ${tel.length>8 ? `<a href="https://wa.me/55${tel}" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>` : ''}
+            </div>`;
         });
     }
 
     // ========== RELATÓRIOS ==========
     async function carregarRelatorios() {
-        mudarSecao('relatorios');
-        const div = document.getElementById('listaRelatorios'); div.innerHTML = '<p>Carregando...</p>';
-        const sel = document.getElementById('filtroRelCelula');
-        sel.innerHTML = '<option value="">Todas as Células</option>';
-        dadosCelulas.forEach(c => sel.innerHTML += `<option>${c[0]}</option>`);
         const { data } = await supabaseClient.from('relatorios').select('*').order('id', { ascending: false });
         dadosRelatorios = data || [];
+        document.getElementById('filtroRelCelula').innerHTML = '<option value="">Todas as Células</option>';
+        dadosCelulas.forEach(c => document.getElementById('filtroRelCelula').innerHTML += `<option value="${c[1]}">${c[1]}</option>`);
+        const hoje = new Date();
+        const primeiro = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        document.getElementById('filtroRelDataInicio').value = primeiro.toISOString().split('T')[0];
+        document.getElementById('filtroRelDataFim').value = hoje.toISOString().split('T')[0];
         filtrarRelatorios();
     }
 
     function filtrarRelatorios() {
         const celula = document.getElementById('filtroRelCelula').value;
+        const inicio = document.getElementById('filtroRelDataInicio').value;
+        const fim = document.getElementById('filtroRelDataFim').value;
         const div = document.getElementById('listaRelatorios'); div.innerHTML = '';
-        const filtrados = dadosRelatorios.filter(r => !celula || r.celula === celula);
+        const filtrados = dadosRelatorios.filter(r => {
+            if (celula && r.celula !== celula) return false;
+            if (inicio && r.data < inicio) return false;
+            if (fim && r.data > fim) return false;
+            return true;
+        });
         if(!filtrados.length) { div.innerHTML = '<p>Nenhum relatório.</p>'; return; }
         filtrados.forEach(r => {
-            let dataF = r.data?.split('-').reverse().join('/') || '';
             div.innerHTML += `<div class="report-list-item" onclick="abrirDetalheRelatorio('${r.id}')">
-                <div><strong>${r.celula}</strong><br><small>${dataF}</small></div>
+                <div><strong>${r.celula}</strong><br><small>${r.data?.split('-').reverse().join('/')}</small></div>
                 <i class="fas fa-chevron-right"></i>
             </div>`;
         });
@@ -700,13 +583,11 @@
         if(!rel) return;
         const { data: presencas } = await supabaseClient.from('presencas').select('membro_id, presente').eq('relatorio_id', id);
         const presentes = [], ausentes = [];
-        if(presencas) {
-            for(let p of presencas) {
-                const membro = dadosMembros.find(m => String(m[0]) === String(p.membro_id));
-                const nome = membro ? membro[1] : `ID ${p.membro_id}`;
-                if(p.presente) presentes.push(nome); else ausentes.push(nome);
-            }
-        }
+        presencas?.forEach(p => {
+            const m = dadosMembros.find(x => String(x[0]) === String(p.membro_id));
+            const nome = m ? m[1] : `ID ${p.membro_id}`;
+            if(p.presente) presentes.push(nome); else ausentes.push(nome);
+        });
         document.getElementById('detalheRelCelula').innerText = rel.celula;
         document.getElementById('detalheRelData').innerText = rel.data?.split('-').reverse().join('/');
         document.getElementById('detalheRelTotal').innerText = presentes.length;
@@ -714,105 +595,57 @@
         document.getElementById('detalheRelPalavra').innerText = rel.palavra || '-';
         document.getElementById('detalheRelLouvor').innerText = rel.louvor || '-';
         document.getElementById('detalheRelLanche').innerText = rel.lanche || '-';
-        document.getElementById('detalheRelObs').innerText = rel.observacoes || 'Nenhuma.';
-        const listaPres = document.getElementById('listaPresentes');
-        const listaAus = document.getElementById('listaAusentes');
-        listaPres.innerHTML = presentes.length ? presentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
-        listaAus.innerHTML = ausentes.length ? ausentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
+        document.getElementById('detalheRelObs').innerText = rel.observacoes || 'Nenhuma observação.';
+        document.getElementById('listaPresentes').innerHTML = presentes.length ? presentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div>Nenhum</div>';
+        document.getElementById('listaAusentes').innerHTML = ausentes.length ? ausentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div>Nenhum</div>';
         document.getElementById('modalRelatorio').classList.remove('hidden');
     }
 
-    // ========== APASCENTAR ==========
-    async function abrirApascentar() {
-        if(!celulaAtiva) return;
-        const trintaDias = new Date(); trintaDias.setDate(trintaDias.getDate()-30);
-        const dataLimite = trintaDias.toISOString().split('T')[0];
-        const { data: rels } = await supabaseClient.from('relatorios').select('id').eq('celula', celulaAtiva[0]).gte('data', dataLimite);
-        if(!rels?.length) return alert("Nenhum relatório recente.");
-        const ids = rels.map(r=>r.id);
-        const { data: pres } = await supabaseClient.from('presencas').select('membro_id, presente').in('relatorio_id', ids);
-        const faltas = {};
-        pres?.forEach(p => { if(!p.presente) faltas[p.membro_id] = (faltas[p.membro_id]||0)+1; });
-        const faltosos = membrosDaCelulaAtiva.filter(m => faltas[m.id] > 0);
-        if(!faltosos.length) return alert("Nenhum faltoso.");
-        let msg = "Faltosos (últimos 30 dias):\n\n";
-        faltosos.forEach(m => msg += `${m.nome} - ${faltas[m.id]} falta(s)\n`);
-        alert(msg);
-    }
-
-    // ========== ARQUIVADOS ==========
-    async function carregarArquivados() {
-        mudarSecao('arquivos');
-        const grid = document.getElementById('gridArquivos'); grid.innerHTML = '<p>Carregando...</p>';
-        const { data } = await supabaseClient.from('membros').select('*').or('arquivado.eq.Sim,arquivado.eq.sim');
-        grid.innerHTML = '';
-        if(!data?.length) { grid.innerHTML = '<p>Nenhum arquivado.</p>'; return; }
-        data.forEach(m => {
-            const nasc = m.nascimento?.split('-').reverse().join('/') || '';
-            grid.innerHTML += `<div class="member-card">
-                <div class="card-header"><h4 class="card-name">${m.nome}</h4><span class="cat-badge">${m.tipo||'Membro'}</span></div>
-                <div class="card-info"><i class="fas fa-archive"></i> Arquivado ${nasc}</div>
-                <div class="card-actions"><button onclick="restaurarMembro('${m.id}')" class="btn-card" style="color:var(--success-text);"><i class="fas fa-undo"></i> Restaurar</button></div>
-            </div>`;
-        });
-    }
-
-    async function arquivarMembro(id, nome) {
-        if(!confirm(`Arquivar ${nome}?`)) return;
-        await supabaseClient.from('membros').update({ arquivado: 'Sim' }).eq('id', id);
-        registrarLogAcao(`Arquivou membro ${nome}`);
-        carregarTudo();
-    }
-
-    async function restaurarMembro(id) {
-        if(!confirm("Restaurar?")) return;
-        await supabaseClient.from('membros').update({ arquivado: 'Não' }).eq('id', id);
-        registrarLogAcao(`Restaurou membro ID ${id}`);
-        carregarTudo();
-        mudarSecao('lista');
-    }
-
-    // ========== SUGESTÕES ==========
+    // ========== SUGESTÕES (PEDIDOS DE ORAÇÃO) ==========
     async function carregarSugestoes() {
-        mudarSecao('sugestoes');
-        const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="2">Carregando...</td></tr>';
+        const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
         const { data } = await supabaseClient.from('sugestoes').select('*').order('id', { ascending: false });
         corpo.innerHTML = '';
-        if(!data?.length) { corpo.innerHTML = '<tr><td colspan="2">Vazio.</td></tr>'; return; }
-        data.forEach(s => corpo.innerHTML += `<tr><td>${s.data||''}</td><td>${s.mensagem}</td></tr>`);
-    }
-
-    // ========== FINANCEIRO ==========
-    async function carregarFinanceiro() {
-        const { data } = await supabaseClient.from('financeiro').select('*').order('id', { ascending: false });
-        dadosFinanceiros = data || [];
-        recalcularFinanceiro();
-    }
-
-    function recalcularFinanceiro() {
-        const mes = document.getElementById('filtroMesFin').value;
-        let ent=0, sai=0, filtrados=[];
-        dadosFinanceiros.forEach(f => {
-            if(f.data.startsWith(mes)) {
-                let v = parseFloat(f.valor);
-                if(f.tipo==='Entrada') ent+=v; else sai+=v;
-                filtrados.push(f);
-            }
+        if(!data?.length) { corpo.innerHTML = '<tr><td colspan="3">Nenhum pedido.</td></tr>'; return; }
+        data.forEach(s => {
+            const opaco = s.ativo === false ? 'opacity:0.5;' : '';
+            corpo.innerHTML += `<tr style="${opaco}">
+                <td>${s.data||''}</td>
+                <td>${s.mensagem}</td>
+                <td>${s.ativo !== false ? `<button class="btn-card" onclick="concluirPedido(${s.id})"><i class="fas fa-check"></i> Concluir</button>` : 'Concluído'}</td>
+            </tr>`;
         });
-        const fmt = (v) => v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-        document.getElementById('finSaldo').innerText = fmt(ent - sai);
-        document.getElementById('finEntrada').innerText = fmt(ent);
-        document.getElementById('finSaida').innerText = fmt(sai);
-        renderizarExtrato(filtrados);
     }
 
-    function renderizarExtrato(lista) {
-        const corpo = document.getElementById('corpoFin');
-        corpo.innerHTML = '';
-        const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-        lista.reverse().forEach(l => {
-            let cor = l.tipo==='Entrada'?'var(--success-text)':'var(--danger-text)';
-            corpo.innerHTML += `<tr><td>${l.data.split('-')[2]}/${l.data.split('-')[1]}</td><td>${l.descricao}</td><td style="color:${cor};">${fmt(l.valor)}</td></tr>`;
+    async function concluirPedido(id) {
+        await supabaseClient.from('sugestoes').update({ ativo: false }).eq('id', id);
+        carregarSugestoes();
+    }
+
+    // ========== AGENDA ==========
+    function renderizarAgenda(lista) {
+        const div = document.getElementById('listaAgenda'); div.innerHTML = '';
+        const mesFiltro = document.getElementById('filtroMesAgenda')?.value;
+        let filtrada = lista;
+        if (mesFiltro && mesFiltro !== 'todos') {
+            const mesNum = parseInt(mesFiltro);
+            filtrada = lista.filter(a => {
+                const d = a[0];
+                if (!d) return false;
+                const partes = d.includes('-') ? d.split('-') : d.split('/');
+                const mes = partes.length === 3 ? (d.includes('-') ? parseInt(partes[1]) : parseInt(partes[1])) : null;
+                return mes === mesNum;
+            });
+        }
+        filtrada.sort((a,b) => new Date(a[0]) - new Date(b[0]));
+        filtrada.forEach(a => {
+            let dataF = a[0]?.split('-').reverse().join('/') || '';
+            div.innerHTML += `<div class="member-card">
+                <div class="card-header"><h4 class="card-name">${dataF}</h4><span class="cat-badge">${a[4]||''}</span></div>
+                <div><strong>${a[1]}</strong></div>
+                <div>${a[2]||''}</div>
+                <div><span style="color:${a[3]==='Pago'?'#dc3545':'var(--success-text)'};">${a[3]}</span></div>
+            </div>`;
         });
     }
 
@@ -824,69 +657,96 @@
     }
 
     function renderizarPalavras() {
-        const div = document.getElementById('listaPalavras');
-        div.innerHTML = '';
+        const div = document.getElementById('listaPalavras'); div.innerHTML = '';
         if(!listaPalavras.length) { div.innerHTML = '<p>Nenhuma palavra.</p>'; return; }
         listaPalavras.forEach((p,i) => {
             let dataF = p.data?.split('-').reverse().join('/') || '';
-            div.innerHTML += `<div class="word-list-item" onclick="abrirPalavra(${i})">
-                <div><div class="word-date">${dataF}</div><div class="word-theme">${p.tema}</div></div>
-                <i class="fas fa-chevron-right"></i>
+            div.innerHTML += `<div class="word-list-item">
+                <div onclick="abrirPalavra(${i})" style="flex:1; cursor:pointer;">
+                    <div class="word-date">${dataF}</div>
+                    <div class="word-theme">${p.tema}</div>
+                </div>
+                <button class="btn-card" onclick="editarPalavra(${i})"><i class="fas fa-edit"></i></button>
             </div>`;
         });
     }
 
     function abrirPalavra(index) {
-        palavraAtual = listaPalavras[index];
-        document.getElementById('modalTitulo').innerText = palavraAtual.tema;
-        document.getElementById('modalDataPalavra').innerText = palavraAtual.data?.split('-').reverse().join('/');
-        document.getElementById('modalTexto').innerText = palavraAtual.texto;
+        const p = listaPalavras[index];
+        document.getElementById('modalTitulo').innerText = p.tema;
+        document.getElementById('modalDataPalavra').innerText = p.data?.split('-').reverse().join('/');
+        document.getElementById('modalTexto').innerText = p.texto;
         const btn = document.getElementById('btnLinkYoutube');
-        if(palavraAtual.link_youtube) { btn.href = palavraAtual.link_youtube; btn.classList.remove('hidden'); }
+        if(p.link_youtube) { btn.href = p.link_youtube; btn.classList.remove('hidden'); }
         else btn.classList.add('hidden');
         document.getElementById('modalPalavra').classList.remove('hidden');
     }
 
-    // ========== AGENDA ==========
-    function renderizarAgenda(lista) {
-        const div = document.getElementById('listaAgenda'); div.innerHTML = '';
-        if(!lista.length) { div.innerHTML = '<p>Nenhum evento.</p>'; return; }
-        lista.sort((a,b) => new Date(a[0]) - new Date(b[0]));
-        lista.forEach(a => {
-            let dataF = a[0]?.split('-').reverse().join('/') || '';
-            div.innerHTML += `<div class="member-card">
-                <div class="card-header"><h4 class="card-name">${dataF}</h4><span class="cat-badge">${a[4]||''}</span></div>
-                <div><strong>${a[1]}</strong></div>
-                <div>${a[2]||''}</div>
-                <div><span style="color:${a[3]==='Pago'?'#dc3545':'var(--success-text)'};">${a[3]}</span></div>
-            </div>`;
+    function editarPalavra(index) {
+        const p = listaPalavras[index];
+        document.getElementById('palavraId').value = p.id;
+        document.getElementById('palavraData').value = p.data;
+        document.getElementById('palavraTema').value = p.tema;
+        document.getElementById('palavraTexto').value = p.texto;
+        document.getElementById('palavraLink').value = p.link_youtube || '';
+        document.getElementById('modalEditarPalavra').classList.remove('hidden');
+    }
+
+    // ========== MINHA IGREJA (ESTATÍSTICAS) ==========
+    function carregarEstatisticas() {
+        const agora = new Date();
+        const inicioSemana = new Date(agora);
+        inicioSemana.setDate(agora.getDate() - ((agora.getDay() + 6) % 7)); // segunda
+        inicioSemana.setHours(0,0,0,0);
+        const fimSemana = new Date(inicioSemana);
+        fimSemana.setDate(inicioSemana.getDate() + 6);
+        fimSemana.setHours(23,59,59,999);
+
+        const ativos = obterAtivos();
+        const totalMembros = ativos.length;
+        const batizados = ativos.filter(m => m[6] === 'Sim').length;
+        const cursao = ativos.filter(m => m[7] === 'Sim').length;
+        const ctl = ativos.filter(m => m[8] === 'Sim').length;
+        const seminario = ativos.filter(m => m[11] === 'Sim').length;
+        const dizimistas = ativos.filter(m => m[12] === 'Sim').length;
+        const lideres = ativos.filter(m => m[2] === 'Líder').length;
+        const discipuladores = ativos.filter(m => m[2] === 'Discipulador').length;
+        const frequentadores = ativos.filter(m => m[2] === 'Frequentador').length;
+        const membrosCount = ativos.filter(m => m[2] === 'Membro').length;
+        const totalCelulas = dadosCelulas.length;
+
+        // Presença na semana
+        const relatoriosSemana = dadosRelatorios.filter(r => {
+            const d = new Date(r.data + 'T00:00:00');
+            return d >= inicioSemana && d <= fimSemana;
         });
-    }
+        let presencaSemana = 0;
+        let lideresQueEnviaram = new Set();
+        relatoriosSemana.forEach(r => {
+            lideresQueEnviaram.add(r.celula);
+            // soma de presentes não disponível diretamente, precisaria consultar presencas. Simplificando.
+        });
+        // Verificar células sem relatório
+        const celulasSemRelatorio = dadosCelulas.filter(c => !relatoriosSemana.some(r => r.celula === c[1]));
 
-    // ========== BÍBLIA ==========
-    async function abrirBiblia() {
-        document.getElementById('painel-biblia').classList.add('aberto');
-        const overlay = document.getElementById('biblia-overlay');
-        overlay.style.display = 'block';
-        setTimeout(() => overlay.style.opacity = '1', 10);
-        if (typeof Biblia !== 'undefined') {
-            if (!Biblia.bibliaCarregada) await Biblia.inicializar();
-            versaoSelecionada = Biblia.getVersaoAtiva();
-            document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[versaoSelecionada] || versaoSelecionada;
-        }
-    }
-
-    function fecharBiblia() {
-        document.getElementById('painel-biblia').classList.remove('aberto');
-        const overlay = document.getElementById('biblia-overlay');
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.style.display = 'none', 300);
+        document.getElementById('statTotalMembros').innerText = totalMembros;
+        document.getElementById('statBatizados').innerText = batizados;
+        document.getElementById('statCursao').innerText = cursao;
+        document.getElementById('statCtl').innerText = ctl;
+        document.getElementById('statSeminario').innerText = seminario;
+        document.getElementById('statDizimistas').innerText = dizimistas;
+        document.getElementById('statLideres').innerText = lideres;
+        document.getElementById('statDiscipuladores').innerText = discipuladores;
+        document.getElementById('statFrequentadores').innerText = frequentadores;
+        document.getElementById('statMembros').innerText = membrosCount;
+        document.getElementById('statCelulas').innerText = totalCelulas;
+        document.getElementById('statRelatoriosSemana').innerText = relatoriosSemana.length;
+        document.getElementById('statCelulasSemRelatorio').innerHTML = celulasSemRelatorio.map(c => c[1]).join(', ') || 'Nenhuma';
     }
 
     // ========== MUDAR SEÇÃO ==========
     function mudarSecao(s) {
-        fecharBiblia();
-        const secoes = ['lista','minha-rede','celulas','financeiro','relatorios','arquivos','sugestoes','agenda','palavras','cadastro','form-celula','nova-palavra','modal-ver-relatorio'];
+        const secoes = ['lista','minha-rede','celulas','relatorios','arquivos','sugestoes','agenda','palavras','minha-igreja','cadastro','form-celula','nova-palavra','modal-ver-relatorio'];
         secoes.forEach(id => {
             const el = document.getElementById(`secao-${id}`) || document.getElementById(id);
             if(el) el.classList.add('hidden');
@@ -896,20 +756,23 @@
         if(ativa) ativa.classList.remove('hidden');
         const btn = document.getElementById(`btn-${s}`);
         if(btn) btn.classList.add('active');
-        if(s === 'biblia') abrirBiblia();
-        if(s === 'minha-rede') filtrarCelulasRede();
+        if(s === 'sugestoes') carregarSugestoes();
+        if(s === 'minha-igreja') carregarEstatisticas();
     }
 
-    // ========== INICIALIZAÇÃO DE EVENTOS E SELECTS ==========
+    // ========== EVENTOS ==========
     function preencherSelects() {
         const selCelula = document.getElementById('selectCelulas');
-        const filtroCelula = document.getElementById('filtroCelula');
-        const selLider = document.getElementById('celLider');
-        if(selCelula) { selCelula.innerHTML = '<option value="">Selecione...</option>'; dadosCelulas.forEach(c => selCelula.innerHTML += `<option>${c[0]}</option>`); }
-        if(filtroCelula) { filtroCelula.innerHTML = '<option value="">Células</option>'; dadosCelulas.forEach(c => filtroCelula.innerHTML += `<option>${c[0]}</option>`); }
-        if(selLider) { selLider.innerHTML = '<option value="">Selecione...</option>'; const lideres = [...new Set(dadosMembros.filter(m=>['Líder','Pastor','Discipulador'].includes(m[2])).map(m=>m[1]))]; lideres.forEach(l => selLider.innerHTML += `<option>${l}</option>`); }
-        const selMembroFin = document.getElementById('finMembroSelect');
-        if(selMembroFin) { selMembroFin.innerHTML = '<option value="">Membro...</option>'; dadosMembros.sort((a,b)=>a[1].localeCompare(b[1])).forEach(m => selMembroFin.innerHTML += `<option>${m[1]}</option>`); }
+        if(selCelula) { selCelula.innerHTML = '<option value="">Selecione...</option>'; dadosCelulas.forEach(c => selCelula.innerHTML += `<option value="${c[0]}">${c[1]}</option>`); }
+        // Multiselect de células
+        const multiCelula = document.getElementById('multiCelula');
+        if(multiCelula) { multiCelula.innerHTML = ''; dadosCelulas.forEach(c => multiCelula.innerHTML += `<label><input type="checkbox" value="${c[0]}"> ${c[1]}</label>`); }
+        const selectLider = document.getElementById('celLider');
+        if(selectLider) {
+            selectLider.innerHTML = '<option value="">Selecione...</option>';
+            const lideres = [...new Set(dadosMembros.filter(m=>['Líder','Pastor','Discipulador'].includes(m[2])).map(m=>m[1]))];
+            lideres.forEach(l => selectLider.innerHTML += `<option>${l}</option>`);
+        }
     }
 
     function editarMembro(id) {
@@ -919,7 +782,7 @@
         document.getElementById('campoNome').value = m[1];
         document.getElementById('campoNasc').value = m[10];
         document.getElementById('campoTel').value = m[4];
-        document.getElementById('selectCelulas').value = m[3];
+        document.getElementById('selectCelulas').value = m[13] || '';
         document.getElementById('campoCategoria').value = m[2];
         document.getElementById('checkBat').checked = (m[6]==='Sim');
         document.getElementById('checkCur').checked = (m[7]==='Sim');
@@ -932,13 +795,12 @@
 
     function editarCelula(index) {
         const c = dadosCelulas[index];
-        document.getElementById('nomeOriginalCelula').value = c[0];
-        document.getElementById('celNome').value = c[0];
-        document.getElementById('celDia').value = c[2];
-        document.getElementById('celEndereco').value = c[3];
-        const sel = document.getElementById('celLider');
-        sel.value = c[1];
-        mudarSecao('form-celula');
+        document.getElementById('editCelulaId').value = c[0];
+        document.getElementById('editCelulaNome').value = c[1];
+        document.getElementById('editCelulaLider').value = c[2];
+        document.getElementById('editCelulaDia').value = c[3];
+        document.getElementById('editCelulaEnd').value = c[4];
+        document.getElementById('modalEditarCelula').classList.remove('hidden');
     }
 
     function inicializarEventos() {
@@ -949,7 +811,7 @@
                 nome: document.getElementById('campoNome').value,
                 nascimento: document.getElementById('campoNasc').value,
                 tipo: document.getElementById('campoCategoria').value,
-                celula: document.getElementById('selectCelulas').value,
+                celula_id: document.getElementById('selectCelulas').value || null,
                 telefone: document.getElementById('campoTel').value,
                 batizado: document.getElementById('checkBat').checked?'Sim':'Não',
                 cursao: document.getElementById('checkCur').checked?'Sim':'Não',
@@ -968,64 +830,64 @@
 
         document.getElementById('formCelula').onsubmit = async (e) => {
             e.preventDefault();
-            const nomeOrig = document.getElementById('nomeOriginalCelula').value;
+            const id = document.getElementById('editCelulaId').value;
             const dados = {
-                nome: document.getElementById('celNome').value,
-                lider: document.getElementById('celLider').value,
-                dia_horario: document.getElementById('celDia').value,
-                endereco: document.getElementById('celEndereco').value
+                nome: document.getElementById('editCelulaNome').value,
+                lider: document.getElementById('editCelulaLider').value,
+                dia_horario: document.getElementById('editCelulaDia').value,
+                endereco: document.getElementById('editCelulaEnd').value,
+                supervisor_email: sessionStorage.getItem('pastorEmail')
             };
-            if(nomeOrig) await supabaseClient.from('celulas').update(dados).eq('nome', nomeOrig);
+            if(id) await supabaseClient.from('celulas').update(dados).eq('id', id);
             else await supabaseClient.from('celulas').insert([dados]);
-            registrarLogAcao(`${nomeOrig?'Editou':'Criou'} célula ${dados.nome}`);
-            mudarSecao('celulas');
+            registrarLogAcao(`${id?'Editou':'Criou'} célula ${dados.nome}`);
+            fecharModal('modalEditarCelula');
             carregarTudo();
-        };
-
-        document.getElementById('formFinanceiro').onsubmit = async (e) => {
-            e.preventDefault();
-            const tipo = document.getElementById('finTipo').value;
-            const cat = document.getElementById('finCategoria').value;
-            let desc = (tipo==='Entrada' && cat==='Dízimo') ? document.getElementById('finMembroSelect').value : document.getElementById('finDescricaoInput').value;
-            const dados = {
-                tipo, categoria: cat, descricao: desc,
-                valor: document.getElementById('finValor').value,
-                data: document.getElementById('finData').value,
-                metodo: document.getElementById('finMetodo').value
-            };
-            await supabaseClient.from('financeiro').insert([dados]);
-            registrarLogAcao(`Lançou ${tipo} de R$ ${dados.valor}`);
-            document.getElementById('formFinanceiro').reset();
-            document.getElementById('finData').valueAsDate = new Date();
-            carregarFinanceiro();
         };
 
         document.getElementById('formPalavra').onsubmit = async (e) => {
             e.preventDefault();
+            const id = document.getElementById('palavraId').value;
             const dados = {
                 data: document.getElementById('palavraData').value,
                 tema: document.getElementById('palavraTema').value,
                 texto: document.getElementById('palavraTexto').value,
                 link_youtube: document.getElementById('palavraLink').value
             };
-            await supabaseClient.from('palavras').insert([dados]);
-            registrarLogAcao(`Publicou palavra: ${dados.tema}`);
-            mudarSecao('palavras');
+            if(id) await supabaseClient.from('palavras').update(dados).eq('id', id);
+            else await supabaseClient.from('palavras').insert([dados]);
+            registrarLogAcao(`${id?'Editou':'Publicou'} palavra: ${dados.tema}`);
+            fecharModal('modalEditarPalavra');
             carregarPalavrasDados();
         };
+
+        document.getElementById('filtroStatusGeral').addEventListener('change', aplicarFiltrosMembros);
+        document.getElementById('inputBusca').addEventListener('keyup', aplicarFiltrosMembros);
+        document.getElementById('filtroMesAgenda').addEventListener('change', () => renderizarAgenda(listaAgenda));
+        setupMultiselects();
     }
 
-    function fazerLogout() {
-        if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; }
+    async function arquivarMembro(id, nome) {
+        if(!confirm(`Arquivar ${nome}?`)) return;
+        await supabaseClient.from('membros').update({ arquivado: 'Sim' }).eq('id', id);
+        registrarLogAcao(`Arquivou membro ${nome}`);
+        carregarTudo();
     }
+
+    async function restaurarMembro(id) {
+        if(!confirm("Restaurar?")) return;
+        await supabaseClient.from('membros').update({ arquivado: 'Não' }).eq('id', id);
+        registrarLogAcao(`Restaurou membro ID ${id}`);
+        carregarTudo();
+    }
+
+    function fazerLogout() { if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; } }
 
     window.onload = () => {
-        document.getElementById('finData').valueAsDate = new Date();
-        document.getElementById('filtroMesFin').value = new Date().toISOString().slice(0,7);
+        document.getElementById('filtroMesAgenda').value = 'todos';
     };
 </script>
 
-<!-- ================== HTML (CORPO) ================== -->
 <div class="container">
     <div class="header">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -1041,137 +903,231 @@
     <div class="nav-menu">
         <button id="btn-lista" class="nav-btn active" onclick="mudarSecao('lista')"><i class="fas fa-users"></i> Membros</button>
         <button id="btn-minha-rede" class="nav-btn" onclick="mudarSecao('minha-rede')"><i class="fas fa-network-wired"></i> Rede</button>
-        <button id="btn-celulas" class="nav-btn" onclick="mudarSecao('celulas')"><i class="fas fa-church"></i> Células</button>
-        <button id="btn-relatorios" class="nav-btn" onclick="carregarRelatorios()"><i class="fas fa-clipboard-list"></i> Relatórios</button>
-        <button id="btn-financeiro" class="nav-btn" onclick="mudarSecao('financeiro')"><i class="fas fa-wallet"></i> Financeiro</button>
-        <button id="btn-arquivos" class="nav-btn" onclick="carregarArquivados()"><i class="fas fa-archive"></i> Arquivos</button>
-        <button id="btn-sugestoes" class="nav-btn" onclick="carregarSugestoes()"><i class="fas fa-hands-praying"></i> Pedidos</button>
+        <button id="btn-relatorios" class="nav-btn" onclick="mudarSecao('relatorios')"><i class="fas fa-clipboard-list"></i> Relatórios</button>
+        <button id="btn-sugestoes" class="nav-btn" onclick="mudarSecao('sugestoes')"><i class="fas fa-hands-praying"></i> Pedidos</button>
         <button id="btn-agenda" class="nav-btn" onclick="mudarSecao('agenda')"><i class="far fa-calendar-alt"></i> Agenda</button>
         <button id="btn-palavras" class="nav-btn" onclick="mudarSecao('palavras')"><i class="fas fa-book-open"></i> Palavras</button>
-        <button id="btn-biblia" class="nav-btn" onclick="abrirBiblia()"><i class="fas fa-bible"></i> Bíblia</button>
+        <button id="btn-minha-igreja" class="nav-btn" onclick="mudarSecao('minha-igreja')"><i class="fas fa-chart-bar"></i> Minha Igreja</button>
     </div>
 
-    <!-- SEÇÃO MEMBROS -->
+    <!-- MEMBROS -->
     <div id="secao-lista">
         <div style="background:white; padding:15px; border-radius:12px; margin-bottom:20px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <h4><span id="totalMembros">0</span> Membros <span id="contagemFiltrados" style="font-size:0.75rem; display:none;"></span></h4>
-                <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                <h4><span id="totalMembros">0</span> Membros</h4>
+                <div style="display:flex; gap:8px;">
                     <button onclick="exportarExcel()" class="btn-add-member" style="background:#166534;"><i class="fas fa-file-excel"></i></button>
                     <button onclick="exportarPDF()" class="btn-add-member" style="background:#991b1b;"><i class="fas fa-file-pdf"></i></button>
                     <button onclick="novoCadastro()" class="btn-add-member"><i class="fas fa-plus"></i> Novo</button>
                 </div>
             </div>
-            <div class="filtros-box" style="display:flex; gap:8px; flex-wrap:wrap;">
-                <input type="text" id="inputBusca" placeholder="🔍 Buscar..." onkeyup="filtrarMembros()" style="flex:2;">
-                <select id="filtroCelula" onchange="filtrarMembros()" style="flex:1;"><option value="">Células</option></select>
-                <select id="filtroCategoria" onchange="filtrarMembros()" style="flex:1;"><option value="">Cargos</option><option value="pastor">Pastor</option><option value="discipulador">Discip.</option><option value="líder">Líder</option><option value="membro">Membro</option><option value="frequentador">Freq.</option></select>
-                <select id="filtroTag" onchange="filtrarMembros()" style="flex:1;"><option value="">Status</option><option value="batizado">Batizado</option><option value="cursão">Cursão</option><option value="ctl">CTL</option><option value="encontro">Encontro</option><option value="seminário">Seminário</option><option value="dizimista">Dizimista</option></select>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="flex:1; min-width:150px;">
+                <div class="multi-select" id="multiCelula" style="flex:1;">
+                    <div class="trigger">Células <i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown"></div>
+                </div>
+                <div class="multi-select" id="multiCargo" style="flex:1;">
+                    <div class="trigger">Cargos <i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown">
+                        <label><input type="checkbox" value="pastor"> Pastor</label>
+                        <label><input type="checkbox" value="discipulador"> Discipulador</label>
+                        <label><input type="checkbox" value="líder"> Líder</label>
+                        <label><input type="checkbox" value="membro"> Membro</label>
+                        <label><input type="checkbox" value="frequentador"> Frequentador</label>
+                    </div>
+                </div>
+                <div class="multi-select" id="multiStatus" style="flex:1;">
+                    <div class="trigger">Status <i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown">
+                        <label><input type="checkbox" value="batizado"> Batismo</label>
+                        <label><input type="checkbox" value="cursão"> Cursão</label>
+                        <label><input type="checkbox" value="ctl"> CTL</label>
+                        <label><input type="checkbox" value="encontro"> Encontro</label>
+                        <label><input type="checkbox" value="seminário"> Seminário</label>
+                        <label><input type="checkbox" value="dizimista"> Dizimista</label>
+                    </div>
+                </div>
+                <select id="filtroStatusGeral" style="max-width:130px;">
+                    <option value="ativos" selected>Ativos</option>
+                    <option value="inativos">Inativos</option>
+                    <option value="todos">Todos</option>
+                </select>
             </div>
         </div>
         <div id="gridMembros" class="member-grid"></div>
     </div>
 
-    <!-- SEÇÃO MINHA REDE -->
+    <!-- REDE -->
     <div id="secao-minha-rede" class="hidden">
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <select id="filtroLiderRede" onchange="filtrarCelulasRede()" style="flex:1;"><option value="">Todos os Líderes</option></select>
-            <select id="filtroSupervisorRede" onchange="filtrarCelulasRede()" style="flex:1;"><option value="">Todos os Supervisores</option></select>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="contagemCelulasRede" style="font-weight:bold;">0</span> células
+            <button onclick="exportarListaCelulasPDF()" class="btn-add-member"><i class="fas fa-print"></i> Exportar Lista</button>
+            <button onclick="novaCelula()" class="btn-add-member"><i class="fas fa-plus"></i> Nova</button>
+        </div>
+        <div class="filtro-lider">
+            <select id="filtroLiderRede" onchange="filtrarCelulasRede()"><option value="">Todos os Líderes</option></select>
+            <select id="filtroSupervisorRede" onchange="filtrarCelulasRede()"><option value="">Todos os Supervisores</option></select>
         </div>
         <div id="listaCelulasRede"></div>
     </div>
 
-    <!-- SEÇÃO CÉLULAS (TABELA) -->
-    <div id="secao-celulas" class="hidden">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <h4>Gestão de Células</h4>
-            <button onclick="novaCelula()" class="btn-add-member" style="background:var(--accent);">+ Nova</button>
-        </div>
-        <table class="table-clean">
-            <thead><tr><th>Célula</th><th>Líder</th><th>Dia</th><th></th></tr></thead>
-            <tbody id="corpoCelulas"></tbody>
-        </table>
-    </div>
-
-    <!-- SEÇÃO RELATÓRIOS -->
+    <!-- RELATÓRIOS -->
     <div id="secao-relatorios" class="hidden">
-        <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="margin-bottom:15px;"><option value="">Todas as Células</option></select>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+            <select id="filtroRelCelula" onchange="filtrarRelatorios()"><option value="">Todas as Células</option></select>
+            <input type="date" id="filtroRelDataInicio" onchange="filtrarRelatorios()">
+            <input type="date" id="filtroRelDataFim" onchange="filtrarRelatorios()">
+        </div>
         <div id="listaRelatorios"></div>
     </div>
 
-    <!-- SEÇÃO FINANCEIRO -->
-    <div id="secao-financeiro" class="hidden">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <h4>Dashboard</h4>
-            <input type="month" id="filtroMesFin" onchange="recalcularFinanceiro()" style="width:auto;">
-        </div>
-        <div class="fin-dashboard">
-            <div class="fin-card blue"><small>SALDO</small><div class="fin-val" id="finSaldo">R$ 0,00</div></div>
-            <div class="fin-card green"><small>ENTRADAS</small><div class="fin-val" id="finEntrada">R$ 0,00</div></div>
-            <div class="fin-card red"><small>SAÍDAS</small><div class="fin-val" id="finSaida">R$ 0,00</div></div>
-        </div>
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <button class="nav-btn active" onclick="mudarTabFin('lancamento',this)">Lançar</button>
-            <button class="nav-btn" onclick="mudarTabFin('extrato',this)">Extrato</button>
-        </div>
-        <div id="tab-lancamento" class="form-box">
-            <form id="formFinanceiro">
-                <div style="display:flex; gap:10px;">
-                    <select id="finTipo" onchange="atualizarCategorias()" required><option>Entrada</option><option>Saída</option></select>
-                    <select id="finCategoria" onchange="atualizarCampos()" required><option>Dízimo</option><option>Oferta</option></select>
-                </div>
-                <select id="finMembroSelect"></select>
-                <input type="text" id="finDescricaoInput" class="hidden" placeholder="Descrição">
-                <div style="display:flex; gap:10px;">
-                    <input type="number" step="0.01" id="finValor" placeholder="Valor" required>
-                    <input type="date" id="finData" required>
-                </div>
-                <select id="finMetodo"><option>Pix</option><option>Dinheiro</option><option>Cartão</option></select>
-                <button type="submit" class="btn-save">Registrar</button>
-            </form>
-        </div>
-        <div id="tab-extrato" class="hidden">
-            <table class="table-clean"><thead><tr><th>Dia</th><th>Descrição</th><th>Valor</th></tr></thead><tbody id="corpoFin"></tbody></table>
-        </div>
-    </div>
-
-    <!-- SEÇÃO ARQUIVOS -->
-    <div id="secao-arquivos" class="hidden">
-        <h4>Membros Arquivados</h4>
-        <div id="gridArquivos" class="member-grid"></div>
-    </div>
-
-    <!-- SEÇÃO SUGESTÕES -->
+    <!-- PEDIDOS DE ORAÇÃO -->
     <div id="secao-sugestoes" class="hidden">
         <h4>Pedidos de Oração</h4>
-        <table class="table-clean"><thead><tr><th>Data</th><th>Mensagem</th></tr></thead><tbody id="corpoSugestoes"></tbody></table>
+        <table class="table-clean">
+            <thead><tr><th>Data</th><th>Mensagem</th><th>Ação</th></tr></thead>
+            <tbody id="corpoSugestoes"></tbody>
+        </table>
     </div>
 
-    <!-- SEÇÃO AGENDA -->
+    <!-- AGENDA -->
     <div id="secao-agenda" class="hidden">
-        <h4>Próximos Eventos</h4>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <h4>Próximos Eventos</h4>
+            <select id="filtroMesAgenda">
+                <option value="todos" selected>Todos os meses</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
         <div id="listaAgenda" class="member-grid"></div>
     </div>
 
-    <!-- SEÇÃO PALAVRAS -->
+    <!-- PALAVRAS -->
     <div id="secao-palavras" class="hidden">
-        <div style="display:flex; justify-content:space-between;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
             <h4>Palavras</h4>
             <button onclick="novaPalavra()" class="btn-add-member"><i class="fas fa-plus"></i> Nova</button>
         </div>
         <div id="listaPalavras"></div>
     </div>
 
-    <!-- SEÇÃO CADASTRO DE MEMBRO -->
+    <!-- MINHA IGREJA -->
+    <div id="secao-minha-igreja" class="hidden">
+        <h4>Estatísticas da Igreja</h4>
+        <div class="member-grid">
+            <div class="member-card"><strong>Total de Membros</strong><br><span id="statTotalMembros"></span></div>
+            <div class="member-card"><strong>Batizados</strong><br><span id="statBatizados"></span></div>
+            <div class="member-card"><strong>Cursão</strong><br><span id="statCursao"></span></div>
+            <div class="member-card"><strong>CTL</strong><br><span id="statCtl"></span></div>
+            <div class="member-card"><strong>Seminário</strong><br><span id="statSeminario"></span></div>
+            <div class="member-card"><strong>Dizimistas</strong><br><span id="statDizimistas"></span></div>
+            <div class="member-card"><strong>Líderes</strong><br><span id="statLideres"></span></div>
+            <div class="member-card"><strong>Discipuladores</strong><br><span id="statDiscipuladores"></span></div>
+            <div class="member-card"><strong>Frequentadores</strong><br><span id="statFrequentadores"></span></div>
+            <div class="member-card"><strong>Membros</strong><br><span id="statMembros"></span></div>
+            <div class="member-card"><strong>Total de Células</strong><br><span id="statCelulas"></span></div>
+            <div class="member-card"><strong>Relatórios na Semana</strong><br><span id="statRelatoriosSemana"></span></div>
+            <div class="member-card"><strong>Sem Relatório (semana)</strong><br><span id="statCelulasSemRelatorio"></span></div>
+        </div>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
+            <div style="text-align:center;"><h2 id="detalheRelCelula"></h2><p id="detalheRelData"></p></div>
+            <div class="attend-box"><span class="attend-num" id="detalheRelTotal">0</span> presentes</div>
+            <div class="role-grid">
+                <div class="role-box"><span class="role-label">Palavra</span><span class="role-val" id="detalheRelPalavra">-</span></div>
+                <div class="role-box"><span class="role-label">Louvor</span><span class="role-val" id="detalheRelLouvor">-</span></div>
+                <div class="role-box"><span class="role-label">Lanche</span><span class="role-val" id="detalheRelLanche">-</span></div>
+                <div class="role-box"><span class="role-label">Quebra-Gelo</span><span class="role-val" id="detalheRelQuebra">-</span></div>
+            </div>
+            <div style="display:flex; gap:15px;">
+                <div style="flex:1;"><strong>Presentes</strong><div id="listaPresentes" class="list-present"></div></div>
+                <div style="flex:1;"><strong>Ausentes</strong><div id="listaAusentes" class="list-present"></div></div>
+            </div>
+            <div class="obs-box"><strong>Obs:</strong> <span id="detalheRelObs"></span></div>
+        </div>
+    </div>
+
+    <div id="modalPalavra" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="fecharModal('modalPalavra')">&times;</button>
+            <h3 id="modalTitulo"></h3>
+            <small id="modalDataPalavra"></small>
+            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir</a>
+            <div id="modalTexto" style="white-space:pre-wrap;"></div>
+        </div>
+    </div>
+
+    <div id="modalEditarPalavra" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="fecharModal('modalEditarPalavra')">&times;</button>
+            <h3>Editar Palavra</h3>
+            <form id="formPalavra">
+                <input type="hidden" id="palavraId">
+                <input type="date" id="palavraData" required>
+                <input type="text" id="palavraTema" placeholder="Tema" required>
+                <input type="text" id="palavraLink" placeholder="Link YouTube (opcional)">
+                <textarea id="palavraTexto" rows="10" required></textarea>
+                <button type="submit" class="btn-save">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalEditarCelula" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
+            <h3>Célula</h3>
+            <form id="formCelula">
+                <input type="hidden" id="editCelulaId">
+                <label>Nome</label><input type="text" id="editCelulaNome" required>
+                <label>Líder</label><select id="editCelulaLider" required></select>
+                <label>Dia/Horário</label>
+                <select id="editCelulaDia">
+                    <option value="">Selecione</option>
+                    <option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option>
+                </select>
+                <label>Endereço</label><input type="text" id="editCelulaEnd">
+                <button type="submit" class="btn-save">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalCelula" class="modal-overlay hidden">
+        <div class="modal-content" style="height:100vh; max-height:100vh; border-radius:0;">
+            <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--primary); padding-bottom:15px;">
+                <h2 id="modalCelulaTitulo"></h2>
+                <button class="btn-close-modal" onclick="fecharModalCelula()" style="position:static;">&times;</button>
+            </div>
+            <div style="display:flex; gap:10px; margin:15px 0;">
+                <button class="btn-card" onclick="abrirModalCadastroMembro()"><i class="fas fa-plus"></i> Novo Membro</button>
+                <button class="btn-card" onclick="abrirApascentar()"><i class="fas fa-hands-praying"></i> Apascentar</button>
+            </div>
+            <div id="gridMembrosCelulaModal" class="member-grid"></div>
+            <input type="hidden" id="cadastroModalCelulaHidden">
+        </div>
+    </div>
+
     <div id="secao-cadastro" class="form-box hidden">
         <h3>Cadastro de Membro</h3>
         <form id="formMembro">
             <input type="hidden" id="idMembro">
             <label>Nome</label><input type="text" id="campoNome" required>
-            <div style="display:flex; gap:10px;">
-                <input type="date" id="campoNasc" placeholder="Nascimento">
-                <input type="tel" id="campoTel" placeholder="WhatsApp">
-            </div>
+            <div style="display:flex; gap:10px;"><input type="date" id="campoNasc"><input type="tel" id="campoTel" placeholder="WhatsApp"></div>
             <select id="selectCelulas"></select>
             <select id="campoCategoria"><option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option></select>
             <div class="switch-container"><span>Batismo</span><label class="switch"><input type="checkbox" id="checkBat"><span class="slider"></span></label></div>
@@ -1183,173 +1139,89 @@
             <button type="submit" class="btn-save">Salvar</button>
         </form>
     </div>
-
-    <!-- SEÇÃO FORM CÉLULA -->
-    <div id="secao-form-celula" class="form-box hidden">
-        <h3>Célula</h3>
-        <form id="formCelula">
-            <input type="hidden" id="nomeOriginalCelula">
-            <label>Nome</label><input type="text" id="celNome" required>
-            <label>Líder</label><select id="celLider"></select>
-            <label>Dia</label><select id="celDia"><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option></select>
-            <label>Endereço</label><input type="text" id="celEndereco">
-            <button type="submit" class="btn-save">Salvar</button>
-        </form>
-    </div>
-
-    <!-- SEÇÃO NOVA PALAVRA -->
-    <div id="secao-nova-palavra" class="form-box hidden">
-        <h3>Nova Palavra</h3>
-        <form id="formPalavra">
-            <input type="date" id="palavraData" required>
-            <input type="text" id="palavraTema" placeholder="Tema" required>
-            <input type="text" id="palavraLink" placeholder="Link YouTube (opcional)">
-            <textarea id="palavraTexto" rows="10" placeholder="Esboço..." required></textarea>
-            <button type="submit" class="btn-save">Publicar</button>
-        </form>
-    </div>
-</div>
-
-<!-- MODAL CÉLULA (TELA CHEIA) -->
-<div id="modalCelula" class="modal-overlay hidden">
-    <div class="modal-content" style="height:100vh; max-height:100vh; border-radius:0;">
-        <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--primary); padding-bottom:15px;">
-            <h2 id="modalCelulaTitulo"></h2>
-            <button class="btn-close-modal" onclick="fecharModalCelula()" style="position:static;">&times;</button>
-        </div>
-        <div style="display:flex; gap:10px; margin:15px 0;">
-            <button class="btn-card" onclick="abrirModalCadastroMembro()"><i class="fas fa-plus"></i> Novo Membro</button>
-            <button class="btn-card" onclick="abrirApascentar()"><i class="fas fa-hands-praying"></i> Apascentar</button>
-            <button class="btn-card" onclick="abrirListaRelatoriosCelula()"><i class="fas fa-clipboard-list"></i> Relatórios</button>
-        </div>
-        <div id="gridMembrosCelulaModal" class="member-grid"></div>
-        <input type="hidden" id="cadastroModalCelulaHidden">
-    </div>
-</div>
-
-<!-- MODAL RELATÓRIO DETALHE -->
-<div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
-        <div style="text-align:center;"><h2 id="detalheRelCelula"></h2><p id="detalheRelData"></p></div>
-        <div class="attend-box"><span class="attend-num" id="detalheRelTotal">0</span> presentes</div>
-        <div class="role-grid">
-            <div class="role-box"><span class="role-label">Palavra</span><span class="role-val" id="detalheRelPalavra">-</span></div>
-            <div class="role-box"><span class="role-label">Louvor</span><span class="role-val" id="detalheRelLouvor">-</span></div>
-            <div class="role-box"><span class="role-label">Lanche</span><span class="role-val" id="detalheRelLanche">-</span></div>
-            <div class="role-box"><span class="role-label">Quebra-Gelo</span><span class="role-val" id="detalheRelQuebra">-</span></div>
-        </div>
-        <div style="display:flex; gap:15px;">
-            <div style="flex:1;"><strong>Presentes</strong><div id="listaPresentes" class="list-present"></div></div>
-            <div style="flex:1;"><strong>Ausentes</strong><div id="listaAusentes" class="list-present"></div></div>
-        </div>
-        <div class="obs-box"><strong>Obs:</strong> <span id="detalheRelObs"></span></div>
-    </div>
-</div>
-
-<!-- MODAL PALAVRA -->
-<div id="modalPalavra" class="modal-overlay hidden">
-    <div class="modal-content">
-        <button class="btn-close-modal" onclick="fecharModal('modalPalavra')">&times;</button>
-        <h3 id="modalTitulo"></h3>
-        <small id="modalDataPalavra"></small>
-        <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir</a>
-        <div id="modalTexto" style="white-space:pre-wrap;"></div>
-    </div>
-</div>
-
-<!-- BÍBLIA OFF-CANVAS -->
-<div id="biblia-overlay" onclick="fecharBiblia()"></div>
-<div id="painel-biblia" class="biblia-offcanvas">
-    <div class="biblia-header">
-        <div class="biblia-titulo-area"><i class="fas fa-bible"></i><h2>Bíblia</h2></div>
-        <button class="btn-fechar-biblia" onclick="fecharBiblia()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="biblia-controles">
-        <button class="versao-selector-btn" id="btnSeletorVersao" onclick="abrirModalVersao()"><span id="versaoSiglaAtual">MSG</span><i class="fas fa-chevron-down"></i></button>
-        <select id="biblia-livro" onchange="Biblia.onLivroChange()"></select>
-        <select id="biblia-capitulo" onchange="Biblia.onCapituloChange()"></select>
-    </div>
-    <div id="biblia-conteudo" class="biblia-texto-area"><p class="biblia-placeholder">Selecione livro e capítulo</p></div>
-    <div class="biblia-nav-footer">
-        <button class="nav-capitulo-btn" onclick="capituloAnterior()"><i class="fas fa-chevron-left"></i> Anterior</button>
-        <button class="nav-capitulo-btn" onclick="capituloProximo()">Próximo <i class="fas fa-chevron-right"></i></button>
-    </div>
-</div>
-
-<!-- MODAL VERSÃO BÍBLIA -->
-<div id="modalVersao" class="modal-overlay hidden" onclick="fecharModalVersao(event)">
-    <div class="modal-content" style="max-width:500px;" onclick="event.stopPropagation()">
-        <div style="display:flex; justify-content:space-between;"><h3>Versão</h3><button onclick="fecharModalVersao()">&times;</button></div>
-        <div id="listaVersoes" class="versao-lista"></div>
-    </div>
 </div>
 
 <script>
-    // Funções complementares para Bíblia e modais
-    function abrirModalVersao() {
-        const modal = document.getElementById('modalVersao');
-        const lista = document.getElementById('listaVersoes');
-        lista.innerHTML = '';
-        Object.entries(nomesCompletos).forEach(([id, nome]) => {
-            const item = document.createElement('div');
-            item.className = 'versao-item' + (id===versaoSelecionada?' selecionada':'');
-            item.innerHTML = `${nome} <span>${siglasVersoes[id]}</span>`;
-            item.onclick = () => selecionarVersao(id);
-            lista.appendChild(item);
+    function exportarExcel() {
+        const lista = obterMembrosFiltrados();
+        if(!lista.length) return alert("Nenhum dado.");
+        const ws = XLSX.utils.json_to_sheet(lista.map(m => ({ Nome: m[1], Categoria: m[2], Célula: m[3], WhatsApp: m[4], Batismo: m[6], Cursão: m[7], CTL: m[8], Encontro: m[9], Seminário: m[11], Dizimista: m[12] })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Membros");
+        XLSX.writeFile(wb, `Membros_${new Date().toLocaleDateString()}.xlsx`);
+    }
+
+    async function exportarPDF() {
+        const lista = obterMembrosFiltrados();
+        if(!lista.length) return alert("Nenhum dado.");
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        try {
+            const resp = await fetch('logo.png');
+            const blob = await resp.blob();
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            await new Promise(r => reader.onload = r);
+            doc.addImage(reader.result, 'PNG', 14, 10, 16, 16);
+        } catch(e) {}
+        doc.setFontSize(16); doc.text("Relatório de Membros - Videira Jataí", 34, 16);
+        doc.setFontSize(9); doc.text(`Gerado em ${new Date().toLocaleString()} | Total: ${lista.length}`, 34, 22);
+        doc.autoTable({ head: [["Nome","Categoria","Célula","WhatsApp","Bat.","Cur.","CTL","Enc.","Sem.","Diz."]], body: lista.map(m => [m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[11], m[12]]), startY: 30, theme: 'grid', headStyles: { fillColor: [128,0,32] }, styles: { fontSize: 8 } });
+        doc.save(`Membros_${new Date().toLocaleDateString()}.pdf`);
+    }
+
+    function obterMembrosFiltrados() {
+        const ativos = document.getElementById('filtroStatusGeral').value;
+        let base;
+        if (ativos === 'ativos') base = obterAtivos();
+        else if (ativos === 'inativos') base = obterInativos();
+        else base = [...dadosMembros];
+        const busca = document.getElementById('inputBusca').value.toLowerCase();
+        const celulas = Array.from(document.querySelectorAll('#multiCelula input:checked')).map(cb => cb.value);
+        const cargos = Array.from(document.querySelectorAll('#multiCargo input:checked')).map(cb => cb.value.toLowerCase());
+        const statusCheck = Array.from(document.querySelectorAll('#multiStatus input:checked')).map(cb => cb.value);
+        return base.filter(m => {
+            if (busca && !m[1].toLowerCase().includes(busca)) return false;
+            if (celulas.length && !celulas.includes(String(m[13]))) return false;
+            if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
+            if (statusCheck.length) {
+                const tags = [];
+                if(m[6]==='Sim') tags.push('batizado');
+                if(m[7]==='Sim') tags.push('cursão');
+                if(m[8]==='Sim') tags.push('ctl');
+                if(m[9]==='Sim') tags.push('encontro');
+                if(m[11]==='Sim') tags.push('seminário');
+                if(m[12]==='Sim') tags.push('dizimista');
+                if (!statusCheck.some(s => tags.includes(s))) return false;
+            }
+            return true;
         });
-        modal.classList.remove('hidden');
     }
-    function fecharModalVersao(e) { if(!e || e.target.classList.contains('modal-overlay')) document.getElementById('modalVersao').classList.add('hidden'); }
-    async function selecionarVersao(id) {
-        versaoSelecionada = id;
-        localStorage.setItem('biblia_versao', id);
-        document.getElementById('versaoSiglaAtual').innerText = siglasVersoes[id];
-        fecharModalVersao();
-        if(typeof Biblia !== 'undefined') await Biblia.mudarVersao(id);
-    }
-    function capituloAnterior() { if(typeof Biblia !== 'undefined') Biblia.capituloAnterior?.(); }
-    function capituloProximo() { if(typeof Biblia !== 'undefined') Biblia.capituloProximo?.(); }
+
     function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
     function novoCadastro() { document.getElementById('formMembro').reset(); document.getElementById('idMembro').value=''; mudarSecao('cadastro'); }
-    function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('nomeOriginalCelula').value=''; mudarSecao('form-celula'); }
-    function novaPalavra() { document.getElementById('formPalavra').reset(); mudarSecao('nova-palavra'); }
-    function mudarTabFin(tab, btn) {
-        document.getElementById('tab-lancamento').classList.add('hidden');
-        document.getElementById('tab-extrato').classList.add('hidden');
-        document.getElementById('tab-'+tab).classList.remove('hidden');
-        btn.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-    }
-    function atualizarCategorias() {
-        const tipo = document.getElementById('finTipo').value;
-        const cat = document.getElementById('finCategoria');
-        cat.innerHTML = tipo==='Saída' ? '<option>Despesa Fixa</option><option>Eventual</option><option>Manutenção</option>' : '<option>Dízimo</option><option>Oferta</option>';
-        atualizarCampos();
-    }
-    function atualizarCampos() {
-        const tipo = document.getElementById('finTipo').value;
-        const cat = document.getElementById('finCategoria').value;
-        const sel = document.getElementById('finMembroSelect');
-        const inp = document.getElementById('finDescricaoInput');
-        if(tipo==='Entrada' && cat==='Dízimo') { sel.classList.remove('hidden'); inp.classList.add('hidden'); }
-        else { sel.classList.add('hidden'); inp.classList.remove('hidden'); }
-    }
+    function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('editCelulaId').value=''; document.getElementById('modalEditarCelula').classList.remove('hidden'); }
+    function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraId').value=''; document.getElementById('modalEditarPalavra').classList.remove('hidden'); }
     function abrirModalCadastroMembro() {
         if(!celulaAtiva) return;
         document.getElementById('selectCelulas').value = celulaAtiva[0];
         novoCadastro();
     }
-    async function abrirListaRelatoriosCelula() {
+    async function abrirApascentar() {
         if(!celulaAtiva) return;
-        document.getElementById('filtroRelCelula').value = celulaAtiva[0];
-        mudarSecao('relatorios');
-        await carregarRelatorios();
-        filtrarRelatorios();
+        const trintaDias = new Date(); trintaDias.setDate(trintaDias.getDate()-30);
+        const { data: rels } = await supabaseClient.from('relatorios').select('id').eq('celula', celulaAtiva[1]).gte('data', trintaDias.toISOString().split('T')[0]);
+        if(!rels?.length) return alert("Nenhum relatório recente.");
+        const ids = rels.map(r=>r.id);
+        const { data: pres } = await supabaseClient.from('presencas').select('membro_id, presente').in('relatorio_id', ids);
+        const faltas = {};
+        pres?.forEach(p => { if(!p.presente) faltas[p.membro_id] = (faltas[p.membro_id]||0)+1; });
+        const faltosos = membrosDaCelulaAtiva.filter(m => faltas[m.id] > 0);
+        if(!faltosos.length) return alert("Nenhum faltoso.");
+        let msg = "Faltosos (últimos 30 dias):\n\n";
+        faltosos.forEach(m => msg += `${m.nome} - ${faltas[m.id]} falta(s)\n`);
+        alert(msg);
     }
-    // Inicializa categorias financeiras
-    window.atualizarCategorias = atualizarCategorias;
-    window.atualizarCampos = atualizarCampos;
 </script>
 </body>
 </html>
