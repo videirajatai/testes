@@ -618,7 +618,8 @@
                 dadosMembros.forEach(m => { if (m[13]) m[3] = window.celulaMap[m[13]] || 'Sem Célula'; });
 
                 document.getElementById('totalMembros').innerText = obterAtivos().length;
-                renderizarCards(obterAtivos());
+               const ativosOrdenados = ordenarMembrosPorHierarquia(obterAtivos());
+                renderizarCards(ativosOrdenados);
                 preencherSelects();
                 preencherSelectLideres();
                 renderizarCelulasRede(dadosCelulas);
@@ -648,6 +649,32 @@
 
         function obterInativos() { return dadosMembros.filter(m => m[14] === 'Sim' || (typeof m[14] === 'string' && m[14]
                 .toLowerCase() === 'sim')); }
+
+        function ordenarMembrosPorHierarquia(lista) {
+            const ordemCategorias = {
+                'Pastor': 1,
+                'Discipulador': 2,
+                'Líder': 3,
+                'Membro': 4,
+                'Frequentador': 5
+            };
+            
+            return lista.sort((a, b) => {
+                const prioridadeA = ordemCategorias[a[2]] || 99;
+                const prioridadeB = ordemCategorias[b[2]] || 99;
+                if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
+                // Mesma categoria: ordena alfabeticamente pelo nome (índice 1)
+                const nomeA = (a[1] || '').toLowerCase();
+                const nomeB = (b[1] || '').toLowerCase();
+                if (nomeA < nomeB) return -1;
+                if (nomeA > nomeB) return 1;
+                return 0;
+            });
+        }
+
+
+
+        
 
         // ========== RENDER MEMBROS ==========
         function renderizarCards(lista) {
@@ -708,6 +735,8 @@
                 }
                 return true;
             });
+            // 🔹 Ordena pela hierarquia e depois alfabeticamente
+            base = ordenarMembrosPorHierarquia(base);
             renderizarCards(base);
             document.getElementById('totalMembros').innerText = base.length;
         }
