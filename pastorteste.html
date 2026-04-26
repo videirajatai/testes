@@ -975,30 +975,76 @@
 
         // ========== AGENDA ==========
         function renderizarAgenda(lista) {
-            const div = document.getElementById('listaAgenda');
-            div.innerHTML = '';
-            const mesFiltro = document.getElementById('filtroMesAgenda')?.value;
-            let filtrada = lista;
-            if (mesFiltro && mesFiltro !== 'todos') {
-                filtrada = lista.filter(a => {
-                    const d = a[0];
-                    if (!d) return false;
-                    const partes = d.includes('-') ? d.split('-') : d.split('/');
-                    const mes = partes.length === 3 ? parseInt(partes[1]) : null;
-                    return mes === parseInt(mesFiltro);
-                });
-            }
-            filtrada.sort((a, b) => new Date(a[0]) - new Date(b[0]));
-            filtrada.forEach(a => {
-                let dataF = a[0]?.split('-').reverse().join('/') || '';
-                div.innerHTML += `<div class="member-card">
-                    <div class="card-header"><h4 class="card-name">${dataF}</h4><span class="cat-badge">${a[4]||''}</span></div>
-                    <div><strong>${a[1]}</strong></div>
-                    <div>${a[2]||''}</div>
-                    <div><span style="color:${a[3]==='Pago'?'#dc3545':'var(--success-text)'};">${a[3]}</span></div>
-                </div>`;
-            });
+    const div = document.getElementById('listaAgenda');
+    div.innerHTML = '';
+    const mesFiltro = document.getElementById('filtroMesAgenda')?.value;
+    let filtrada = lista;
+
+    // Filtro por mês (preservado)
+    if (mesFiltro && mesFiltro !== 'todos') {
+        filtrada = lista.filter(a => {
+            const d = a[0];
+            if (!d) return false;
+            const partes = d.includes('-') ? d.split('-') : d.split('/');
+            const mes = partes.length === 3 ? parseInt(partes[1]) : null;
+            return mes === parseInt(mesFiltro);
+        });
+    }
+
+    // Função de parse robusta (igual à do líder)
+    const parseDate = (str) => {
+        if (!str) return 0;
+        // Formato AAAA-MM-DD
+        if (str.includes('-')) {
+            const [y, m, d] = str.split('-').map(Number);
+            return new Date(y, m - 1, d).getTime();
         }
+        // Formato DD/MM/AAAA
+        if (str.includes('/')) {
+            const [d, m, y] = str.split('/').map(Number);
+            return new Date(y, m - 1, d).getTime();
+        }
+        // Fallback
+        const t = Date.parse(str);
+        return isNaN(t) ? 0 : t;
+    };
+
+    // Ordenação decrescente (mais recente primeiro)
+    filtrada.sort((a, b) => parseDate(b[0]) - parseDate(a[0]));
+
+    // Renderização
+    filtrada.forEach(a => {
+        let rawDate = a[0] || '';
+        let dataF = rawDate;
+        if (rawDate.includes('-')) {
+            const [y, m, d] = rawDate.split('-');
+            dataF = `${d}/${m}/${y}`;
+        }
+
+        // Cores das badges (como no líder)
+        let bgColor = '#555';
+        let textColor = 'white';
+        if (a[4] === 'RADICAIS LIVRES') bgColor = '#0056b3';
+        else if (a[4] === 'GOOGLE AGENDA') { bgColor = '#600018'; textColor = 'white'; }
+        else if (a[4] === 'RADICAIS KIDS') bgColor = '#b58900';
+
+        const badgeStyle = `background:${bgColor}; color:${textColor};`;
+        let corTipo = (a[3] === 'Pago') ? '#dc3545' : 'var(--success-text)';
+
+        div.innerHTML += `
+        <div class="member-card">
+            <div class="card-header">
+                <h4 class="card-name"><i class="far fa-calendar-alt"></i> ${dataF}</h4>
+                <span class="cat-badge" style="${badgeStyle}">${a[4] || ''}</span>
+            </div>
+            <div style="font-weight:700;">${a[1] || ''}</div>
+            <div style="color:#666;">${a[2] || ''}</div>
+            <div style="margin-top:10px;">
+                <span style="color:${corTipo};">${a[3] || ''}</span>
+            </div>
+        </div>`;
+    });
+}
 
         // ========== PALAVRAS ==========
         async function carregarPalavrasDados() {
