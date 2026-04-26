@@ -542,18 +542,37 @@
     }
 
     // ========== EDIÇÃO DE MEMBRO ==========
-    function editarMembro(id) {
-        const m = dadosMembros.find(x => x[0] == id);
-        if(!m) return;
-        document.getElementById('idMembro').value = m[0];
-        document.getElementById('campoNome').value = m[1];
-        document.getElementById('campoNasc').value = m[10];
-        document.getElementById('campoTel').value = m[4];
-        document.getElementById('selectCelulas').value = m[13] || '';
-        document.getElementById('campoCategoria').value = m[2];
-        ['checkBat','checkCur','checkCtl','checkDiz','checkSem','checkDizi'].forEach((id,i) => document.getElementById(id).checked = m[6+i]==='Sim');
-        mudarSecao('cadastro');
+    // Garanta que fecharModal seja usada também para clique no overlay
+function fecharModalClique(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.add('hidden');
     }
+}
+
+// Atualize a função novoCadastro para resetar o formulário e mudar o título
+function novoCadastro() {
+    document.getElementById('formMembro').reset();
+    document.getElementById('idMembro').value = '';
+    document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
+    document.getElementById('secao-cadastro').classList.remove('hidden');
+}
+
+// A função editarMembro deve abrir o mesmo modal, preenchendo os campos
+function editarMembro(id) {
+    const m = dadosMembros.find(x => x[0] == id);
+    if (!m) return;
+    document.getElementById('idMembro').value = m[0];
+    document.getElementById('campoNome').value = m[1];
+    document.getElementById('campoNasc').value = m[10];
+    document.getElementById('campoTel').value = m[4];
+    document.getElementById('selectCelulas').value = m[13] || '';
+    document.getElementById('campoCategoria').value = m[2];
+    ['checkBat','checkCur','checkCtl','checkDiz','checkSem','checkDizi'].forEach((checkId, i) => {
+        document.getElementById(checkId).checked = (m[6 + i] === 'Sim');
+    });
+    document.getElementById('tituloFormMembro').innerText = 'Editar Membro';
+    document.getElementById('secao-cadastro').classList.remove('hidden');
+}
 
     async function arquivarMembro(id, nome) {
         if(confirm(`Arquivar ${nome}?`)) { await supabaseClient.from('membros').update({ arquivado: 'Sim' }).eq('id', id); carregarTudo(); }
@@ -578,7 +597,14 @@
     }
 
     function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
-    function novoCadastro() { document.getElementById('formMembro').reset(); document.getElementById('idMembro').value=''; mudarSecao('cadastro'); }
+    
+    function novoCadastro() {
+    document.getElementById('formMembro').reset();
+    document.getElementById('idMembro').value = '';
+    document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
+    document.getElementById('secao-cadastro').classList.remove('hidden');
+}
+    
     function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('editCelulaId').value=''; document.getElementById('modalEditarCelula').classList.remove('hidden'); }
     function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraId').value=''; document.getElementById('modalEditarPalavra').classList.remove('hidden'); }
 
@@ -701,38 +727,68 @@
         <button id="btn-minha-igreja" class="nav-btn" onclick="mudarSecao('minha-igreja')"><i class="fas fa-chart-bar"></i> Minha Igreja</button>
     </div>
 
-    <!-- MEMBROS -->
+   <!-- MEMBROS -->
     <div id="secao-lista">
+        <!-- Barra superior: contagem + botões -->
         <div style="background:white; padding:12px; border-radius:12px; margin-bottom:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h4><span id="totalMembros">0</span> Membros</h4>
+                <h4 style="margin:0;"><span id="totalMembros">0</span> Membros</h4>
                 <div style="display:flex; gap:4px;">
-                    <button onclick="exportarExcel()" class="btn-card" style="background:#166534; color:white;"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="exportarPDF()" class="btn-card" style="background:#991b1b; color:white;"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="novoCadastro()" class="btn-card" style="background:var(--success-text); color:white;"><i class="fas fa-plus"></i> Novo</button>
+                    <button onclick="exportarExcel()" class="btn-card" style="background:#166534; color:white; border-color:#166534;"><i class="fas fa-file-excel"></i></button>
+                    <button onclick="exportarPDF()" class="btn-card" style="background:#991b1b; color:white; border-color:#991b1b;"><i class="fas fa-file-pdf"></i></button>
+                    <button onclick="novoCadastro()" class="btn-card" style="background:var(--success-text); color:white; border-color:var(--success-text);"><i class="fas fa-plus"></i> Novo</button>
                 </div>
             </div>
+    
+            <!-- Filtros (linha única com quebra em mobile) -->
             <div class="filtros-container">
-                <div class="filtro-item" style="flex:2;"><input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;"></div>
-                <div class="multi-select" id="multiCelula"><div class="trigger">Células <i class="fas fa-chevron-down"></i></div><div class="dropdown"></div></div>
-                <div class="multi-select" id="multiCargo"><div class="trigger">Cargos <i class="fas fa-chevron-down"></i></div><div class="dropdown">
-                    <label><input type="checkbox" value="pastor"> Pastor</label>
-                    <label><input type="checkbox" value="discipulador"> Discipulador</label>
-                    <label><input type="checkbox" value="líder"> Líder</label>
-                    <label><input type="checkbox" value="membro"> Membro</label>
-                    <label><input type="checkbox" value="frequentador"> Frequentador</label>
-                </div></div>
-                <div class="multi-select" id="multiStatus"><div class="trigger">Status <i class="fas fa-chevron-down"></i></div><div class="dropdown">
-                    <label><input type="checkbox" value="batizado"> Batismo</label>
-                    <label><input type="checkbox" value="cursão"> Cursão</label>
-                    <label><input type="checkbox" value="ctl"> CTL</label>
-                    <label><input type="checkbox" value="encontro"> Encontro</label>
-                    <label><input type="checkbox" value="seminário"> Seminário</label>
-                    <label><input type="checkbox" value="dizimista"> Dizimista</label>
-                </div></div>
-                <div class="filtro-item" style="max-width:100px;"><select id="filtroStatusGeral" style="height:38px;"><option value="ativos" selected>Ativos</option><option value="inativos">Inativos</option><option value="todos">Todos</option></select></div>
+                <div class="filtro-item" style="flex:2;">
+                    <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;">
+                </div>
+    
+                <!-- Multiselect Células -->
+                <div class="multi-select" id="multiCelula">
+                    <div class="trigger">Células <i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown"></div>
+                </div>
+    
+                <!-- Multiselect Cargos -->
+                <div class="multi-select" id="multiCargo">
+                    <div class="trigger">Cargos <i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown">
+                        <label><input type="checkbox" value="pastor"> Pastor</label>
+                        <label><input type="checkbox" value="discipulador"> Discipulador</label>
+                        <label><input type="checkbox" value="líder"> Líder</label>
+                        <label><input type="checkbox" value="membro"> Membro</label>
+                        <label><input type="checkbox" value="frequentador"> Frequentador</label>
+                    </div>
+                </div>
+    
+                <!-- Multiselect Status (passos de fé) -->
+                <div class="multi-select" id="multiStatus">
+                    <div class="trigger">Status <i class="fas fa-chevron-down"></i></div>
+                    <div class="dropdown">
+                        <label><input type="checkbox" value="batizado"> Batismo</label>
+                        <label><input type="checkbox" value="cursão"> Cursão</label>
+                        <label><input type="checkbox" value="ctl"> CTL</label>
+                        <label><input type="checkbox" value="encontro"> Encontro</label>
+                        <label><input type="checkbox" value="seminário"> Seminário</label>
+                        <label><input type="checkbox" value="dizimista"> Dizimista</label>
+                    </div>
+                </div>
+    
+                <!-- Filtro Ativo/Inativo/Todos -->
+                <div class="filtro-item" style="max-width:100px;">
+                    <select id="filtroStatusGeral" style="height:38px;">
+                        <option value="ativos" selected>Ativos</option>
+                        <option value="inativos">Inativos</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
             </div>
         </div>
+    
+        <!-- Grid de cards dos membros -->
         <div id="gridMembros" class="member-grid"></div>
     </div>
 
@@ -875,21 +931,36 @@
     </div>
 </div>
 
-<div id="secao-cadastro" class="modal-overlay hidden">
-    <div class="modal-content"><button class="btn-close-modal" onclick="fecharModal('secao-cadastro')">&times;</button>
-        <h3>Cadastro de Membro</h3>
-        <form id="formMembro"><input type="hidden" id="idMembro">
-            <label>Nome</label><input type="text" id="campoNome" required>
-            <div style="display:flex; gap:10px;"><input type="date" id="campoNasc"><input type="tel" id="campoTel" placeholder="WhatsApp"></div>
-            <label>Célula</label><select id="selectCelulas"></select>
-            <label>Categoria</label><select id="campoCategoria"><option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option></select>
+<!-- MODAL DE CADASTRO/EDIÇÃO DE MEMBRO (sobreposto) -->
+<div id="secao-cadastro" class="modal-overlay hidden" onclick="fecharModalClique(event)">
+    <div class="modal-content" style="max-width:600px; max-height:90vh;" onclick="event.stopPropagation()">
+        <button class="btn-close-modal" onclick="fecharModal('secao-cadastro')">&times;</button>
+        <h3 id="tituloFormMembro">Cadastro de Membro</h3>
+        <form id="formMembro">
+            <input type="hidden" id="idMembro">
+            <label>Nome Completo</label>
+            <input type="text" id="campoNome" required>
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Nascimento</label><input type="date" id="campoNasc"></div>
+                <div style="flex:1;"><label>WhatsApp</label><input type="tel" id="campoTel" placeholder="(00) 00000-0000"></div>
+            </div>
+            <label>Célula</label>
+            <select id="selectCelulas"><option value="">Selecione uma célula</option></select>
+            <label>Categoria</label>
+            <select id="campoCategoria">
+                <option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option>
+            </select>
+            <h4 style="margin-top:15px;">Passos de Fé</h4>
             <div class="switch-container"><span>Batismo</span><label class="switch"><input type="checkbox" id="checkBat"><span class="slider"></span></label></div>
             <div class="switch-container"><span>Cursão</span><label class="switch"><input type="checkbox" id="checkCur"><span class="slider"></span></label></div>
             <div class="switch-container"><span>CTL</span><label class="switch"><input type="checkbox" id="checkCtl"><span class="slider"></span></label></div>
             <div class="switch-container"><span>Encontro</span><label class="switch"><input type="checkbox" id="checkDiz"><span class="slider"></span></label></div>
             <div class="switch-container"><span>Seminário</span><label class="switch"><input type="checkbox" id="checkSem"><span class="slider"></span></label></div>
             <div class="switch-container"><span>Dizimista</span><label class="switch"><input type="checkbox" id="checkDizi"><span class="slider"></span></label></div>
-            <button type="submit" class="btn-card" style="background:var(--primary); color:white; width:100%;">Salvar</button>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="button" onclick="fecharModal('secao-cadastro')" class="btn-card" style="flex:1;">Cancelar</button>
+                <button type="submit" class="btn-card" style="flex:2; background:var(--primary); color:white;">Salvar</button>
+            </div>
         </form>
     </div>
 </div>
@@ -905,6 +976,19 @@
     }
     const observer = new MutationObserver(() => preencherSelectLideres());
     observer.observe(document.getElementById('modalEditarCelula'), { attributes: true, attributeFilter: ['class'] });
+
+
+
+
+
+    // Garanta que fecharModal seja usada também para clique no overlay
+    function fecharModalClique(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.add('hidden');
+        }
+    }
+
+    
 </script>
 </body>
 </html>
