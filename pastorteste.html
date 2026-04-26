@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel Pastoral • Videira Jataí</title>
-    
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js">
+    </script>
+
     <script src="config.js"></script>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="shortcut icon" type="image/png" href="logo.png">
@@ -21,7 +24,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Sistema Videira">
     <meta name="apple-mobile-web-app-title" content="Sistema Videira">
-    <meta name="theme-color" content="#0f172a"> 
+    <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -39,1004 +42,1550 @@
             --text-light: #64748b;
             --border-color: #e2e8f0;
             --input-bg: #f8fafc;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             --radius: 16px;
         }
-        * { box-sizing: border-box; margin: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--text-main); padding-bottom: 20px; }
-        .container { max-width: 900px; margin: 0 auto; padding: 15px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: var(--text-main);
+            padding-bottom: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 15px;
+        }
         .header {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--card-bg); padding: 15px 20px; border-radius: var(--radius);
-            box-shadow: var(--shadow); margin-bottom: 20px; border-left: 5px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
         }
-        .header h3 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.1rem; }
-        .btn-refresh { background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; transition: 0.3s; }
-        .btn-refresh:hover { color: var(--primary); transform: rotate(90deg); }
+        .header h3 {
+            margin: 0;
+            color: var(--primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+        }
+        .btn-refresh {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-refresh:hover {
+            color: var(--primary);
+            transform: rotate(90deg);
+        }
 
-        .nav-menu { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+        .nav-menu {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
         .nav-btn {
-            flex: 1 1 80px; min-width: 70px; padding: 10px 4px; border: none; border-radius: 12px;
-            background: white; color: var(--text-light); font-weight: 600; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); font-size: 0.65rem;
+            flex: 1 1 80px;
+            min-width: 70px;
+            padding: 10px 4px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            font-size: 0.65rem;
         }
-        .nav-btn i { font-size: 1.1rem; }
-        .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(128,0,32,0.3); }
+        .nav-btn i {
+            font-size: 1.1rem;
+        }
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(128, 0, 32, 0.3);
+        }
 
-        .member-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media (min-width: 600px) { .member-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); } }
+        .member-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 600px) {
+            .member-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
         .member-card {
-            background: var(--card-bg); border-radius: var(--radius); padding: 12px;
-            box-shadow: var(--shadow); border: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 6px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
-        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
-        .card-name { font-size: 0.95rem; font-weight: 700; margin: 0; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px;
+        }
+        .card-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 0;
+        }
         .cat-badge {
-            font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; background: #eee; color: #555;
-            font-weight: bold; border: 1px solid transparent; white-space: nowrap;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: #eee;
+            color: #555;
+            font-weight: bold;
+            border: 1px solid transparent;
+            white-space: nowrap;
         }
-        .cat-badge.Líder { background: rgba(212, 175, 55, 0.15); color: #b58900; border-color: #D4AF37; }
-        .cat-badge.Pastor { background: rgba(128, 0, 32, 0.1); color: #800020; border-color: #800020; }
-        .cat-badge.Discipulador { background: rgba(0, 86, 179, 0.1); color: #0056b3; border-color: #0056b3; }
-        .card-info { font-size: 0.7rem; color: var(--text-light); display: flex; align-items: center; gap: 4px; }
-        .status-row { display: flex; gap: 3px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+        .cat-badge.Líder {
+            background: rgba(212, 175, 55, 0.15);
+            color: #b58900;
+            border-color: #D4AF37;
+        }
+        .cat-badge.Pastor {
+            background: rgba(128, 0, 32, 0.1);
+            color: #800020;
+            border-color: #800020;
+        }
+        .cat-badge.Discipulador {
+            background: rgba(0, 86, 179, 0.1);
+            color: #0056b3;
+            border-color: #0056b3;
+        }
+        .card-info {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-row {
+            display: flex;
+            gap: 3px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
         .status-pill {
-            font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; background: #f0f0f0; color: #999; font-weight: 600; white-space: nowrap;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: #f0f0f0;
+            color: #999;
+            font-weight: 600;
+            white-space: nowrap;
         }
-        .status-pill.active { background: var(--success-bg); color: var(--success-text); border: 1px solid #c3e6cb; }
-        .card-actions { display: flex; gap: 4px; margin-top: 4px; padding-top: 6px; border-top: 1px solid #eee; }
+        .status-pill.active {
+            background: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid #c3e6cb;
+        }
+        .card-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            padding-top: 6px;
+            border-top: 1px solid #eee;
+        }
         .btn-card {
-            flex: 1; padding: 6px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer;
-            font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 3px;
-            background: white; color: #555; transition: 0.2s; text-decoration: none;
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            background: white;
+            color: #555;
+            transition: 0.2s;
+            text-decoration: none;
         }
-        .btn-zap { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
-        .btn-card:hover { background: #f5f5f5; }
+        .btn-zap {
+            background: #f0fdf4;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+        .btn-card:hover {
+            background: #f5f5f5;
+        }
 
-        .filtros-container { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-        .filtro-item { flex: 1 1 120px; min-width: 100px; }
-        .filtro-item input, .filtro-item select {
-            width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-color);
-            background: white; font-size: 0.8rem; margin-bottom: 0;
+        .filtros-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
         }
-        .multi-select { position: relative; flex: 1 1 110px; min-width: 90px; }
+        .filtro-item {
+            flex: 1 1 120px;
+            min-width: 100px;
+        }
+        .filtro-item input,
+        .filtro-item select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: white;
+            font-size: 0.8rem;
+            margin-bottom: 0;
+        }
+        .multi-select {
+            position: relative;
+            flex: 1 1 110px;
+            min-width: 90px;
+        }
         .multi-select .trigger {
-            background: white; border: 1px solid var(--border-color); border-radius: 8px;
-            padding: 8px 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-            font-size: 0.8rem; color: var(--text-main);
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-main);
         }
         .multi-select .dropdown {
-            display: none; position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border: 1px solid var(--border-color); border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 20; padding: 8px;
-            max-height: 180px; overflow-y: auto;
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+            padding: 8px;
+            max-height: 180px;
+            overflow-y: auto;
         }
-        .multi-select.open .dropdown { display: block; }
-        .multi-select .dropdown label { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; cursor: pointer; font-size: 0.75rem; }
+        .multi-select.open .dropdown {
+            display: block;
+        }
+        .multi-select .dropdown label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
         .stat-card {
-            background: white; border-radius: var(--radius); padding: 15px 10px;
-            box-shadow: var(--shadow); text-align: center; position: relative;
+            background: white;
+            border-radius: var(--radius);
+            padding: 15px 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
             border-left: 4px solid var(--primary);
         }
-        .stat-card .stat-icon { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
-        .stat-card .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
-        .stat-card .stat-label { font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        .stat-card .stat-number {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .stat-card .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        .table-clean { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-        .table-clean th { background: var(--primary); color: white; padding: 10px; font-size: 0.8rem; }
-        .table-clean td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.8rem; }
+        .table-clean {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .table-clean th {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            font-size: 0.8rem;
+        }
+        .table-clean td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.8rem;
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3100; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 3100;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            backdrop-filter: blur(2px);
+        }
         .modal-content {
-            background: white; width: 100%; max-width: 800px; max-height: 85vh;
-            border-radius: 20px 20px 0 0; padding: 25px 20px; overflow-y: auto;
-            position: relative; animation: slideUp 0.3s ease-out;
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            border-radius: 20px 20px 0 0;
+            padding: 25px 20px;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
         }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
         .btn-close-modal {
-            position: absolute; top: 15px; right: 15px; background: #eee; border: none;
-            width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555;
-            display: flex; align-items: center; justify-content: center;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #eee;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .hidden { display: none !important; }
+        .hidden {
+            display: none !important;
+        }
         .cell-card {
-            background: #fef9e8; border-radius: var(--radius); padding: 15px; margin-bottom: 12px;
-            box-shadow: var(--shadow); border-left: 4px solid var(--primary); cursor: pointer;
-            transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
+            background: #fef9e8;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .cell-info { flex: 1; }
-        .cell-nome { font-weight: 700; font-size: 1rem; color: var(--text-main); }
-        .cell-lider { font-size: 0.8rem; color: #92400e; margin-top: 4px; }
-        .badge-membros { background: var(--primary); color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
-        .filtro-lider { background: white; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .filtro-lider select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
-        .switch-container { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; margin-bottom: 8px; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--success-text); }
-        input:checked + .slider:before { transform: translateX(22px); }
-        .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; }
+        .cell-info {
+            flex: 1;
+        }
+        .cell-nome {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+        .cell-lider {
+            font-size: 0.8rem;
+            color: #92400e;
+            margin-top: 4px;
+        }
+        .badge-membros {
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .filtro-lider {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filtro-lider select {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-bottom: 8px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked+.slider {
+            background-color: var(--success-text);
+        }
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+        .btn-youtube {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background-color: #FF0000;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .cell-card-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: 10px;
+        }
+        .cell-card-actions .btn-card {
+            flex: 0 0 auto;
+            padding: 6px 10px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // ========== CONFIGURAÇÃO ==========
-    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-    const API_URL = sessionStorage.getItem('urlApi');
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <script>
+        // ========== CONFIGURAÇÃO ==========
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const API_URL = sessionStorage.getItem('urlApi');
 
-    let dadosMembros = [];
-    let dadosCelulas = [];
-    let dadosRelatorios = [];
-    let listaPalavras = [];
-    let listaAgenda = [];
-    let celulaAtiva = null;
-    let membrosDaCelulaAtiva = [];
+        let dadosMembros = [];
+        let dadosCelulas = [];
+        let dadosRelatorios = [];
+        let listaPalavras = [];
+        let listaAgenda = [];
+        let celulaAtiva = null;
+        let membrosDaCelulaAtiva = [];
 
-    // ========== AUTENTICAÇÃO ==========
-    (async () => {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) { window.location.href = "index.html"; return; }
-        const { data: usuario } = await supabaseClient.from('usuarios').select('categoria, nome').eq('email', user.email).single();
-        if (!["pastor", "administrador"].includes(usuario?.categoria?.toLowerCase())) {
-            alert("Acesso restrito.");
-            window.location.href = (usuario?.categoria === "membro") ? "membro.html" : "lider.html";
-            return;
+        // ========== AUTENTICAÇÃO ==========
+        (async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = "index.html"; return; }
+            const { data: usuario } = await supabaseClient.from('usuarios').select('categoria, nome').eq(
+                'email', user.email).single();
+            if (!["pastor", "administrador"].includes(usuario?.categoria?.toLowerCase())) {
+                alert("Acesso restrito.");
+                window.location.href = (usuario?.categoria === "membro") ? "membro.html" : "lider.html";
+                return;
+            }
+            sessionStorage.setItem('pastorEmail', user.email);
+            sessionStorage.setItem('usuarioLogado', usuario?.nome || user.email);
+            sessionStorage.setItem('loginDigitado', user.email);
+            await carregarTudo();
+            inicializarEventos();
+        })();
+
+        async function registrarLogAcao(acao) {
+            try {
+                await supabaseClient.from('log').insert([{
+                    datahora: new Date().toLocaleString('pt-BR'),
+                    usuario: sessionStorage.getItem('loginDigitado'),
+                    nomelider: sessionStorage.getItem('usuarioLogado'),
+                    acao
+                }]);
+            } catch (e) {}
         }
-        sessionStorage.setItem('pastorEmail', user.email);
-        sessionStorage.setItem('usuarioLogado', usuario?.nome || user.email);
-        sessionStorage.setItem('loginDigitado', user.email);
-        await carregarTudo();
-        inicializarEventos();
-    })();
 
-    async function registrarLogAcao(acao) {
-        try { await supabaseClient.from('log').insert([{ datahora: new Date().toLocaleString('pt-BR'), usuario: sessionStorage.getItem('loginDigitado'), nomelider: sessionStorage.getItem('usuarioLogado'), acao }]); } catch(e) {}
-    }
+        async function fetchGoogle(action, payload = {}) {
+            payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
+            try {
+                let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, payload }) });
+                let json = await res.json();
+                if (json.status === "sucesso") return json.dados || json.mensagem;
+            } catch (e) {}
+        }
 
-    async function fetchGoogle(action, payload = {}) {
-        payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
-        try {
-            let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, payload }) });
-            let json = await res.json();
-            if (json.status === "sucesso") return json.dados || json.mensagem;
-        } catch(e) {}
-    }
+        // ========== CARREGAMENTO ==========
+        async function carregarTudo() {
+            const icon = document.getElementById('iconRefresh');
+            if (icon) icon.classList.add('fa-spin');
+            try {
+                const { data: memData, error: errMem } = await supabaseClient.from('membros').select('*');
+                if (errMem) throw errMem;
+                dadosMembros = memData ? memData.map(m => {
+                    let tipo = m.tipo?.trim().toLowerCase();
+                    let categoria = 'Membro';
+                    if (tipo === 'lider' || tipo === 'líder') categoria = 'Líder';
+                    else if (tipo === 'pastor') categoria = 'Pastor';
+                    else if (tipo === 'discipulador') categoria = 'Discipulador';
+                    else if (tipo === 'frequentador') categoria = 'Frequentador';
+                    return [m.id, m.nome || 'Sem Nome', categoria, '', m.telefone || '', '', m.batizado || 'Não', m
+                        .cursao || 'Não', m.ctl || 'Não', m.encontro || 'Não', m.nascimento || '', m.seminario ||
+                        'Não', m.dizimista || 'Não', m.celula_id || null, m.arquivado || 'Não'
+                    ];
+                }) : [];
 
-    // ========== CARREGAMENTO ==========
-    async function carregarTudo() {
-        const icon = document.getElementById('iconRefresh');
-        if (icon) icon.classList.add('fa-spin');
-        try {
-            const { data: memData } = await supabaseClient.from('membros').select('*');
-            dadosMembros = memData ? memData.map(m => {
-                let tipo = m.tipo?.trim().toLowerCase();
-                let categoria = 'Membro';
-                if (tipo === 'lider' || tipo === 'líder') categoria = 'Líder';
-                else if (tipo === 'pastor') categoria = 'Pastor';
-                else if (tipo === 'discipulador') categoria = 'Discipulador';
-                else if (tipo === 'frequentador') categoria = 'Frequentador';
-                return [m.id, m.nome||'Sem Nome', categoria, '', m.telefone||'', '', m.batizado||'Não', m.cursao||'Não', m.ctl||'Não', m.encontro||'Não', m.nascimento||'', m.seminario||'Não', m.dizimista||'Não', m.celula_id||null, m.arquivado||'Não'];
-            }) : [];
-            const { data: celData } = await supabaseClient.from('celulas').select('*');
-            dadosCelulas = celData ? celData.map(c => [c.id, c.nome, c.lider, c.dia_horario||'-', c.endereco||'', c.supervisor_email||'']) : [];
-            window.celulaMap = {};
-            dadosCelulas.forEach(c => window.celulaMap[c[0]] = c[1]);
-            dadosMembros.forEach(m => { if (m[13]) m[3] = window.celulaMap[m[13]] || 'Sem Célula'; });
-            document.getElementById('totalMembros').innerText = obterAtivos().length;
-            renderizarCards(obterAtivos());
-            preencherSelects();
+                const { data: celData, error: errCel } = await supabaseClient.from('celulas').select('*');
+                if (errCel) throw errCel;
+                dadosCelulas = celData ? celData.map(c => [c.id, c.nome, c.lider, c.dia_horario || '-', c.endereco || '',
+                    c.supervisor_email || ''
+                ]) : [];
+                window.celulaMap = {};
+                dadosCelulas.forEach(c => window.celulaMap[c[0]] = c[1]);
+                dadosMembros.forEach(m => { if (m[13]) m[3] = window.celulaMap[m[13]] || 'Sem Célula'; });
+
+                document.getElementById('totalMembros').innerText = obterAtivos().length;
+                renderizarCards(obterAtivos());
+                preencherSelects();
+                preencherSelectLideres();
+                renderizarCelulasRede(dadosCelulas);
+                window.celulasRedeCompleta = dadosCelulas;
+                await carregarRelatorios();
+                try { listaAgenda = await fetchGoogle('buscarAgenda') || [];
+                    renderizarAgenda(listaAgenda); } catch (e) {}
+                await carregarPalavrasDados();
+
+                // Atualiza estatísticas se a seção estiver visível
+                if (!document.getElementById('secao-minha-igreja').classList.contains('hidden')) {
+                    carregarEstatisticas();
+                }
+            } catch (err) {
+                console.error("Erro ao carregar dados:", err);
+                alert("Erro ao carregar dados. Verifique a conexão.");
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        }
+
+        function obterAtivos() { return dadosMembros.filter(m => m[14] === 'Não' || !m[14] || m[14].toLowerCase() ===
+                'não'); }
+
+        function obterInativos() { return dadosMembros.filter(m => m[14] === 'Sim' || (typeof m[14] === 'string' && m[14]
+                .toLowerCase() === 'sim')); }
+
+        // ========== RENDER MEMBROS ==========
+        function renderizarCards(lista) {
+            const grid = document.getElementById('gridMembros');
+            grid.innerHTML = '';
+            const check = val => val === 'Sim' || val === true ? 'active' : '';
+            const fmtData = d => { if (!d) return ''; if (d.includes('/')) return d; const p = d.split('-'); return p
+                    .length === 3 ? `${p[2]}/${p[1]}` : d; };
+            lista.forEach(m => {
+                let tel = String(m[4] || '').replace(/\D/g, '');
+                let btnZap = tel.length > 8 ?
+                    `<a href="https://wa.me/55${tel}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>` :
+                    `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
+                let nasc = m[10] ?
+                    `<span style="color:#999; font-size:0.7rem;"><i class="fas fa-birthday-cake"></i> ${fmtData(m[10])}</span>` :
+                    '';
+                grid.innerHTML += `
+                <div class="member-card" data-nome="${m[1].toLowerCase()}" data-celula="${m[3].toLowerCase()}" data-categoria="${m[2].toLowerCase()}" data-tags="${[m[6],m[7],m[8],m[9],m[11],m[12]].map(v=>v==='Sim'?1:0).join(',')}">
+                    <div class="card-header"><h4 class="card-name">${m[1]}</h4><span class="cat-badge ${m[2]}">${m[2]}</span></div>
+                    <div class="card-info"><i class="fas fa-users"></i> ${m[3]} ${nasc}</div>
+                    <div class="status-row">
+                        <span class="status-pill ${check(m[6])}">Batismo</span>
+                        <span class="status-pill ${check(m[7])}">Cursão</span>
+                        <span class="status-pill ${check(m[8])}">CTL</span>
+                        <span class="status-pill ${check(m[9])}">Encontro</span>
+                        <span class="status-pill ${check(m[11])}">Seminário</span>
+                        <span class="status-pill ${check(m[12])}">Dizimista</span>
+                    </div>
+                    <div class="card-actions">
+                        ${btnZap}
+                        <button onclick="editarMembro('${m[0]}')" class="btn-card"><i class="fas fa-edit"></i></button>
+                        ${m[14]==='Sim' ? `<button onclick="restaurarMembro('${m[0]}')" class="btn-card" style="color:var(--success-text);"><i class="fas fa-undo"></i></button>` : `<button onclick="arquivarMembro('${m[0]}','${m[1]}')" class="btn-card" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>`}
+                    </div>
+                </div>`;
+            });
+        }
+
+        function aplicarFiltros() {
+            const status = document.getElementById('filtroStatusGeral').value;
+            let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
+            const busca = document.getElementById('inputBusca').value.toLowerCase();
+            const celulaFiltro = document.getElementById('filtroCelula').value;
+            const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb => cb.value.toLowerCase());
+            const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb => cb.value);
+            base = base.filter(m => {
+                if (busca && !m[1].toLowerCase().includes(busca)) return false;
+                if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;
+                if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
+                if (tagsSel.length) {
+                    const tags = [];
+                    if (m[6] === 'Sim') tags.push('batizado');
+                    if (m[7] === 'Sim') tags.push('cursão');
+                    if (m[8] === 'Sim') tags.push('ctl');
+                    if (m[9] === 'Sim') tags.push('encontro');
+                    if (m[11] === 'Sim') tags.push('seminário');
+                    if (m[12] === 'Sim') tags.push('dizimista');
+                    if (!tagsSel.some(t => tags.includes(t))) return false;
+                }
+                return true;
+            });
+            renderizarCards(base);
+            document.getElementById('totalMembros').innerText = base.length;
+        }
+
+        function setupMultiselects() {
+            document.querySelectorAll('.multi-select .trigger').forEach(trg => {
+                trg.addEventListener('click', e => {
+                    e.stopPropagation();
+                    trg.closest('.multi-select').classList.toggle('open');
+                });
+            });
+            document.addEventListener('click', e => {
+                document.querySelectorAll('.multi-select.open').forEach(ms => {
+                    if (!ms.contains(e.target)) ms.classList.remove('open');
+                });
+            });
+            document.querySelectorAll('#multiCargo input, #multiStatus input').forEach(cb => {
+                cb.addEventListener('change', aplicarFiltros);
+            });
+        }
+
+        function preencherSelects() {
+            const selCel = document.getElementById('selectCelulas');
+            if (selCel) {
+                selCel.innerHTML = '<option value="">Selecione uma célula</option>';
+                dadosCelulas.forEach(c => selCel.innerHTML += `<option value="${c[0]}">${c[1]}</option>`);
+            }
+            const filtroCelula = document.getElementById('filtroCelula');
+            if (filtroCelula) {
+                filtroCelula.innerHTML = '<option value="">Todas as Células</option>';
+                dadosCelulas.forEach(c => filtroCelula.innerHTML += `<option value="${c[0]}">${c[1]}</option>`);
+            }
+        }
+
+        function preencherSelectLideres() {
+            const sel = document.getElementById('editCelulaLider');
+            if (sel) {
+                sel.innerHTML = '<option value="">Selecione...</option>';
+                dadosMembros.filter(m => ['Líder', 'Pastor', 'Discipulador'].includes(m[2])).forEach(m => sel.innerHTML +=
+                    `<option>${m[1]}</option>`);
+            }
+        }
+
+        // ========== REDE DE CÉLULAS ==========
+        function renderizarCelulasRede(celulas) {
+            const container = document.getElementById('listaCelulasRede');
+            const filtroLider = document.getElementById('filtroLiderRede');
+            const filtroSupervisor = document.getElementById('filtroSupervisorRede');
+            document.getElementById('contagemCelulasRede').innerText = celulas.length;
+            if (filtroLider) {
+                const lideresUnicos = [...new Set(celulas.map(c => c[2]).filter(l => l))];
+                filtroLider.innerHTML = '<option value="">Todos os Líderes</option>';
+                lideresUnicos.forEach(l => filtroLider.innerHTML += `<option>${l}</option>`);
+            }
+            if (filtroSupervisor) {
+                const supervisoresUnicos = [...new Set(celulas.map(c => c[5]).filter(s => s))];
+                filtroSupervisor.innerHTML = '<option value="">Todos os Supervisores</option>';
+                supervisoresUnicos.forEach(s => filtroSupervisor.innerHTML += `<option>${s}</option>`);
+            }
+            window.celulasRedeCompleta = celulas;
+            filtrarCelulasRede();
+            // Atualiza estatísticas se a seção estiver visível
+            if (!document.getElementById('secao-minha-igreja').classList.contains('hidden')) {
+                carregarEstatisticas();
+            }
+        }
+
+        function filtrarCelulasRede() {
+            const lider = document.getElementById('filtroLiderRede')?.value || '';
+            const supervisor = document.getElementById('filtroSupervisorRede')?.value || '';
+            const container = document.getElementById('listaCelulasRede');
+            let filtradas = window.celulasRedeCompleta || [];
+            if (lider) filtradas = filtradas.filter(c => c[2] === lider);
+            if (supervisor) filtradas = filtradas.filter(c => c[5] === supervisor);
+            document.getElementById('contagemCelulasRede').innerText = filtradas.length;
+            container.innerHTML = filtradas.map(c => `
+                <div class="cell-card">
+                    <div class="cell-info" onclick="abrirModalCelula([${c[0]},'${c[1]}','${c[2]}','${c[3]}','${c[4]}','${c[5]}'])">
+                        <div class="cell-nome">${c[1]}</div>
+                        <div class="cell-lider">Líder: ${c[2]||'?'} • Supervisor: ${c[5]||'?'}</div>
+                    </div>
+                    <div class="cell-card-actions">
+                        <button onclick="event.stopPropagation(); editarCelula(${c[0]})" class="btn-card" title="Editar Célula"><i class="fas fa-edit"></i></button>
+                        <span class="badge-membros" style="cursor:pointer;" onclick="abrirModalCelula([${c[0]},'${c[1]}','${c[2]}','${c[3]}','${c[4]}','${c[5]}'])"><i class="fas fa-chevron-right"></i></span>
+                    </div>
+                </div>`).join('');
+        }
+
+        function editarCelula(id) {
+            const cel = dadosCelulas.find(c => c[0] == id);
+            if (!cel) return;
+            document.getElementById('editCelulaId').value = cel[0];
+            document.getElementById('editCelulaNome').value = cel[1];
+            document.getElementById('editCelulaLider').value = cel[2] || '';
+            document.getElementById('editCelulaDia').value = cel[3] || '';
+            document.getElementById('editCelulaEnd').value = cel[4] || '';
             preencherSelectLideres();
-            renderizarCelulasRede(dadosCelulas);
-            window.celulasRedeCompleta = dadosCelulas;
-            await carregarRelatorios();
-            try { listaAgenda = await fetchGoogle('buscarAgenda') || []; renderizarAgenda(listaAgenda); } catch(e) {}
-            await carregarPalavrasDados();
-        } finally { if(icon) icon.classList.remove('fa-spin'); }
-    }
+            document.getElementById('editCelulaLider').value = cel[2] || '';
+            document.getElementById('modalEditarCelula').classList.remove('hidden');
+        }
 
-    function obterAtivos() { return dadosMembros.filter(m => m[14] === 'Não' || !m[14] || m[14].toLowerCase() === 'não'); }
-    function obterInativos() { return dadosMembros.filter(m => m[14] === 'Sim' || (typeof m[14] === 'string' && m[14].toLowerCase() === 'sim')); }
+        function novaCelula() {
+            document.getElementById('formCelula').reset();
+            document.getElementById('editCelulaId').value = '';
+            preencherSelectLideres();
+            document.getElementById('modalEditarCelula').classList.remove('hidden');
+        }
 
-    // ========== RENDER MEMBROS ==========
-    function renderizarCards(lista) {
-        const grid = document.getElementById('gridMembros'); grid.innerHTML = '';
-        const check = val => val==='Sim'||val===true?'active':'';
-        const fmtData = d => { if(!d)return''; if(d.includes('/')) return d; const p=d.split('-'); return p.length===3?`${p[2]}/${p[1]}`:d; };
-        lista.forEach(m => {
-            let tel = String(m[4]||'').replace(/\D/g,'');
-            let btnZap = tel.length>8 ? `<a href="https://wa.me/55${tel}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>` : `<button disabled class="btn-card" style="opacity:0.3;">Sem nº</button>`;
-            let nasc = m[10] ? `<span style="color:#999; font-size:0.7rem;"><i class="fas fa-birthday-cake"></i> ${fmtData(m[10])}</span>` : '';
-            grid.innerHTML += `<div class="member-card" data-nome="${m[1].toLowerCase()}" data-celula="${m[3].toLowerCase()}" data-categoria="${m[2].toLowerCase()}" data-tags="${[m[6],m[7],m[8],m[9],m[11],m[12]].map(v=>v==='Sim'?1:0).join(',')}">
-                <div class="card-header"><h4 class="card-name">${m[1]}</h4><span class="cat-badge ${m[2]}">${m[2]}</span></div>
-                <div class="card-info"><i class="fas fa-users"></i> ${m[3]} ${nasc}</div>
-                <div class="status-row">
-                    <span class="status-pill ${check(m[6])}">Batismo</span>
-                    <span class="status-pill ${check(m[7])}">Cursão</span>
-                    <span class="status-pill ${check(m[8])}">CTL</span>
-                    <span class="status-pill ${check(m[9])}">Encontro</span>
-                    <span class="status-pill ${check(m[11])}">Seminário</span>
-                    <span class="status-pill ${check(m[12])}">Dizimista</span>
-                </div>
-                <div class="card-actions">
-                    ${btnZap}
-                    <button onclick="editarMembro('${m[0]}')" class="btn-card"><i class="fas fa-edit"></i></button>
-                    ${m[14]==='Sim' ? `<button onclick="restaurarMembro('${m[0]}')" class="btn-card" style="color:var(--success-text);"><i class="fas fa-undo"></i></button>` : `<button onclick="arquivarMembro('${m[0]}','${m[1]}')" class="btn-card" style="color:var(--danger-text);"><i class="fas fa-archive"></i></button>`}
-                </div>
-            </div>`;
-        });
-    }
+        function exportarListaCelulasPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Células - Videira Jataí", 14, 20);
+            doc.autoTable({
+                head: [
+                    ["Nome", "Líder", "Dia", "Endereço", "Supervisor"]
+                ],
+                body: (window.celulasRedeCompleta || dadosCelulas).map(c => [c[1], c[2], c[3], c[4], c[5]]),
+                startY: 30,
+                theme: 'grid',
+                headStyles: { fillColor: [128, 0, 32] },
+                styles: { fontSize: 9 }
+            });
+            doc.save(`Celulas_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
 
-    function aplicarFiltros() {
-        const status = document.getElementById('filtroStatusGeral').value;
-        let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
-        const busca = document.getElementById('inputBusca').value.toLowerCase();
-        const celulaFiltro = document.getElementById('filtroCelula').value;
-        const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb=>cb.value.toLowerCase());
-        const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb=>cb.value);
-        base = base.filter(m => {
-            if (busca && !m[1].toLowerCase().includes(busca)) return false;
-            if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;
-            if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
-            if (tagsSel.length) {
-                const tags = [];
-                if(m[6]==='Sim') tags.push('batizado');
-                if(m[7]==='Sim') tags.push('cursão');
-                if(m[8]==='Sim') tags.push('ctl');
-                if(m[9]==='Sim') tags.push('encontro');
-                if(m[11]==='Sim') tags.push('seminário');
-                if(m[12]==='Sim') tags.push('dizimista');
-                if (!tagsSel.some(t=>tags.includes(t))) return false;
+        // ========== MODAL CÉLULA ==========
+        async function abrirModalCelula(cel) {
+            celulaAtiva = cel;
+            document.getElementById('modalCelulaTitulo').innerText = cel[1];
+            document.getElementById('modalCelula').classList.remove('hidden');
+            const { data, error } = await supabaseClient.from('membros').select('*').eq('celula_id', cel[0]).eq('arquivado',
+                'Não');
+            if (error) {
+                console.error(error);
+                membrosDaCelulaAtiva = [];
+            } else {
+                membrosDaCelulaAtiva = data || [];
             }
-            return true;
-        });
-        renderizarCards(base);
-        document.getElementById('totalMembros').innerText = base.length;
-    }
+            document.getElementById('gridMembrosCelulaModal').innerHTML = membrosDaCelulaAtiva.map(m => `
+                <div class="member-card">
+                    <div class="card-header"><h4 class="card-name">${m.nome}</h4><span class="cat-badge">${m.tipo||'Membro'}</span></div>
+                    <div class="status-row">
+                        ${['batizado','cursao','ctl','encontro','seminario','dizimista'].map(f => `<span class="status-pill ${m[f]==='Sim'?'active':''}">${f.charAt(0).toUpperCase()+f.slice(1)}</span>`).join('')}
+                    </div>
+                    ${m.telefone ? `<a href="https://wa.me/55${String(m.telefone).replace(/\D/g,'')}" target="_blank" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>` : ''}
+                </div>`).join('') || '<p style="text-align:center; color:#999;">Nenhum membro nesta célula.</p>';
+        }
 
-    function setupMultiselects() {
-        document.querySelectorAll('.multi-select .trigger').forEach(trg => {
-            trg.addEventListener('click', e => {
-                e.stopPropagation();
-                trg.closest('.multi-select').classList.toggle('open');
+        function fecharModalCelula() { document.getElementById('modalCelula').classList.add('hidden'); }
+
+        function abrirModalCadastroMembro() {
+            if (!celulaAtiva) {
+                alert("Selecione uma célula primeiro.");
+                return;
+            }
+            document.getElementById('selectCelulas').value = celulaAtiva[0];
+            novoCadastro();
+        }
+
+        async function abrirApascentar() {
+            if (!celulaAtiva) return;
+            const inicio = new Date();
+            inicio.setDate(inicio.getDate() - 30);
+            const { data: rels, error } = await supabaseClient.from('relatorios').select('id').eq('celula', celulaAtiva[1])
+                .gte('data', inicio.toISOString().split('T')[0]);
+            if (error || !rels?.length) return alert("Nenhum relatório recente.");
+            const ids = rels.map(r => r.id);
+            const { data: pres } = await supabaseClient.from('presencas').select('membro_id, presente').in('relatorio_id',
+                ids);
+            const faltas = {};
+            pres?.forEach(p => { if (!p.presente) faltas[p.membro_id] = (faltas[p.membro_id] || 0) + 1; });
+            const faltosos = membrosDaCelulaAtiva.filter(m => faltas[m.id] > 0);
+            if (!faltosos.length) return alert("Nenhum faltoso.");
+            alert("Faltosos:\n" + faltosos.map(m => `${m.nome} - ${faltas[m.id]} falta(s)`).join('\n'));
+        }
+
+        // ========== RELATÓRIOS ==========
+        async function carregarRelatorios() {
+            const { data, error } = await supabaseClient.from('relatorios').select('*').order('id', { ascending: false });
+            if (error) {
+                console.error(error);
+                dadosRelatorios = [];
+            } else {
+                dadosRelatorios = data || [];
+            }
+            const sel = document.getElementById('filtroRelCelula');
+            if (sel) {
+                sel.innerHTML = '<option value="">Todas as Células</option>';
+                dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c[1]}">${c[1]}</option>`);
+            }
+            const hoje = new Date();
+            const primeiro = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            if (document.getElementById('filtroRelDataInicio')) document.getElementById('filtroRelDataInicio').value =
+                primeiro.toISOString().split('T')[0];
+            if (document.getElementById('filtroRelDataFim')) document.getElementById('filtroRelDataFim').value = hoje
+                .toISOString().split('T')[0];
+            filtrarRelatorios();
+        }
+
+        function filtrarRelatorios() {
+            const celula = document.getElementById('filtroRelCelula').value;
+            const inicio = document.getElementById('filtroRelDataInicio').value;
+            const fim = document.getElementById('filtroRelDataFim').value;
+            const div = document.getElementById('listaRelatorios');
+            div.innerHTML = '';
+            const filtrados = dadosRelatorios.filter(r => (!celula || r.celula === celula) && (!inicio || r.data >=
+                inicio) && (!fim || r.data <= fim));
+            if (!filtrados.length) { div.innerHTML =
+                '<p style="text-align:center; color:#999;">Nenhum relatório encontrado.</p>'; return; }
+            filtrados.forEach(r => div.innerHTML +=
+                `<div class="cell-card" onclick="abrirDetalheRelatorio('${r.id}')" style="justify-content:space-between;"><div><strong>${r.celula}</strong><br><small>${r.data?.split('-').reverse().join('/')}</small></div><i class="fas fa-chevron-right"></i></div>`
+                );
+        }
+
+        async function abrirDetalheRelatorio(id) {
+            const { data: rel, error } = await supabaseClient.from('relatorios').select('*').eq('id', id).single();
+            if (error || !rel) return;
+            const { data: presencas } = await supabaseClient.from('presencas').select('membro_id, presente').eq(
+                'relatorio_id', id);
+            const presentes = [],
+                ausentes = [];
+            presencas?.forEach(p => {
+                const m = dadosMembros.find(x => String(x[0]) === String(p.membro_id));
+                const nome = m ? m[1] : `ID ${p.membro_id}`;
+                if (p.presente) presentes.push(nome);
+                else ausentes.push(nome);
             });
-        });
-        document.addEventListener('click', e => {
-            document.querySelectorAll('.multi-select.open').forEach(ms => {
-                if (!ms.contains(e.target)) ms.classList.remove('open');
-            });
-        });
-        document.querySelectorAll('#multiCargo input, #multiStatus input').forEach(cb => {
-            cb.addEventListener('change', aplicarFiltros);
-        });
-    }
-
-    function preencherSelects() {
-        const selCel = document.getElementById('selectCelulas');
-        if (selCel) { 
-            selCel.innerHTML = '<option value="">Selecione uma célula</option>'; 
-            dadosCelulas.forEach(c => selCel.innerHTML += `<option value="${c[0]}">${c[1]}</option>`); 
+            document.getElementById('detalheRelCelula').innerText = rel.celula;
+            document.getElementById('detalheRelData').innerText = rel.data?.split('-').reverse().join('/');
+            document.getElementById('detalheRelTotal').innerText = presentes.length;
+            document.getElementById('detalheRelQuebra').innerText = rel.quebra_gelo || '-';
+            document.getElementById('detalheRelPalavra').innerText = rel.palavra || '-';
+            document.getElementById('detalheRelLouvor').innerText = rel.louvor || '-';
+            document.getElementById('detalheRelLanche').innerText = rel.lanche || '-';
+            document.getElementById('detalheRelObs').innerText = rel.observacoes || 'Nenhuma observação.';
+            document.getElementById('listaPresentes').innerHTML = presentes.length ? presentes.map(n =>
+                `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
+            document.getElementById('listaAusentes').innerHTML = ausentes.length ? ausentes.map(n => `<div>👤 ${n}</div>`)
+                .join('') : '<div style="color:#999;">Nenhum</div>';
+            document.getElementById('modalRelatorio').classList.remove('hidden');
         }
-        const filtroCelula = document.getElementById('filtroCelula');
-        if (filtroCelula) {
-            filtroCelula.innerHTML = '<option value="">Todas as Células</option>';
-            dadosCelulas.forEach(c => filtroCelula.innerHTML += `<option value="${c[0]}">${c[1]}</option>`);
-        }
-    }
 
-    function preencherSelectLideres() {
-        const sel = document.getElementById('editCelulaLider');
-        if(sel) {
-            sel.innerHTML = '<option value="">Selecione...</option>';
-            dadosMembros.filter(m => ['Líder','Pastor','Discipulador'].includes(m[2])).forEach(m => sel.innerHTML += `<option>${m[1]}</option>`);
-        }
-    }
-
-    // ========== REDE DE CÉLULAS ==========
-    function renderizarCelulasRede(celulas) {
-        const container = document.getElementById('listaCelulasRede');
-        const filtroLider = document.getElementById('filtroLiderRede');
-        const filtroSupervisor = document.getElementById('filtroSupervisorRede');
-        document.getElementById('contagemCelulasRede').innerText = celulas.length;
-        if(filtroLider) {
-            const lideresUnicos = [...new Set(celulas.map(c => c[2]).filter(l => l))];
-            filtroLider.innerHTML = '<option value="">Todos os Líderes</option>';
-            lideresUnicos.forEach(l => filtroLider.innerHTML += `<option>${l}</option>`);
-        }
-        if(filtroSupervisor) {
-            const supervisoresUnicos = [...new Set(celulas.map(c => c[5]).filter(s => s))];
-            filtroSupervisor.innerHTML = '<option value="">Todos os Supervisores</option>';
-            supervisoresUnicos.forEach(s => filtroSupervisor.innerHTML += `<option>${s}</option>`);
-        }
-        window.celulasRedeCompleta = celulas;
-        filtrarCelulasRede(); // exibe todas inicialmente
-    }
-
-    function filtrarCelulasRede() {
-        const lider = document.getElementById('filtroLiderRede')?.value || '';
-        const supervisor = document.getElementById('filtroSupervisorRede')?.value || '';
-        const container = document.getElementById('listaCelulasRede');
-        let filtradas = window.celulasRedeCompleta || [];
-        if(lider) filtradas = filtradas.filter(c => c[2] === lider);
-        if(supervisor) filtradas = filtradas.filter(c => c[5] === supervisor);
-        document.getElementById('contagemCelulasRede').innerText = filtradas.length;
-        container.innerHTML = filtradas.map(c => `
-            <div class="cell-card" onclick="abrirModalCelula([${c[0]},'${c[1]}','${c[2]}','${c[3]}','${c[4]}','${c[5]}'])">
-                <div class="cell-info"><div class="cell-nome">${c[1]}</div><div class="cell-lider">Líder: ${c[2]||'?'} • Supervisor: ${c[5]||'?'}</div></div>
-                <div class="badge-membros"><i class="fas fa-chevron-right"></i></div>
-            </div>`).join('');
-    }
-
-    function exportarListaCelulasPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text("Células - Videira Jataí", 14, 20);
-        doc.autoTable({
-            head: [["Nome", "Líder", "Dia", "Endereço", "Supervisor"]],
-            body: (window.celulasRedeCompleta || dadosCelulas).map(c => [c[1], c[2], c[3], c[4], c[5]]),
-            startY: 30, theme: 'grid', headStyles: { fillColor: [128,0,32] }, styles: { fontSize: 9 }
-        });
-        doc.save(`Celulas_${new Date().toISOString().slice(0,10)}.pdf`);
-    }
-
-    // ========== MODAL CÉLULA ==========
-    async function abrirModalCelula(cel) {
-        celulaAtiva = cel;
-        document.getElementById('modalCelulaTitulo').innerText = cel[1];
-        document.getElementById('modalCelula').classList.remove('hidden');
-        const { data } = await supabaseClient.from('membros').select('*').eq('celula_id', cel[0]).eq('arquivado', 'Não');
-        membrosDaCelulaAtiva = data || [];
-        document.getElementById('gridMembrosCelulaModal').innerHTML = membrosDaCelulaAtiva.map(m => `
-            <div class="member-card">
-                <div class="card-header"><h4 class="card-name">${m.nome}</h4><span class="cat-badge">${m.tipo||'Membro'}</span></div>
-                <div class="status-row">
-                    ${['batizado','cursao','ctl','encontro','seminario','dizimista'].map(f => `<span class="status-pill ${m[f]==='Sim'?'active':''}">${f.charAt(0).toUpperCase()+f.slice(1)}</span>`).join('')}
-                </div>
-                ${m.telefone ? `<a href="https://wa.me/55${String(m.telefone).replace(/\D/g,'')}" class="btn-card btn-zap"><i class="fab fa-whatsapp"></i></a>` : ''}
-            </div>`).join('');
-    }
-
-    function fecharModalCelula() { document.getElementById('modalCelula').classList.add('hidden'); }
-
-    function abrirModalCadastroMembro() {
-        if (!celulaAtiva) return;
-        document.getElementById('selectCelulas').value = celulaAtiva[0];
-        novoCadastro();
-    }
-
-    async function abrirApascentar() {
-        if(!celulaAtiva) return;
-        const inicio = new Date(); inicio.setDate(inicio.getDate()-30);
-        const { data: rels } = await supabaseClient.from('relatorios').select('id').eq('celula', celulaAtiva[1]).gte('data', inicio.toISOString().split('T')[0]);
-        if(!rels?.length) return alert("Nenhum relatório recente.");
-        const ids = rels.map(r=>r.id);
-        const { data: pres } = await supabaseClient.from('presencas').select('membro_id, presente').in('relatorio_id', ids);
-        const faltas = {};
-        pres?.forEach(p => { if(!p.presente) faltas[p.membro_id] = (faltas[p.membro_id]||0)+1; });
-        const faltosos = membrosDaCelulaAtiva.filter(m => faltas[m.id] > 0);
-        if(!faltosos.length) return alert("Nenhum faltoso.");
-        alert("Faltosos:\n" + faltosos.map(m => `${m.nome} - ${faltas[m.id]} falta(s)`).join('\n'));
-    }
-
-    // ========== RELATÓRIOS ==========
-    async function carregarRelatorios() {
-        const { data } = await supabaseClient.from('relatorios').select('*').order('id', { ascending: false });
-        dadosRelatorios = data || [];
-        const sel = document.getElementById('filtroRelCelula');
-        if(sel) { sel.innerHTML = '<option value="">Todas as Células</option>'; dadosCelulas.forEach(c => sel.innerHTML += `<option value="${c[1]}">${c[1]}</option>`); }
-        const hoje = new Date();
-        const primeiro = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-        if(document.getElementById('filtroRelDataInicio')) document.getElementById('filtroRelDataInicio').value = primeiro.toISOString().split('T')[0];
-        if(document.getElementById('filtroRelDataFim')) document.getElementById('filtroRelDataFim').value = hoje.toISOString().split('T')[0];
-        filtrarRelatorios();
-    }
-
-    function filtrarRelatorios() {
-        const celula = document.getElementById('filtroRelCelula').value;
-        const inicio = document.getElementById('filtroRelDataInicio').value;
-        const fim = document.getElementById('filtroRelDataFim').value;
-        const div = document.getElementById('listaRelatorios'); div.innerHTML = '';
-        const filtrados = dadosRelatorios.filter(r => (!celula || r.celula === celula) && (!inicio || r.data >= inicio) && (!fim || r.data <= fim));
-        if(!filtrados.length) { div.innerHTML = '<p style="text-align:center; color:#999;">Nenhum relatório encontrado.</p>'; return; }
-        filtrados.forEach(r => div.innerHTML += `<div class="cell-card" onclick="abrirDetalheRelatorio('${r.id}')" style="justify-content:space-between;"><div><strong>${r.celula}</strong><br><small>${r.data?.split('-').reverse().join('/')}</small></div><i class="fas fa-chevron-right"></i></div>`);
-    }
-
-    async function abrirDetalheRelatorio(id) {
-        const { data: rel } = await supabaseClient.from('relatorios').select('*').eq('id', id).single();
-        if(!rel) return;
-        const { data: presencas } = await supabaseClient.from('presencas').select('membro_id, presente').eq('relatorio_id', id);
-        const presentes = [], ausentes = [];
-        presencas?.forEach(p => {
-            const m = dadosMembros.find(x => String(x[0]) === String(p.membro_id));
-            const nome = m ? m[1] : `ID ${p.membro_id}`;
-            if(p.presente) presentes.push(nome); else ausentes.push(nome);
-        });
-        document.getElementById('detalheRelCelula').innerText = rel.celula;
-        document.getElementById('detalheRelData').innerText = rel.data?.split('-').reverse().join('/');
-        document.getElementById('detalheRelTotal').innerText = presentes.length;
-        document.getElementById('detalheRelQuebra').innerText = rel.quebra_gelo || '-';
-        document.getElementById('detalheRelPalavra').innerText = rel.palavra || '-';
-        document.getElementById('detalheRelLouvor').innerText = rel.louvor || '-';
-        document.getElementById('detalheRelLanche').innerText = rel.lanche || '-';
-        document.getElementById('detalheRelObs').innerText = rel.observacoes || 'Nenhuma observação.';
-        document.getElementById('listaPresentes').innerHTML = presentes.length ? presentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
-        document.getElementById('listaAusentes').innerHTML = ausentes.length ? ausentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
-        document.getElementById('modalRelatorio').classList.remove('hidden');
-    }
-
-    // ========== PEDIDOS DE ORAÇÃO ==========
-    async function carregarSugestoes() {
-        const corpo = document.getElementById('corpoSugestoes'); corpo.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
-        const { data } = await supabaseClient.from('sugestoes').select('*').order('id', { ascending: false });
-        corpo.innerHTML = '';
-        if(!data?.length) { corpo.innerHTML = '<tr><td colspan="3">Nenhum pedido.</td></tr>'; return; }
-        data.forEach(s => {
-            const opaco = s.ativo === false ? 'opacity:0.5;' : '';
-            corpo.innerHTML += `<tr style="${opaco}">
-                <td>${s.data||''}</td>
-                <td>${s.mensagem}</td>
-                <td>${s.ativo !== false ? `<button class="btn-card" onclick="concluirPedido(${s.id})"><i class="fas fa-check"></i> Concluir</button>` : '✔️ Concluído'}</td>
-            </tr>`;
-        });
-    }
-
-    async function concluirPedido(id) {
-        await supabaseClient.from('sugestoes').update({ ativo: false }).eq('id', id);
-        carregarSugestoes();
-    }
-
-    // ========== AGENDA ==========
-    function renderizarAgenda(lista) {
-        const div = document.getElementById('listaAgenda'); div.innerHTML = '';
-        const mesFiltro = document.getElementById('filtroMesAgenda')?.value;
-        let filtrada = lista;
-        if (mesFiltro && mesFiltro !== 'todos') {
-            filtrada = lista.filter(a => {
-                const d = a[0];
-                if (!d) return false;
-                const partes = d.includes('-') ? d.split('-') : d.split('/');
-                const mes = partes.length === 3 ? parseInt(partes[1]) : null;
-                return mes === parseInt(mesFiltro);
+        // ========== PEDIDOS DE ORAÇÃO ==========
+        async function carregarSugestoes() {
+            const corpo = document.getElementById('corpoSugestoes');
+            corpo.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
+            const { data, error } = await supabaseClient.from('sugestoes').select('*').order('id', { ascending: false });
+            corpo.innerHTML = '';
+            if (error || !data?.length) { corpo.innerHTML =
+                '<tr><td colspan="3">Nenhum pedido.</td></tr>'; return; }
+            data.forEach(s => {
+                const opaco = s.ativo === false ? 'opacity:0.5;' : '';
+                corpo.innerHTML += `<tr style="${opaco}">
+                    <td>${s.data||''}</td>
+                    <td>${s.mensagem}</td>
+                    <td>${s.ativo !== false ? `<button class="btn-card" onclick="concluirPedido(${s.id})"><i class="fas fa-check"></i> Concluir</button>` : '✔️ Concluído'}</td>
+                </tr>`;
             });
         }
-        filtrada.sort((a,b) => new Date(a[0]) - new Date(b[0]));
-        filtrada.forEach(a => {
-            let dataF = a[0]?.split('-').reverse().join('/') || '';
-            div.innerHTML += `<div class="member-card">
-                <div class="card-header"><h4 class="card-name">${dataF}</h4><span class="cat-badge">${a[4]||''}</span></div>
-                <div><strong>${a[1]}</strong></div>
-                <div>${a[2]||''}</div>
-                <div><span style="color:${a[3]==='Pago'?'#dc3545':'var(--success-text)'};">${a[3]}</span></div>
-            </div>`;
-        });
-    }
 
-    // ========== PALAVRAS ==========
-    async function carregarPalavrasDados() {
-        const { data } = await supabaseClient.from('palavras').select('*').order('id', { ascending: false });
-        listaPalavras = data || [];
-        renderizarPalavras();
-    }
+        async function concluirPedido(id) {
+            await supabaseClient.from('sugestoes').update({ ativo: false }).eq('id', id);
+            carregarSugestoes();
+        }
 
-    function renderizarPalavras() {
-        const div = document.getElementById('listaPalavras'); div.innerHTML = '';
-        if(!listaPalavras.length) { div.innerHTML = '<p style="text-align:center;">Nenhuma palavra.</p>'; return; }
-        listaPalavras.forEach((p,i) => {
-            let dataF = p.data?.split('-').reverse().join('/') || '';
-            div.innerHTML += `<div class="cell-card" style="justify-content:space-between;">
-                <div onclick="abrirPalavra(${i})" style="cursor:pointer; flex:1;">
-                    <div style="font-weight:800;">${dataF}</div>
-                    <div style="font-size:0.85rem;">${p.tema}</div>
-                </div>
-                <button class="btn-card" style="flex:0 0 auto; padding:4px 8px; font-size:0.65rem;" onclick="editarPalavra(${i})"><i class="fas fa-edit"></i></button>
-            </div>`;
-        });
-    }
+        // ========== AGENDA ==========
+        function renderizarAgenda(lista) {
+            const div = document.getElementById('listaAgenda');
+            div.innerHTML = '';
+            const mesFiltro = document.getElementById('filtroMesAgenda')?.value;
+            let filtrada = lista;
+            if (mesFiltro && mesFiltro !== 'todos') {
+                filtrada = lista.filter(a => {
+                    const d = a[0];
+                    if (!d) return false;
+                    const partes = d.includes('-') ? d.split('-') : d.split('/');
+                    const mes = partes.length === 3 ? parseInt(partes[1]) : null;
+                    return mes === parseInt(mesFiltro);
+                });
+            }
+            filtrada.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+            filtrada.forEach(a => {
+                let dataF = a[0]?.split('-').reverse().join('/') || '';
+                div.innerHTML += `<div class="member-card">
+                    <div class="card-header"><h4 class="card-name">${dataF}</h4><span class="cat-badge">${a[4]||''}</span></div>
+                    <div><strong>${a[1]}</strong></div>
+                    <div>${a[2]||''}</div>
+                    <div><span style="color:${a[3]==='Pago'?'#dc3545':'var(--success-text)'};">${a[3]}</span></div>
+                </div>`;
+            });
+        }
 
-    function abrirPalavra(index) {
-        const p = listaPalavras[index];
-        document.getElementById('modalTitulo').innerText = p.tema;
-        document.getElementById('modalDataPalavra').innerText = p.data?.split('-').reverse().join('/');
-        document.getElementById('modalTexto').innerText = p.texto;
-        const btn = document.getElementById('btnLinkYoutube');
-        if(p.link_youtube) { btn.href = p.link_youtube; btn.classList.remove('hidden'); } else btn.classList.add('hidden');
-        document.getElementById('modalPalavra').classList.remove('hidden');
-    }
+        // ========== PALAVRAS ==========
+        async function carregarPalavrasDados() {
+            const { data, error } = await supabaseClient.from('palavras').select('*').order('id', { ascending: false });
+            listaPalavras = data || [];
+            renderizarPalavras();
+        }
 
-    function editarPalavra(index) {
-        const p = listaPalavras[index];
-        document.getElementById('palavraId').value = p.id;
-        document.getElementById('palavraData').value = p.data;
-        document.getElementById('palavraTema').value = p.tema;
-        document.getElementById('palavraTexto').value = p.texto;
-        document.getElementById('palavraLink').value = p.link_youtube || '';
-        document.getElementById('modalEditarPalavra').classList.remove('hidden');
-    }
+        function renderizarPalavras() {
+            const div = document.getElementById('listaPalavras');
+            div.innerHTML = '';
+            if (!listaPalavras.length) { div.innerHTML = '<p style="text-align:center;">Nenhuma palavra.</p>'; return; }
+            listaPalavras.forEach((p, i) => {
+                let dataF = p.data?.split('-').reverse().join('/') || '';
+                div.innerHTML += `<div class="cell-card" style="justify-content:space-between;">
+                    <div onclick="abrirPalavra(${i})" style="cursor:pointer; flex:1;">
+                        <div style="font-weight:800;">${dataF}</div>
+                        <div style="font-size:0.85rem;">${p.tema}</div>
+                    </div>
+                    <button class="btn-card" style="flex:0 0 auto; padding:4px 8px; font-size:0.65rem;" onclick="event.stopPropagation(); editarPalavra(${i})"><i class="fas fa-edit"></i></button>
+                </div>`;
+            });
+        }
 
-    async function salvarPalavra(e) {
-        e.preventDefault();
-        const id = document.getElementById('palavraId').value;
-        const dados = {
-            data: document.getElementById('palavraData').value,
-            tema: document.getElementById('palavraTema').value,
-            texto: document.getElementById('palavraTexto').value,
-            link_youtube: document.getElementById('palavraLink').value
+        function abrirPalavra(index) {
+            const p = listaPalavras[index];
+            document.getElementById('modalTitulo').innerText = p.tema;
+            document.getElementById('modalDataPalavra').innerText = p.data?.split('-').reverse().join('/');
+            document.getElementById('modalTexto').innerText = p.texto;
+            const btn = document.getElementById('btnLinkYoutube');
+            if (p.link_youtube) { btn.href = p.link_youtube;
+                btn.classList.remove('hidden'); } else btn.classList.add('hidden');
+            document.getElementById('modalPalavra').classList.remove('hidden');
+        }
+
+        function editarPalavra(index) {
+            const p = listaPalavras[index];
+            document.getElementById('palavraId').value = p.id;
+            document.getElementById('palavraData').value = p.data;
+            document.getElementById('palavraTema').value = p.tema;
+            document.getElementById('palavraTexto').value = p.texto;
+            document.getElementById('palavraLink').value = p.link_youtube || '';
+            document.getElementById('modalEditarPalavra').classList.remove('hidden');
+        }
+
+        function novaPalavra() {
+            document.getElementById('formPalavra').reset();
+            document.getElementById('palavraId').value = '';
+            document.getElementById('modalEditarPalavra').classList.remove('hidden');
+        }
+
+        async function salvarPalavra(e) {
+            e.preventDefault();
+            const id = document.getElementById('palavraId').value;
+            const dados = {
+                data: document.getElementById('palavraData').value,
+                tema: document.getElementById('palavraTema').value,
+                texto: document.getElementById('palavraTexto').value,
+                link_youtube: document.getElementById('palavraLink').value
+            };
+            if (id) await supabaseClient.from('palavras').update(dados).eq('id', id);
+            else await supabaseClient.from('palavras').insert([dados]);
+            document.getElementById('modalEditarPalavra').classList.add('hidden');
+            carregarPalavrasDados();
+        }
+
+        // ========== MINHA IGREJA ==========
+        function carregarEstatisticas() {
+            const ativos = obterAtivos();
+            document.getElementById('statTotalMembros').innerText = ativos.length;
+            document.getElementById('statBatizados').innerText = ativos.filter(m => m[6] === 'Sim').length;
+            document.getElementById('statCursao').innerText = ativos.filter(m => m[7] === 'Sim').length;
+            document.getElementById('statCtl').innerText = ativos.filter(m => m[8] === 'Sim').length;
+            document.getElementById('statSeminario').innerText = ativos.filter(m => m[11] === 'Sim').length;
+            document.getElementById('statDizimistas').innerText = ativos.filter(m => m[12] === 'Sim').length;
+            document.getElementById('statLideres').innerText = ativos.filter(m => m[2] === 'Líder').length;
+            document.getElementById('statDiscipuladores').innerText = ativos.filter(m => m[2] === 'Discipulador').length;
+            document.getElementById('statFrequentadores').innerText = ativos.filter(m => m[2] === 'Frequentador').length;
+            document.getElementById('statMembros').innerText = ativos.filter(m => m[2] === 'Membro').length;
+            document.getElementById('statCelulas').innerText = dadosCelulas.length;
+
+            const agora = new Date();
+            const inicioSemana = new Date(agora);
+            inicioSemana.setDate(agora.getDate() - ((agora.getDay() + 6) % 7));
+            inicioSemana.setHours(0, 0, 0, 0);
+            const fimSemana = new Date(inicioSemana);
+            fimSemana.setDate(inicioSemana.getDate() + 6);
+            fimSemana.setHours(23, 59, 59, 999);
+            const relSemana = dadosRelatorios.filter(r => {
+                const d = new Date(r.data + 'T00:00:00');
+                return d >= inicioSemana && d <= fimSemana;
+            });
+            document.getElementById('statRelatoriosSemana').innerText = relSemana.length;
+            const celulasComRelatorio = new Set(relSemana.map(r => r.celula));
+            const semRelatorio = dadosCelulas.filter(c => !celulasComRelatorio.has(c[1])).map(c => c[1]);
+            document.getElementById('statCelulasSemRelatorio').innerHTML = semRelatorio.length ? semRelatorio.join(', ') :
+                'Todas enviaram';
+        }
+
+        // ========== EDIÇÃO DE MEMBRO ==========
+        function novoCadastro() {
+            document.getElementById('formMembro').reset();
+            document.getElementById('idMembro').value = '';
+            document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
+            document.getElementById('secao-cadastro').classList.remove('hidden');
+            preencherSelects();
+        }
+
+        function editarMembro(id) {
+            const m = dadosMembros.find(x => x[0] == id);
+            if (!m) return;
+            document.getElementById('idMembro').value = m[0];
+            document.getElementById('campoNome').value = m[1];
+            document.getElementById('campoNasc').value = m[10];
+            document.getElementById('campoTel').value = m[4];
+            document.getElementById('selectCelulas').value = m[13] || '';
+            document.getElementById('campoCategoria').value = m[2];
+            // Índices corrigidos: m[6]=batizado, m[7]=cursao, m[8]=ctl, m[9]=encontro, m[11]=seminario, m[12]=dizimista
+            document.getElementById('checkBat').checked = (m[6] === 'Sim');
+            document.getElementById('checkCur').checked = (m[7] === 'Sim');
+            document.getElementById('checkCtl').checked = (m[8] === 'Sim');
+            document.getElementById('checkDiz').checked = (m[9] === 'Sim');
+            document.getElementById('checkSem').checked = (m[11] === 'Sim');
+            document.getElementById('checkDizi').checked = (m[12] === 'Sim');
+            document.getElementById('tituloFormMembro').innerText = 'Editar Membro';
+            document.getElementById('secao-cadastro').classList.remove('hidden');
+            preencherSelects();
+            // Reaplica o valor da célula após preencher o select
+            setTimeout(() => {
+                document.getElementById('selectCelulas').value = m[13] || '';
+            }, 50);
+        }
+
+        async function arquivarMembro(id, nome) {
+            if (confirm(`Arquivar ${nome}?`)) {
+                await supabaseClient.from('membros').update({ arquivado: 'Sim' }).eq('id', id);
+                carregarTudo();
+            }
+        }
+        async function restaurarMembro(id) {
+            if (confirm("Restaurar?")) {
+                await supabaseClient.from('membros').update({ arquivado: 'Não' }).eq('id', id);
+                carregarTudo();
+            }
+        }
+
+        // ========== NAVEGAÇÃO ==========
+        function mudarSecao(s) {
+            ['lista', 'minha-rede', 'relatorios', 'sugestoes', 'agenda', 'palavras', 'minha-igreja'].forEach(id => {
+                const el = document.getElementById(`secao-${id}`);
+                if (el) el.classList.add('hidden');
+            });
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const ativa = document.getElementById(`secao-${s}`);
+            if (ativa) ativa.classList.remove('hidden');
+            const btn = document.getElementById(`btn-${s}`);
+            if (btn) btn.classList.add('active');
+            if (s === 'sugestoes') carregarSugestoes();
+            if (s === 'minha-igreja') carregarEstatisticas();
+            if (s === 'lista') {
+                aplicarFiltros();
+            }
+        }
+
+        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function fecharModalClique(e) { if (e.target.classList.contains('modal-overlay')) e.target.classList.add(
+            'hidden'); }
+
+        function exportarExcel() {
+            const lista = obterMembrosFiltrados();
+            if (!lista.length) return alert("Nenhum dado.");
+            const ws = XLSX.utils.json_to_sheet(lista.map(m => ({ Nome: m[1], Categoria: m[2], Célula: m[3],
+                WhatsApp: m[4], Batismo: m[6], Cursão: m[7], CTL: m[8], Encontro: m[9], Seminário: m[11],
+                Dizimista: m[12] })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Membros");
+            XLSX.writeFile(wb, `Membros_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        async function exportarPDF() {
+            const lista = obterMembrosFiltrados();
+            if (!lista.length) return alert("Nenhum dado.");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            try {
+                const resp = await fetch('logo.png');
+                const blob = await resp.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                await new Promise(r => reader.onload = r);
+                doc.addImage(reader.result, 'PNG', 14, 10, 16, 16);
+            } catch (e) {}
+            doc.setFontSize(16);
+            doc.text("Membros - Videira Jataí", 34, 16);
+            doc.setFontSize(9);
+            doc.text(`Gerado em ${new Date().toLocaleString()} | Total: ${lista.length}`, 34, 22);
+            doc.autoTable({
+                head: [
+                    ["Nome", "Categoria", "Célula", "WhatsApp", "Bat.", "Cur.", "CTL", "Enc.", "Sem.", "Diz."
+                    ]
+                ],
+                body: lista.map(m => [m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[11], m[12]]),
+                startY: 30,
+                theme: 'grid',
+                headStyles: { fillColor: [128, 0, 32] },
+                styles: { fontSize: 8 }
+            });
+            doc.save(`Membros_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        function obterMembrosFiltrados() {
+            const status = document.getElementById('filtroStatusGeral').value;
+            let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
+            const busca = document.getElementById('inputBusca').value.toLowerCase();
+            const celulaFiltro = document.getElementById('filtroCelula').value;
+            const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb => cb.value.toLowerCase());
+            const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb => cb.value);
+            return base.filter(m => {
+                if (busca && !m[1].toLowerCase().includes(busca)) return false;
+                if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;
+                if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
+                if (tagsSel.length) {
+                    const tags = [];
+                    if (m[6] === 'Sim') tags.push('batizado');
+                    if (m[7] === 'Sim') tags.push('cursão');
+                    if (m[8] === 'Sim') tags.push('ctl');
+                    if (m[9] === 'Sim') tags.push('encontro');
+                    if (m[11] === 'Sim') tags.push('seminário');
+                    if (m[12] === 'Sim') tags.push('dizimista');
+                    if (!tagsSel.some(t => tags.includes(t))) return false;
+                }
+                return true;
+            });
+        }
+
+        function fazerLogout() {
+            if (confirm("Sair?")) { sessionStorage.clear();
+                window.location.href = "index.html"; }
+        }
+
+        // ========== EVENTOS ==========
+        function inicializarEventos() {
+            document.getElementById('filtroStatusGeral').addEventListener('change', aplicarFiltros);
+            document.getElementById('inputBusca').addEventListener('keyup', aplicarFiltros);
+            document.getElementById('filtroCelula').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroMesAgenda').addEventListener('change', () => renderizarAgenda(listaAgenda));
+            document.getElementById('filtroLiderRede').addEventListener('change', filtrarCelulasRede);
+            document.getElementById('filtroSupervisorRede').addEventListener('change', filtrarCelulasRede);
+
+            document.getElementById('formMembro').addEventListener('submit', async e => {
+                e.preventDefault();
+                const id = document.getElementById('idMembro').value;
+                const dados = {
+                    nome: document.getElementById('campoNome').value,
+                    nascimento: document.getElementById('campoNasc').value,
+                    tipo: document.getElementById('campoCategoria').value,
+                    celula_id: document.getElementById('selectCelulas').value || null,
+                    telefone: document.getElementById('campoTel').value,
+                    batizado: document.getElementById('checkBat').checked ? 'Sim' : 'Não',
+                    cursao: document.getElementById('checkCur').checked ? 'Sim' : 'Não',
+                    ctl: document.getElementById('checkCtl').checked ? 'Sim' : 'Não',
+                    encontro: document.getElementById('checkDiz').checked ? 'Sim' : 'Não',
+                    seminario: document.getElementById('checkSem').checked ? 'Sim' : 'Não',
+                    dizimista: document.getElementById('checkDizi').checked ? 'Sim' : 'Não',
+                    arquivado: 'Não'
+                };
+                try {
+                    if (id) await supabaseClient.from('membros').update(dados).eq('id', id);
+                    else await supabaseClient.from('membros').insert([dados]);
+                    fecharModal('secao-cadastro');
+                    await carregarTudo();
+                    mudarSecao('lista');
+                } catch (err) {
+                    alert("Erro ao salvar membro: " + err.message);
+                }
+            });
+
+            document.getElementById('formCelula').addEventListener('submit', async e => {
+                e.preventDefault();
+                const id = document.getElementById('editCelulaId').value;
+                const dados = {
+                    nome: document.getElementById('editCelulaNome').value,
+                    lider: document.getElementById('editCelulaLider').value,
+                    dia_horario: document.getElementById('editCelulaDia').value,
+                    endereco: document.getElementById('editCelulaEnd').value,
+                    supervisor_email: sessionStorage.getItem('pastorEmail')
+                };
+                try {
+                    if (id) await supabaseClient.from('celulas').update(dados).eq('id', id);
+                    else await supabaseClient.from('celulas').insert([dados]);
+                    fecharModal('modalEditarCelula');
+                    await carregarTudo();
+                } catch (err) {
+                    alert("Erro ao salvar célula: " + err.message);
+                }
+            });
+
+            document.getElementById('formPalavra').addEventListener('submit', salvarPalavra);
+            setupMultiselects();
+
+            // MutationObserver para preencher líderes quando o modal de célula abrir
+            const observer = new MutationObserver(() => {
+                if (!document.getElementById('modalEditarCelula').classList.contains('hidden')) {
+                    preencherSelectLideres();
+                }
+            });
+            observer.observe(document.getElementById('modalEditarCelula'), { attributes: true,
+                attributeFilter: ['class'] });
+        }
+
+        window.onload = () => {
+            if (document.getElementById('filtroMesAgenda')) document.getElementById('filtroMesAgenda').value = 'todos';
         };
-        if(id) await supabaseClient.from('palavras').update(dados).eq('id', id);
-        else await supabaseClient.from('palavras').insert([dados]);
-        document.getElementById('modalEditarPalavra').classList.add('hidden');
-        carregarPalavrasDados();
-    }
+    </script>
 
-    // ========== MINHA IGREJA ==========
-    function carregarEstatisticas() {
-        const ativos = obterAtivos();
-        document.getElementById('statTotalMembros').innerText = ativos.length;
-        document.getElementById('statBatizados').innerText = ativos.filter(m=>m[6]==='Sim').length;
-        document.getElementById('statCursao').innerText = ativos.filter(m=>m[7]==='Sim').length;
-        document.getElementById('statCtl').innerText = ativos.filter(m=>m[8]==='Sim').length;
-        document.getElementById('statSeminario').innerText = ativos.filter(m=>m[11]==='Sim').length;
-        document.getElementById('statDizimistas').innerText = ativos.filter(m=>m[12]==='Sim').length;
-        document.getElementById('statLideres').innerText = ativos.filter(m=>m[2]==='Líder').length;
-        document.getElementById('statDiscipuladores').innerText = ativos.filter(m=>m[2]==='Discipulador').length;
-        document.getElementById('statFrequentadores').innerText = ativos.filter(m=>m[2]==='Frequentador').length;
-        document.getElementById('statMembros').innerText = ativos.filter(m=>m[2]==='Membro').length;
-        document.getElementById('statCelulas').innerText = dadosCelulas.length;
-
-        const agora = new Date();
-        const inicioSemana = new Date(agora);
-        inicioSemana.setDate(agora.getDate() - ((agora.getDay() + 6) % 7));
-        inicioSemana.setHours(0,0,0,0);
-        const fimSemana = new Date(inicioSemana);
-        fimSemana.setDate(inicioSemana.getDate() + 6);
-        fimSemana.setHours(23,59,59,999);
-        const relSemana = dadosRelatorios.filter(r => {
-            const d = new Date(r.data + 'T00:00:00');
-            return d >= inicioSemana && d <= fimSemana;
-        });
-        document.getElementById('statRelatoriosSemana').innerText = relSemana.length;
-        const celulasComRelatorio = new Set(relSemana.map(r => r.celula));
-        const semRelatorio = dadosCelulas.filter(c => !celulasComRelatorio.has(c[1])).map(c => c[1]);
-        document.getElementById('statCelulasSemRelatorio').innerHTML = semRelatorio.length ? semRelatorio.join(', ') : 'Todas enviaram';
-    }
-
-    // ========== EDIÇÃO DE MEMBRO ==========
-    function novoCadastro() {
-        document.getElementById('formMembro').reset();
-        document.getElementById('idMembro').value = '';
-        document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
-        document.getElementById('secao-cadastro').classList.remove('hidden');
-    }
-
-    function editarMembro(id) {
-        const m = dadosMembros.find(x => x[0] == id);
-        if (!m) return;
-        document.getElementById('idMembro').value = m[0];
-        document.getElementById('campoNome').value = m[1];
-        document.getElementById('campoNasc').value = m[10];
-        document.getElementById('campoTel').value = m[4];
-        document.getElementById('selectCelulas').value = m[13] || '';
-        document.getElementById('campoCategoria').value = m[2];
-        ['checkBat','checkCur','checkCtl','checkDiz','checkSem','checkDizi'].forEach((checkId, i) => {
-            document.getElementById(checkId).checked = (m[6 + i] === 'Sim');
-        });
-        document.getElementById('tituloFormMembro').innerText = 'Editar Membro';
-        document.getElementById('secao-cadastro').classList.remove('hidden');
-    }
-
-    async function arquivarMembro(id, nome) {
-        if(confirm(`Arquivar ${nome}?`)) { await supabaseClient.from('membros').update({ arquivado: 'Sim' }).eq('id', id); carregarTudo(); }
-    }
-    async function restaurarMembro(id) {
-        if(confirm("Restaurar?")) { await supabaseClient.from('membros').update({ arquivado: 'Não' }).eq('id', id); carregarTudo(); }
-    }
-
-    // ========== NAVEGAÇÃO ==========
-    function mudarSecao(s) {
-        ['lista','minha-rede','relatorios','sugestoes','agenda','palavras','minha-igreja'].forEach(id => {
-            const el = document.getElementById(`secao-${id}`);
-            if(el) el.classList.add('hidden');
-        });
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        const ativa = document.getElementById(`secao-${s}`);
-        if(ativa) ativa.classList.remove('hidden');
-        const btn = document.getElementById(`btn-${s}`);
-        if(btn) btn.classList.add('active');
-        if(s === 'sugestoes') carregarSugestoes();
-        if(s === 'minha-igreja') carregarEstatisticas();
-    }
-
-    function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
-    function fecharModalClique(e) { if (e.target.classList.contains('modal-overlay')) e.target.classList.add('hidden'); }
-    function novaCelula() {
-        document.getElementById('formCelula').reset();
-        document.getElementById('editCelulaId').value='';
-        preencherSelectLideres();
-        document.getElementById('modalEditarCelula').classList.remove('hidden');
-    }
-    function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraId').value=''; document.getElementById('modalEditarPalavra').classList.remove('hidden'); }
-
-    // ========== EVENTOS ==========
-    function inicializarEventos() {
-        document.getElementById('filtroStatusGeral').addEventListener('change', aplicarFiltros);
-        document.getElementById('inputBusca').addEventListener('keyup', aplicarFiltros);
-        document.getElementById('filtroCelula').addEventListener('change', aplicarFiltros);
-        document.getElementById('filtroMesAgenda').addEventListener('change', () => renderizarAgenda(listaAgenda));
-        document.getElementById('filtroLiderRede').addEventListener('change', filtrarCelulasRede);
-        document.getElementById('filtroSupervisorRede').addEventListener('change', filtrarCelulasRede);
-        document.getElementById('formMembro').addEventListener('submit', async e => {
-            e.preventDefault();
-            const id = document.getElementById('idMembro').value;
-            const dados = {
-                nome: document.getElementById('campoNome').value,
-                nascimento: document.getElementById('campoNasc').value,
-                tipo: document.getElementById('campoCategoria').value,
-                celula_id: document.getElementById('selectCelulas').value || null,
-                telefone: document.getElementById('campoTel').value,
-                batizado: document.getElementById('checkBat').checked?'Sim':'Não',
-                cursao: document.getElementById('checkCur').checked?'Sim':'Não',
-                ctl: document.getElementById('checkCtl').checked?'Sim':'Não',
-                encontro: document.getElementById('checkDiz').checked?'Sim':'Não',
-                seminario: document.getElementById('checkSem').checked?'Sim':'Não',
-                dizimista: document.getElementById('checkDizi').checked?'Sim':'Não',
-                arquivado: 'Não'
-            };
-            if(id) await supabaseClient.from('membros').update(dados).eq('id', id);
-            else await supabaseClient.from('membros').insert([dados]);
-            fecharModal('secao-cadastro');
-            mudarSecao('lista');
-            carregarTudo();
-        });
-        document.getElementById('formCelula').addEventListener('submit', async e => {
-            e.preventDefault();
-            const id = document.getElementById('editCelulaId').value;
-            const dados = {
-                nome: document.getElementById('editCelulaNome').value,
-                lider: document.getElementById('editCelulaLider').value,
-                dia_horario: document.getElementById('editCelulaDia').value,
-                endereco: document.getElementById('editCelulaEnd').value,
-                supervisor_email: sessionStorage.getItem('pastorEmail')
-            };
-            if(id) await supabaseClient.from('celulas').update(dados).eq('id', id);
-            else await supabaseClient.from('celulas').insert([dados]);
-            fecharModal('modalEditarCelula');
-            carregarTudo();
-        });
-        document.getElementById('formPalavra').addEventListener('submit', salvarPalavra);
-        setupMultiselects();
-
-        const observer = new MutationObserver(() => preencherSelectLideres());
-        observer.observe(document.getElementById('modalEditarCelula'), { attributes: true, attributeFilter: ['class'] });
-    }
-
-    function exportarExcel() {
-        const lista = obterMembrosFiltrados();
-        if(!lista.length) return alert("Nenhum dado.");
-        const ws = XLSX.utils.json_to_sheet(lista.map(m => ({ Nome: m[1], Categoria: m[2], Célula: m[3], WhatsApp: m[4], Batismo: m[6], Cursão: m[7], CTL: m[8], Encontro: m[9], Seminário: m[11], Dizimista: m[12] })));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Membros");
-        XLSX.writeFile(wb, `Membros_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    async function exportarPDF() {
-        const lista = obterMembrosFiltrados();
-        if(!lista.length) return alert("Nenhum dado.");
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        try { const resp = await fetch('logo.png'); const blob = await resp.blob(); const reader = new FileReader(); reader.readAsDataURL(blob); await new Promise(r => reader.onload = r); doc.addImage(reader.result, 'PNG', 14, 10, 16, 16); } catch(e) {}
-        doc.setFontSize(16); doc.text("Membros - Videira Jataí", 34, 16);
-        doc.setFontSize(9); doc.text(`Gerado em ${new Date().toLocaleString()} | Total: ${lista.length}`, 34, 22);
-        doc.autoTable({ head: [["Nome","Categoria","Célula","WhatsApp","Bat.","Cur.","CTL","Enc.","Sem.","Diz."]], body: lista.map(m => [m[1], m[2], m[3], m[4], m[6], m[7], m[8], m[9], m[11], m[12]]), startY: 30, theme: 'grid', headStyles: { fillColor: [128,0,32] }, styles: { fontSize: 8 } });
-        doc.save(`Membros_${new Date().toISOString().slice(0,10)}.pdf`);
-    }
-
-    function obterMembrosFiltrados() {
-        const status = document.getElementById('filtroStatusGeral').value;
-        let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
-        const busca = document.getElementById('inputBusca').value.toLowerCase();
-        const celulaFiltro = document.getElementById('filtroCelula').value;
-        const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb=>cb.value.toLowerCase());
-        const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb=>cb.value);
-        return base.filter(m => {
-            if (busca && !m[1].toLowerCase().includes(busca)) return false;
-            if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;
-            if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
-            if (tagsSel.length) {
-                const tags = [];
-                if(m[6]==='Sim') tags.push('batizado');
-                if(m[7]==='Sim') tags.push('cursão');
-                if(m[8]==='Sim') tags.push('ctl');
-                if(m[9]==='Sim') tags.push('encontro');
-                if(m[11]==='Sim') tags.push('seminário');
-                if(m[12]==='Sim') tags.push('dizimista');
-                if (!tagsSel.some(t=>tags.includes(t))) return false;
-            }
-            return true;
-        });
-    }
-
-    function fazerLogout() { if(confirm("Sair?")) { sessionStorage.clear(); window.location.href="index.html"; } }
-
-    window.onload = () => { if(document.getElementById('filtroMesAgenda')) document.getElementById('filtroMesAgenda').value = 'todos'; };
-</script>
-
-<div class="container">
-    <div class="header">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 100px;">
-            <h3>Painel Pastoral</h3>
+    <div class="container">
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <img src="https://img.linkme.bio/img/2021/05/10141826/logo-videira-circulo-1.png" style="width: 100px;">
+                <h3>Painel Pastoral</h3>
+            </div>
+            <div>
+                <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
+                <button onclick="fazerLogout()" class="btn-refresh" style="color:#991b1b;"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
         </div>
-        <div>
-            <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
-            <button onclick="fazerLogout()" class="btn-refresh" style="color:#991b1b;"><i class="fas fa-sign-out-alt"></i></button>
+
+        <div class="nav-menu">
+            <button id="btn-lista" class="nav-btn active" onclick="mudarSecao('lista')"><i class="fas fa-users"></i> Membros</button>
+            <button id="btn-minha-rede" class="nav-btn" onclick="mudarSecao('minha-rede')"><i class="fas fa-network-wired"></i> Rede</button>
+            <button id="btn-relatorios" class="nav-btn" onclick="mudarSecao('relatorios')"><i class="fas fa-clipboard-list"></i> Relatórios</button>
+            <button id="btn-sugestoes" class="nav-btn" onclick="mudarSecao('sugestoes')"><i class="fas fa-hands-praying"></i> Pedidos</button>
+            <button id="btn-agenda" class="nav-btn" onclick="mudarSecao('agenda')"><i class="far fa-calendar-alt"></i> Agenda</button>
+            <button id="btn-palavras" class="nav-btn" onclick="mudarSecao('palavras')"><i class="fas fa-book-open"></i> Palavras</button>
+            <button id="btn-minha-igreja" class="nav-btn" onclick="mudarSecao('minha-igreja')"><i class="fas fa-chart-bar"></i> Minha Igreja</button>
         </div>
-    </div>
 
-    <div class="nav-menu">
-        <button id="btn-lista" class="nav-btn active" onclick="mudarSecao('lista')"><i class="fas fa-users"></i> Membros</button>
-        <button id="btn-minha-rede" class="nav-btn" onclick="mudarSecao('minha-rede')"><i class="fas fa-network-wired"></i> Rede</button>
-        <button id="btn-relatorios" class="nav-btn" onclick="mudarSecao('relatorios')"><i class="fas fa-clipboard-list"></i> Relatórios</button>
-        <button id="btn-sugestoes" class="nav-btn" onclick="mudarSecao('sugestoes')"><i class="fas fa-hands-praying"></i> Pedidos</button>
-        <button id="btn-agenda" class="nav-btn" onclick="mudarSecao('agenda')"><i class="far fa-calendar-alt"></i> Agenda</button>
-        <button id="btn-palavras" class="nav-btn" onclick="mudarSecao('palavras')"><i class="fas fa-book-open"></i> Palavras</button>
-        <button id="btn-minha-igreja" class="nav-btn" onclick="mudarSecao('minha-igreja')"><i class="fas fa-chart-bar"></i> Minha Igreja</button>
-    </div>
-
-    <!-- MEMBROS -->
-    <div id="secao-lista">
-        <div style="background:white; padding:12px; border-radius:12px; margin-bottom:15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h4 style="margin:0;"><span id="totalMembros">0</span> Membros</h4>
-                <div style="display:flex; gap:4px;">
-                    <button onclick="exportarExcel()" class="btn-card" style="background:#166534; color:white; border-color:#166534;"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="exportarPDF()" class="btn-card" style="background:#991b1b; color:white; border-color:#991b1b;"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="novoCadastro()" class="btn-card" style="background:var(--success-text); color:white; border-color:var(--success-text);"><i class="fas fa-plus"></i> Novo</button>
+        <!-- MEMBROS -->
+        <div id="secao-lista">
+            <div style="background:white; padding:12px; border-radius:12px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <h4 style="margin:0;"><span id="totalMembros">0</span> Membros</h4>
+                    <div style="display:flex; gap:4px;">
+                        <button onclick="exportarExcel()" class="btn-card" style="background:#166534; color:white; border-color:#166534;"><i class="fas fa-file-excel"></i></button>
+                        <button onclick="exportarPDF()" class="btn-card" style="background:#991b1b; color:white; border-color:#991b1b;"><i class="fas fa-file-pdf"></i></button>
+                        <button onclick="novoCadastro()" class="btn-card" style="background:var(--success-text); color:white; border-color:var(--success-text);"><i class="fas fa-plus"></i> Novo</button>
+                    </div>
+                </div>
+                <div class="filtros-container">
+                    <div class="filtro-item" style="flex:2;">
+                        <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;">
+                    </div>
+                    <div class="filtro-item" style="flex:1;">
+                        <select id="filtroCelula" style="height:38px;">
+                            <option value="">Todas as Células</option>
+                        </select>
+                    </div>
+                    <div class="multi-select" id="multiCargo">
+                        <div class="trigger">Cargos <i class="fas fa-chevron-down"></i></div>
+                        <div class="dropdown">
+                            <label><input type="checkbox" value="pastor"> Pastor</label>
+                            <label><input type="checkbox" value="discipulador"> Discipulador</label>
+                            <label><input type="checkbox" value="líder"> Líder</label>
+                            <label><input type="checkbox" value="membro"> Membro</label>
+                            <label><input type="checkbox" value="frequentador"> Frequentador</label>
+                        </div>
+                    </div>
+                    <div class="multi-select" id="multiStatus">
+                        <div class="trigger">Status <i class="fas fa-chevron-down"></i></div>
+                        <div class="dropdown">
+                            <label><input type="checkbox" value="batizado"> Batismo</label>
+                            <label><input type="checkbox" value="cursão"> Cursão</label>
+                            <label><input type="checkbox" value="ctl"> CTL</label>
+                            <label><input type="checkbox" value="encontro"> Encontro</label>
+                            <label><input type="checkbox" value="seminário"> Seminário</label>
+                            <label><input type="checkbox" value="dizimista"> Dizimista</label>
+                        </div>
+                    </div>
+                    <div class="filtro-item" style="max-width:100px;">
+                        <select id="filtroStatusGeral" style="height:38px;">
+                            <option value="ativos" selected>Ativos</option>
+                            <option value="inativos">Inativos</option>
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="filtros-container">
-                <div class="filtro-item" style="flex:2;">
-                    <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;">
+            <div id="gridMembros" class="member-grid"></div>
+        </div>
+
+        <!-- REDE -->
+        <div id="secao-minha-rede" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span><strong id="contagemCelulasRede">0</strong> células</span>
+                <div style="display:flex; gap:4px;">
+                    <button onclick="exportarListaCelulasPDF()" class="btn-card"><i class="fas fa-print"></i> Lista</button>
+                    <button onclick="novaCelula()" class="btn-card" style="background:var(--success-text); color:white;"><i class="fas fa-plus"></i> Nova</button>
+                </div>
+            </div>
+            <div class="filtro-lider" style="display:flex; gap:8px; background:white; padding:8px; border-radius:12px; margin-bottom:15px;">
+                <select id="filtroLiderRede"><option value="">Todos os Líderes</option></select>
+                <select id="filtroSupervisorRede"><option value="">Todos os Supervisores</option></select>
+            </div>
+            <div id="listaCelulasRede"></div>
+        </div>
+
+        <!-- RELATÓRIOS -->
+        <div id="secao-relatorios" class="hidden">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; align-items:center;">
+                <div class="filtro-item" style="flex:1;">
+                    <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;"><option value="">Todas as Células</option></select>
                 </div>
                 <div class="filtro-item" style="flex:1;">
-                    <select id="filtroCelula" style="height:38px;">
-                        <option value="">Todas as Células</option>
-                    </select>
+                    <input type="date" id="filtroRelDataInicio" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;">
                 </div>
-                <div class="multi-select" id="multiCargo">
-                    <div class="trigger">Cargos <i class="fas fa-chevron-down"></i></div>
-                    <div class="dropdown">
-                        <label><input type="checkbox" value="pastor"> Pastor</label>
-                        <label><input type="checkbox" value="discipulador"> Discipulador</label>
-                        <label><input type="checkbox" value="líder"> Líder</label>
-                        <label><input type="checkbox" value="membro"> Membro</label>
-                        <label><input type="checkbox" value="frequentador"> Frequentador</label>
-                    </div>
-                </div>
-                <div class="multi-select" id="multiStatus">
-                    <div class="trigger">Status <i class="fas fa-chevron-down"></i></div>
-                    <div class="dropdown">
-                        <label><input type="checkbox" value="batizado"> Batismo</label>
-                        <label><input type="checkbox" value="cursão"> Cursão</label>
-                        <label><input type="checkbox" value="ctl"> CTL</label>
-                        <label><input type="checkbox" value="encontro"> Encontro</label>
-                        <label><input type="checkbox" value="seminário"> Seminário</label>
-                        <label><input type="checkbox" value="dizimista"> Dizimista</label>
-                    </div>
-                </div>
-                <div class="filtro-item" style="max-width:100px;">
-                    <select id="filtroStatusGeral" style="height:38px;">
-                        <option value="ativos" selected>Ativos</option>
-                        <option value="inativos">Inativos</option>
-                        <option value="todos">Todos</option>
-                    </select>
+                <div class="filtro-item" style="flex:1;">
+                    <input type="date" id="filtroRelDataFim" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;">
                 </div>
             </div>
+            <div id="listaRelatorios"></div>
         </div>
-        <div id="gridMembros" class="member-grid"></div>
-    </div>
 
-    <!-- REDE -->
-    <div id="secao-minha-rede" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span><strong id="contagemCelulasRede">0</strong> células</span>
-            <div style="display:flex; gap:4px;">
-                <button onclick="exportarListaCelulasPDF()" class="btn-card"><i class="fas fa-print"></i> Lista</button>
-                <button onclick="novaCelula()" class="btn-card" style="background:var(--success-text); color:white;"><i class="fas fa-plus"></i> Nova</button>
+        <!-- PEDIDOS -->
+        <div id="secao-sugestoes" class="hidden">
+            <h4 style="margin-bottom:10px;">Pedidos de Oração</h4>
+            <table class="table-clean">
+                <thead><tr><th>Data</th><th>Mensagem</th><th>Ação</th></tr></thead>
+                <tbody id="corpoSugestoes"></tbody>
+            </table>
+        </div>
+
+        <!-- AGENDA -->
+        <div id="secao-agenda" class="hidden">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <h4>Próximos Eventos</h4>
+                <select id="filtroMesAgenda" style="height:38px; width:auto; border-radius:8px; border:1px solid var(--border-color); padding:8px;">
+                    <option value="todos">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div id="listaAgenda" class="member-grid"></div>
+        </div>
+
+        <!-- PALAVRAS -->
+        <div id="secao-palavras" class="hidden">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <h4>Palavras</h4>
+                <button onclick="novaPalavra()" class="btn-card" style="background:var(--success-text); color:white; padding:5px 10px; font-size:0.65rem;"><i class="fas fa-plus"></i> Nova</button>
+            </div>
+            <div id="listaPalavras"></div>
+        </div>
+
+        <!-- MINHA IGREJA -->
+        <div id="secao-minha-igreja" class="hidden">
+            <h4 style="margin-bottom:15px;">Visão Geral da Igreja</h4>
+            <div class="dashboard-grid">
+                <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-number" id="statTotalMembros">0</div><div class="stat-label">Membros</div></div>
+                <div class="stat-card"><div class="stat-icon">✝️</div><div class="stat-number" id="statBatizados">0</div><div class="stat-label">Batizados</div></div>
+                <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-number" id="statCursao">0</div><div class="stat-label">Cursão</div></div>
+                <div class="stat-card"><div class="stat-icon">📖</div><div class="stat-number" id="statCtl">0</div><div class="stat-label">CTL</div></div>
+                <div class="stat-card"><div class="stat-icon">🏫</div><div class="stat-number" id="statSeminario">0</div><div class="stat-label">Seminário</div></div>
+                <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number" id="statDizimistas">0</div><div class="stat-label">Dizimistas</div></div>
+                <div class="stat-card"><div class="stat-icon">👑</div><div class="stat-number" id="statLideres">0</div><div class="stat-label">Líderes</div></div>
+                <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-number" id="statDiscipuladores">0</div><div class="stat-label">Discipuladores</div></div>
+                <div class="stat-card"><div class="stat-icon">🤝</div><div class="stat-number" id="statFrequentadores">0</div><div class="stat-label">Frequentadores</div></div>
+                <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-number" id="statCelulas">0</div><div class="stat-label">Células</div></div>
+                <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number" id="statRelatoriosSemana">0</div><div class="stat-label">Relatórios na Semana</div></div>
+                <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label" style="margin-bottom:4px;">Sem Relatório</div><div style="font-size:0.8rem; font-weight:500; max-height:60px; overflow-y:auto;" id="statCelulasSemRelatorio">-</div></div>
             </div>
         </div>
-        <div class="filtro-lider" style="display:flex; gap:8px; background:white; padding:8px; border-radius:12px; margin-bottom:15px;">
-            <select id="filtroLiderRede"><option value="">Todos os Líderes</option></select>
-            <select id="filtroSupervisorRede"><option value="">Todos os Supervisores</option></select>
-        </div>
-        <div id="listaCelulasRede"></div>
     </div>
 
-    <!-- RELATÓRIOS -->
-    <div id="secao-relatorios" class="hidden">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; align-items:center;">
-            <div class="filtro-item" style="flex:1;">
-                <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;"><option value="">Todas as Células</option></select>
+    <!-- MODAIS -->
+    <div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
+            <div style="text-align:center;"><h2 id="detalheRelCelula"></h2><p id="detalheRelData"></p></div>
+            <div class="stat-card" style="margin-bottom:15px;"><span style="font-size:2rem; font-weight:800;" id="detalheRelTotal">0</span><br>presentes</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div><strong>Palavra:</strong> <span id="detalheRelPalavra">-</span></div>
+                <div><strong>Louvor:</strong> <span id="detalheRelLouvor">-</span></div>
+                <div><strong>Lanche:</strong> <span id="detalheRelLanche">-</span></div>
+                <div><strong>Quebra-gelo:</strong> <span id="detalheRelQuebra">-</span></div>
             </div>
-            <div class="filtro-item" style="flex:1;">
-                <input type="date" id="filtroRelDataInicio" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;">
-            </div>
-            <div class="filtro-item" style="flex:1;">
-                <input type="date" id="filtroRelDataFim" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;">
-            </div>
-        </div>
-        <div id="listaRelatorios"></div>
-    </div>
-
-    <!-- PEDIDOS -->
-    <div id="secao-sugestoes" class="hidden">
-        <h4 style="margin-bottom:10px;">Pedidos de Oração</h4>
-        <table class="table-clean"><thead><tr><th>Data</th><th>Mensagem</th><th>Ação</th></tr></thead><tbody id="corpoSugestoes"></tbody></table>
-    </div>
-
-    <!-- AGENDA -->
-    <div id="secao-agenda" class="hidden">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <h4>Próximos Eventos</h4>
-            <select id="filtroMesAgenda" style="height:38px; width:auto; border-radius:8px; border:1px solid var(--border-color); padding:8px;">
-                <option value="todos">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
-            </select>
-        </div>
-        <div id="listaAgenda" class="member-grid"></div>
-    </div>
-
-    <!-- PALAVRAS -->
-    <div id="secao-palavras" class="hidden">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <h4>Palavras</h4>
-            <button onclick="novaPalavra()" class="btn-card" style="background:var(--success-text); color:white; padding:5px 10px; font-size:0.65rem;"><i class="fas fa-plus"></i> Nova</button>
-        </div>
-        <div id="listaPalavras"></div>
-    </div>
-
-    <!-- MINHA IGREJA -->
-    <div id="secao-minha-igreja" class="hidden">
-        <h4 style="margin-bottom:15px;">Visão Geral da Igreja</h4>
-        <div class="dashboard-grid">
-            <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-number" id="statTotalMembros">0</div><div class="stat-label">Membros</div></div>
-            <div class="stat-card"><div class="stat-icon">✝️</div><div class="stat-number" id="statBatizados">0</div><div class="stat-label">Batizados</div></div>
-            <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-number" id="statCursao">0</div><div class="stat-label">Cursão</div></div>
-            <div class="stat-card"><div class="stat-icon">📖</div><div class="stat-number" id="statCtl">0</div><div class="stat-label">CTL</div></div>
-            <div class="stat-card"><div class="stat-icon">🏫</div><div class="stat-number" id="statSeminario">0</div><div class="stat-label">Seminário</div></div>
-            <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number" id="statDizimistas">0</div><div class="stat-label">Dizimistas</div></div>
-            <div class="stat-card"><div class="stat-icon">👑</div><div class="stat-number" id="statLideres">0</div><div class="stat-label">Líderes</div></div>
-            <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-number" id="statDiscipuladores">0</div><div class="stat-label">Discipuladores</div></div>
-            <div class="stat-card"><div class="stat-icon">🤝</div><div class="stat-number" id="statFrequentadores">0</div><div class="stat-label">Frequentadores</div></div>
-            <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-number" id="statCelulas">0</div><div class="stat-label">Células</div></div>
-            <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number" id="statRelatoriosSemana">0</div><div class="stat-label">Relatórios na Semana</div></div>
-            <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label" style="margin-bottom:4px;">Sem Relatório</div><div style="font-size:0.8rem; font-weight:500; max-height:60px; overflow-y:auto;" id="statCelulasSemRelatorio">-</div></div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAIS -->
-<div id="modalRelatorio" class="modal-overlay hidden" onclick="fecharModal('modalRelatorio')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="btn-close-modal" onclick="fecharModal('modalRelatorio')">&times;</button>
-        <div style="text-align:center;"><h2 id="detalheRelCelula"></h2><p id="detalheRelData"></p></div>
-        <div class="stat-card" style="margin-bottom:15px;"><span style="font-size:2rem; font-weight:800;" id="detalheRelTotal">0</span><br>presentes</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-            <div><strong>Palavra:</strong> <span id="detalheRelPalavra">-</span></div>
-            <div><strong>Louvor:</strong> <span id="detalheRelLouvor">-</span></div>
-            <div><strong>Lanche:</strong> <span id="detalheRelLanche">-</span></div>
-            <div><strong>Quebra-gelo:</strong> <span id="detalheRelQuebra">-</span></div>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1;"><strong>Presentes</strong><div id="listaPresentes" style="font-size:0.85rem;"></div></div>
-            <div style="flex:1;"><strong>Ausentes</strong><div id="listaAusentes" style="font-size:0.85rem;"></div></div>
-        </div>
-        <div style="margin-top:10px;"><strong>Obs.:</strong> <span id="detalheRelObs"></span></div>
-    </div>
-</div>
-
-<div id="modalPalavra" class="modal-overlay hidden">
-    <div class="modal-content"><button class="btn-close-modal" onclick="fecharModal('modalPalavra')">&times;</button>
-        <h3 id="modalTitulo"></h3><small id="modalDataPalavra"></small>
-        <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir</a>
-        <div id="modalTexto" style="white-space:pre-wrap; margin-top:15px;"></div>
-    </div>
-</div>
-
-<div id="modalEditarPalavra" class="modal-overlay hidden">
-    <div class="modal-content" style="height:100vh; max-height:100vh; border-radius:0; display:flex; flex-direction:column;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0; font-weight:700;">Palavra</h2>
-            <button class="btn-close-modal" onclick="fecharModal('modalEditarPalavra')" style="position:static;">&times;</button>
-        </div>
-        <form id="formPalavra" style="flex:1; display:flex; flex-direction:column;">
-            <input type="hidden" id="palavraId">
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <div class="form-group" style="flex:1;">
-                    <label>Data</label>
-                    <input type="date" id="palavraData" required style="height:38px;">
-                </div>
-                <div class="form-group" style="flex:3;">
-                    <label>Tema</label>
-                    <input type="text" id="palavraTema" placeholder="Tema da palavra" required style="height:38px;">
-                </div>
-            </div>
-            <div class="form-group" style="margin-bottom:15px;">
-                <label>Link YouTube (opcional)</label>
-                <input type="text" id="palavraLink" placeholder="https://youtube.com/..." style="height:38px;">
-            </div>
-            <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-                <label>Texto / Esboço</label>
-                <textarea id="palavraTexto" required style="flex:1; min-height:40vh; border-radius:12px; border:1px solid var(--border-color); padding:12px; font-size:0.9rem; line-height:1.6; resize:vertical;"></textarea>
-            </div>
-            <div style="margin-top:20px;">
-                <button type="submit" class="btn-card" style="background:var(--primary); color:white; width:100%; padding:12px; font-size:0.9rem; font-weight:700; border-radius:12px;">Salvar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="modalEditarCelula" class="modal-overlay hidden">
-    <div class="modal-content">
-        <button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
-        <h3 style="margin-top:0; margin-bottom:20px;">Célula</h3>
-        <form id="formCelula"><input type="hidden" id="editCelulaId">
-            <div class="form-group"><label>Nome da Célula</label><input type="text" id="editCelulaNome" required style="height:38px;"></div>
-            <div class="form-group"><label>Líder</label><select id="editCelulaLider" required style="height:38px;"></select></div>
-            <div class="form-group"><label>Dia/Horário</label>
-                <select id="editCelulaDia" style="height:38px;"><option value="">Selecione</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option></select>
-            </div>
-            <div class="form-group"><label>Endereço</label><input type="text" id="editCelulaEnd" style="height:38px;"></div>
-            <button type="submit" class="btn-card" style="background:var(--primary); color:white; width:100%; padding:12px; font-weight:600; margin-top:10px;">Salvar</button>
-        </form>
-    </div>
-</div>
-
-<div id="modalCelula" class="modal-overlay hidden">
-    <div class="modal-content" style="height:100vh; max-height:100vh; border-radius:0;">
-        <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--primary); padding-bottom:15px;">
-            <h2 id="modalCelulaTitulo"></h2>
-            <button class="btn-close-modal" onclick="fecharModalCelula()" style="position:static;">&times;</button>
-        </div>
-        <div style="display:flex; gap:8px; margin:15px 0;">
-            <button class="btn-card" onclick="abrirModalCadastroMembro()"><i class="fas fa-plus"></i> Novo Membro</button>
-            <button class="btn-card" onclick="abrirApascentar()"><i class="fas fa-hands-praying"></i> Apascentar</button>
-        </div>
-        <div id="gridMembrosCelulaModal" class="member-grid"></div>
-    </div>
-</div>
-
-<!-- MODAL DE CADASTRO/EDIÇÃO DE MEMBRO (sobreposto) -->
-<div id="secao-cadastro" class="modal-overlay hidden" onclick="fecharModalClique(event)">
-    <div class="modal-content" style="max-width:600px; max-height:90vh;" onclick="event.stopPropagation()">
-        <button class="btn-close-modal" onclick="fecharModal('secao-cadastro')">&times;</button>
-        <h3 id="tituloFormMembro" style="margin-top:0; margin-bottom:20px;">Cadastro de Membro</h3>
-        <form id="formMembro">
-            <input type="hidden" id="idMembro">
-            <div class="form-group"><label>Nome Completo</label><input type="text" id="campoNome" required style="height:38px;"></div>
             <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1;"><label>Nascimento</label><input type="date" id="campoNasc" style="height:38px;"></div>
-                <div class="form-group" style="flex:1;"><label>WhatsApp</label><input type="tel" id="campoTel" placeholder="(00) 00000-0000" style="height:38px;"></div>
+                <div style="flex:1;"><strong>Presentes</strong><div id="listaPresentes" style="font-size:0.85rem;"></div></div>
+                <div style="flex:1;"><strong>Ausentes</strong><div id="listaAusentes" style="font-size:0.85rem;"></div></div>
             </div>
-            <div class="form-group"><label>Célula</label><select id="selectCelulas" style="height:38px;"><option value="">Selecione uma célula</option></select></div>
-            <div class="form-group"><label>Categoria</label><select id="campoCategoria" style="height:38px;"><option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option></select></div>
-            <h4 style="margin-top:15px; margin-bottom:10px;">Passos de Fé</h4>
-            <div class="switch-container"><span>Batismo</span><label class="switch"><input type="checkbox" id="checkBat"><span class="slider"></span></label></div>
-            <div class="switch-container"><span>Cursão</span><label class="switch"><input type="checkbox" id="checkCur"><span class="slider"></span></label></div>
-            <div class="switch-container"><span>CTL</span><label class="switch"><input type="checkbox" id="checkCtl"><span class="slider"></span></label></div>
-            <div class="switch-container"><span>Encontro</span><label class="switch"><input type="checkbox" id="checkDiz"><span class="slider"></span></label></div>
-            <div class="switch-container"><span>Seminário</span><label class="switch"><input type="checkbox" id="checkSem"><span class="slider"></span></label></div>
-            <div class="switch-container"><span>Dizimista</span><label class="switch"><input type="checkbox" id="checkDizi"><span class="slider"></span></label></div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button type="button" onclick="fecharModal('secao-cadastro')" class="btn-card" style="flex:1; padding:10px;">Cancelar</button>
-                <button type="submit" class="btn-card" style="flex:2; background:var(--primary); color:white; padding:10px;">Salvar</button>
-            </div>
-        </form>
+            <div style="margin-top:10px;"><strong>Obs.:</strong> <span id="detalheRelObs"></span></div>
+        </div>
     </div>
-</div>
+
+    <div id="modalPalavra" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="fecharModal('modalPalavra')">&times;</button>
+            <h3 id="modalTitulo"></h3><small id="modalDataPalavra"></small>
+            <a id="btnLinkYoutube" href="#" target="_blank" class="btn-youtube hidden"><i class="fab fa-youtube"></i> Assistir</a>
+            <div id="modalTexto" style="white-space:pre-wrap; margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <div id="modalEditarPalavra" class="modal-overlay hidden">
+        <div class="modal-content" style="max-height:90vh;">
+            <button class="btn-close-modal" onclick="fecharModal('modalEditarPalavra')">&times;</button>
+            <h2 style="margin-top:0; margin-bottom:20px; font-weight:700;">Palavra</h2>
+            <form id="formPalavra">
+                <input type="hidden" id="palavraId">
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Data</label>
+                        <input type="date" id="palavraData" required style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;">
+                    </div>
+                    <div class="form-group" style="flex:3;">
+                        <label>Tema</label>
+                        <input type="text" id="palavraTema" placeholder="Tema da palavra" required style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>Link YouTube (opcional)</label>
+                    <input type="text" id="palavraLink" placeholder="https://youtube.com/..." style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;">
+                </div>
+                <div class="form-group">
+                    <label>Texto / Esboço</label>
+                    <textarea id="palavraTexto" required style="width:100%; min-height:200px; border-radius:8px; border:1px solid var(--border-color); padding:12px; font-size:0.9rem; line-height:1.6; resize:vertical;"></textarea>
+                </div>
+                <button type="submit" style="background:var(--primary); color:white; width:100%; padding:12px; font-weight:600; border:none; border-radius:8px; margin-top:15px; cursor:pointer;">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalEditarCelula" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
+            <h3 style="margin-top:0; margin-bottom:20px;">Célula</h3>
+            <form id="formCelula">
+                <input type="hidden" id="editCelulaId">
+                <div class="form-group"><label>Nome da Célula</label><input type="text" id="editCelulaNome" required style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"></div>
+                <div class="form-group"><label>Líder</label><select id="editCelulaLider" required style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"></select></div>
+                <div class="form-group"><label>Dia/Horário</label>
+                    <select id="editCelulaDia" style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;">
+                        <option value="">Selecione</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Endereço</label><input type="text" id="editCelulaEnd" style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"></div>
+                <button type="submit" style="background:var(--primary); color:white; width:100%; padding:12px; font-weight:600; border:none; border-radius:8px; margin-top:10px; cursor:pointer;">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalCelula" class="modal-overlay hidden">
+        <div class="modal-content" style="max-height:90vh;">
+            <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--primary); padding-bottom:15px;">
+                <h2 id="modalCelulaTitulo"></h2>
+                <button class="btn-close-modal" onclick="fecharModalCelula()" style="position:static;">&times;</button>
+            </div>
+            <div style="display:flex; gap:8px; margin:15px 0;">
+                <button class="btn-card" onclick="abrirModalCadastroMembro()"><i class="fas fa-plus"></i> Novo Membro</button>
+                <button class="btn-card" onclick="abrirApascentar()"><i class="fas fa-hands-praying"></i> Apascentar</button>
+            </div>
+            <div id="gridMembrosCelulaModal" class="member-grid"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE MEMBRO (sobreposto) -->
+    <div id="secao-cadastro" class="modal-overlay hidden" onclick="fecharModalClique(event)">
+        <div class="modal-content" style="max-width:600px; max-height:90vh;" onclick="event.stopPropagation()">
+            <button class="btn-close-modal" onclick="fecharModal('secao-cadastro')">&times;</button>
+            <h3 id="tituloFormMembro" style="margin-top:0; margin-bottom:20px;">Cadastro de Membro</h3>
+            <form id="formMembro">
+                <input type="hidden" id="idMembro">
+                <div class="form-group"><label>Nome Completo</label><input type="text" id="campoNome" required style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"></div>
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;"><label>Nascimento</label><input type="date" id="campoNasc" style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"></div>
+                    <div class="form-group" style="flex:1;"><label>WhatsApp</label><input type="tel" id="campoTel" placeholder="(00) 00000-0000" style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"></div>
+                </div>
+                <div class="form-group"><label>Célula</label><select id="selectCelulas" style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"><option value="">Selecione uma célula</option></select></div>
+                <div class="form-group"><label>Categoria</label><select id="campoCategoria" style="height:38px; width:100%; padding:8px; border:1px solid var(--border-color); border-radius:8px;"><option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option></select></div>
+                <h4 style="margin-top:15px; margin-bottom:10px;">Passos de Fé</h4>
+                <div class="switch-container"><span>Batismo</span><label class="switch"><input type="checkbox" id="checkBat"><span class="slider"></span></label></div>
+                <div class="switch-container"><span>Cursão</span><label class="switch"><input type="checkbox" id="checkCur"><span class="slider"></span></label></div>
+                <div class="switch-container"><span>CTL</span><label class="switch"><input type="checkbox" id="checkCtl"><span class="slider"></span></label></div>
+                <div class="switch-container"><span>Encontro</span><label class="switch"><input type="checkbox" id="checkDiz"><span class="slider"></span></label></div>
+                <div class="switch-container"><span>Seminário</span><label class="switch"><input type="checkbox" id="checkSem"><span class="slider"></span></label></div>
+                <div class="switch-container"><span>Dizimista</span><label class="switch"><input type="checkbox" id="checkDizi"><span class="slider"></span></label></div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" onclick="fecharModal('secao-cadastro')" class="btn-card" style="flex:1; padding:10px;">Cancelar</button>
+                    <button type="submit" style="flex:2; background:var(--primary); color:white; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
