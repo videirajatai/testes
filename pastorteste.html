@@ -149,6 +149,7 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--success-text); }
         input:checked + .slider:before { transform: translateX(22px); }
+        .btn-youtube { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #FF0000; color: white; font-weight: bold; text-decoration: none; border-radius: 8px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -220,6 +221,7 @@
             document.getElementById('totalMembros').innerText = obterAtivos().length;
             renderizarCards(obterAtivos());
             preencherSelects();
+            preencherSelectLideres();
             renderizarCelulasRede(dadosCelulas);
             window.celulasRedeCompleta = dadosCelulas;
             await carregarRelatorios();
@@ -260,33 +262,32 @@
         });
     }
 
-   function aplicarFiltros() {
-    const status = document.getElementById('filtroStatusGeral').value;
-    let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
-    const busca = document.getElementById('inputBusca').value.toLowerCase();
-    const celulaFiltro = document.getElementById('filtroCelula').value;   // alterado
-    const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb=>cb.value.toLowerCase());
-    const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb=>cb.value);
-    
-    base = base.filter(m => {
-        if (busca && !m[1].toLowerCase().includes(busca)) return false;
-        if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;  // alterado
-        if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
-        if (tagsSel.length) {
-            const tags = [];
-            if(m[6]==='Sim') tags.push('batizado');
-            if(m[7]==='Sim') tags.push('cursão');
-            if(m[8]==='Sim') tags.push('ctl');
-            if(m[9]==='Sim') tags.push('encontro');
-            if(m[11]==='Sim') tags.push('seminário');
-            if(m[12]==='Sim') tags.push('dizimista');
-            if (!tagsSel.some(t=>tags.includes(t))) return false;
-        }
-        return true;
-    });
-    renderizarCards(base);
-    document.getElementById('totalMembros').innerText = base.length;
-}
+    function aplicarFiltros() {
+        const status = document.getElementById('filtroStatusGeral').value;
+        let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
+        const busca = document.getElementById('inputBusca').value.toLowerCase();
+        const celulaFiltro = document.getElementById('filtroCelula').value;
+        const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb=>cb.value.toLowerCase());
+        const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb=>cb.value);
+        base = base.filter(m => {
+            if (busca && !m[1].toLowerCase().includes(busca)) return false;
+            if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;
+            if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
+            if (tagsSel.length) {
+                const tags = [];
+                if(m[6]==='Sim') tags.push('batizado');
+                if(m[7]==='Sim') tags.push('cursão');
+                if(m[8]==='Sim') tags.push('ctl');
+                if(m[9]==='Sim') tags.push('encontro');
+                if(m[11]==='Sim') tags.push('seminário');
+                if(m[12]==='Sim') tags.push('dizimista');
+                if (!tagsSel.some(t=>tags.includes(t))) return false;
+            }
+            return true;
+        });
+        renderizarCards(base);
+        document.getElementById('totalMembros').innerText = base.length;
+    }
 
     function setupMultiselects() {
         document.querySelectorAll('.multi-select .trigger').forEach(trg => {
@@ -300,29 +301,32 @@
                 if (!ms.contains(e.target)) ms.classList.remove('open');
             });
         });
-        // Agora apenas os dois multiselects que realmente existem:
         document.querySelectorAll('#multiCargo input, #multiStatus input').forEach(cb => {
             cb.addEventListener('change', aplicarFiltros);
         });
     }
 
-   function preencherSelects() {
-    // Select de células do cadastro (modal)
-    const selCel = document.getElementById('selectCelulas');
-    if (selCel) { 
-        selCel.innerHTML = '<option value="">Selecione uma célula</option>'; 
-        dadosCelulas.forEach(c => selCel.innerHTML += `<option value="${c[0]}">${c[1]}</option>`); 
+    function preencherSelects() {
+        const selCel = document.getElementById('selectCelulas');
+        if (selCel) { 
+            selCel.innerHTML = '<option value="">Selecione uma célula</option>'; 
+            dadosCelulas.forEach(c => selCel.innerHTML += `<option value="${c[0]}">${c[1]}</option>`); 
+        }
+        const filtroCelula = document.getElementById('filtroCelula');
+        if (filtroCelula) {
+            filtroCelula.innerHTML = '<option value="">Todas as Células</option>';
+            dadosCelulas.forEach(c => filtroCelula.innerHTML += `<option value="${c[0]}">${c[1]}</option>`);
+        }
     }
-    
-    // Select de filtro (tela de membros)
-    const filtroCelula = document.getElementById('filtroCelula');
-    if (filtroCelula) {
-        filtroCelula.innerHTML = '<option value="">Todas as Células</option>';
-        dadosCelulas.forEach(c => filtroCelula.innerHTML += `<option value="${c[0]}">${c[1]}</option>`);
+
+    function preencherSelectLideres() {
+        const sel = document.getElementById('editCelulaLider');
+        if(sel) {
+            sel.innerHTML = '<option value="">Selecione...</option>';
+            dadosMembros.filter(m => ['Líder','Pastor','Discipulador'].includes(m[2])).forEach(m => sel.innerHTML += `<option>${m[1]}</option>`);
+        }
     }
-    
-    // A seção de multiselect de Células foi removida, portanto não precisa preencher #multiCelula
-}
+
     // ========== REDE DE CÉLULAS ==========
     function renderizarCelulasRede(celulas) {
         const container = document.getElementById('listaCelulasRede');
@@ -374,6 +378,26 @@
 
     function fecharModalCelula() { document.getElementById('modalCelula').classList.add('hidden'); }
 
+    function abrirModalCadastroMembro() {
+        if (!celulaAtiva) return;
+        document.getElementById('selectCelulas').value = celulaAtiva[0];
+        novoCadastro();
+    }
+
+    async function abrirApascentar() {
+        if(!celulaAtiva) return;
+        const inicio = new Date(); inicio.setDate(inicio.getDate()-30);
+        const { data: rels } = await supabaseClient.from('relatorios').select('id').eq('celula', celulaAtiva[1]).gte('data', inicio.toISOString().split('T')[0]);
+        if(!rels?.length) return alert("Nenhum relatório recente.");
+        const ids = rels.map(r=>r.id);
+        const { data: pres } = await supabaseClient.from('presencas').select('membro_id, presente').in('relatorio_id', ids);
+        const faltas = {};
+        pres?.forEach(p => { if(!p.presente) faltas[p.membro_id] = (faltas[p.membro_id]||0)+1; });
+        const faltosos = membrosDaCelulaAtiva.filter(m => faltas[m.id] > 0);
+        if(!faltosos.length) return alert("Nenhum faltoso.");
+        alert("Faltosos:\n" + faltosos.map(m => `${m.nome} - ${faltas[m.id]} falta(s)`).join('\n'));
+    }
+
     // ========== RELATÓRIOS ==========
     async function carregarRelatorios() {
         const { data } = await supabaseClient.from('relatorios').select('*').order('id', { ascending: false });
@@ -414,7 +438,7 @@
         document.getElementById('detalheRelPalavra').innerText = rel.palavra || '-';
         document.getElementById('detalheRelLouvor').innerText = rel.louvor || '-';
         document.getElementById('detalheRelLanche').innerText = rel.lanche || '-';
-        document.getElementById('detalheRelObs').innerText = rel.observacoes || 'Nenhuma.';
+        document.getElementById('detalheRelObs').innerText = rel.observacoes || 'Nenhuma observação.';
         document.getElementById('listaPresentes').innerHTML = presentes.length ? presentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
         document.getElementById('listaAusentes').innerHTML = ausentes.length ? ausentes.map(n => `<div>👤 ${n}</div>`).join('') : '<div style="color:#999;">Nenhum</div>';
         document.getElementById('modalRelatorio').classList.remove('hidden');
@@ -539,7 +563,6 @@
         document.getElementById('statMembros').innerText = ativos.filter(m=>m[2]==='Membro').length;
         document.getElementById('statCelulas').innerText = dadosCelulas.length;
 
-        // Relatórios da semana
         const agora = new Date();
         const inicioSemana = new Date(agora);
         inicioSemana.setDate(agora.getDate() - ((agora.getDay() + 6) % 7));
@@ -558,37 +581,28 @@
     }
 
     // ========== EDIÇÃO DE MEMBRO ==========
-    // Garanta que fecharModal seja usada também para clique no overlay
-function fecharModalClique(e) {
-    if (e.target.classList.contains('modal-overlay')) {
-        e.target.classList.add('hidden');
+    function novoCadastro() {
+        document.getElementById('formMembro').reset();
+        document.getElementById('idMembro').value = '';
+        document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
+        document.getElementById('secao-cadastro').classList.remove('hidden');
     }
-}
 
-// Atualize a função novoCadastro para resetar o formulário e mudar o título
-function novoCadastro() {
-    document.getElementById('formMembro').reset();
-    document.getElementById('idMembro').value = '';
-    document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
-    document.getElementById('secao-cadastro').classList.remove('hidden');
-}
-
-// A função editarMembro deve abrir o mesmo modal, preenchendo os campos
-function editarMembro(id) {
-    const m = dadosMembros.find(x => x[0] == id);
-    if (!m) return;
-    document.getElementById('idMembro').value = m[0];
-    document.getElementById('campoNome').value = m[1];
-    document.getElementById('campoNasc').value = m[10];
-    document.getElementById('campoTel').value = m[4];
-    document.getElementById('selectCelulas').value = m[13] || '';
-    document.getElementById('campoCategoria').value = m[2];
-    ['checkBat','checkCur','checkCtl','checkDiz','checkSem','checkDizi'].forEach((checkId, i) => {
-        document.getElementById(checkId).checked = (m[6 + i] === 'Sim');
-    });
-    document.getElementById('tituloFormMembro').innerText = 'Editar Membro';
-    document.getElementById('secao-cadastro').classList.remove('hidden');
-}
+    function editarMembro(id) {
+        const m = dadosMembros.find(x => x[0] == id);
+        if (!m) return;
+        document.getElementById('idMembro').value = m[0];
+        document.getElementById('campoNome').value = m[1];
+        document.getElementById('campoNasc').value = m[10];
+        document.getElementById('campoTel').value = m[4];
+        document.getElementById('selectCelulas').value = m[13] || '';
+        document.getElementById('campoCategoria').value = m[2];
+        ['checkBat','checkCur','checkCtl','checkDiz','checkSem','checkDizi'].forEach((checkId, i) => {
+            document.getElementById(checkId).checked = (m[6 + i] === 'Sim');
+        });
+        document.getElementById('tituloFormMembro').innerText = 'Editar Membro';
+        document.getElementById('secao-cadastro').classList.remove('hidden');
+    }
 
     async function arquivarMembro(id, nome) {
         if(confirm(`Arquivar ${nome}?`)) { await supabaseClient.from('membros').update({ arquivado: 'Sim' }).eq('id', id); carregarTudo(); }
@@ -599,7 +613,7 @@ function editarMembro(id) {
 
     // ========== NAVEGAÇÃO ==========
     function mudarSecao(s) {
-        ['lista','minha-rede','relatorios','sugestoes','agenda','palavras','minha-igreja','cadastro'].forEach(id => {
+        ['lista','minha-rede','relatorios','sugestoes','agenda','palavras','minha-igreja'].forEach(id => {
             const el = document.getElementById(`secao-${id}`);
             if(el) el.classList.add('hidden');
         });
@@ -613,14 +627,7 @@ function editarMembro(id) {
     }
 
     function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
-    
-    function novoCadastro() {
-    document.getElementById('formMembro').reset();
-    document.getElementById('idMembro').value = '';
-    document.getElementById('tituloFormMembro').innerText = 'Cadastro de Membro';
-    document.getElementById('secao-cadastro').classList.remove('hidden');
-}
-    
+    function fecharModalClique(e) { if (e.target.classList.contains('modal-overlay')) e.target.classList.add('hidden'); }
     function novaCelula() { document.getElementById('formCelula').reset(); document.getElementById('editCelulaId').value=''; document.getElementById('modalEditarCelula').classList.remove('hidden'); }
     function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraId').value=''; document.getElementById('modalEditarPalavra').classList.remove('hidden'); }
 
@@ -629,6 +636,7 @@ function editarMembro(id) {
         document.getElementById('filtroStatusGeral').addEventListener('change', aplicarFiltros);
         document.getElementById('inputBusca').addEventListener('keyup', aplicarFiltros);
         document.getElementById('filtroCelula').addEventListener('change', aplicarFiltros);
+        document.getElementById('filtroMesAgenda').addEventListener('change', () => renderizarAgenda(listaAgenda));
         document.getElementById('formMembro').addEventListener('submit', async e => {
             e.preventDefault();
             const id = document.getElementById('idMembro').value;
@@ -669,6 +677,10 @@ function editarMembro(id) {
         });
         document.getElementById('formPalavra').addEventListener('submit', salvarPalavra);
         setupMultiselects();
+
+        // Preencher líderes quando o modal abrir
+        const observer = new MutationObserver(() => preencherSelectLideres());
+        observer.observe(document.getElementById('modalEditarCelula'), { attributes: true, attributeFilter: ['class'] });
     }
 
     function exportarExcel() {
@@ -696,12 +708,12 @@ function editarMembro(id) {
         const status = document.getElementById('filtroStatusGeral').value;
         let base = status === 'ativos' ? obterAtivos() : (status === 'inativos' ? obterInativos() : [...dadosMembros]);
         const busca = document.getElementById('inputBusca').value.toLowerCase();
-        const celulas = [...document.querySelectorAll('#multiCelula input:checked')].map(cb=>cb.value);
+        const celulaFiltro = document.getElementById('filtroCelula').value;
         const cargos = [...document.querySelectorAll('#multiCargo input:checked')].map(cb=>cb.value.toLowerCase());
         const tagsSel = [...document.querySelectorAll('#multiStatus input:checked')].map(cb=>cb.value);
         return base.filter(m => {
             if (busca && !m[1].toLowerCase().includes(busca)) return false;
-            if (celulas.length && !celulas.includes(String(m[13]))) return false;
+            if (celulaFiltro && String(m[13]) !== celulaFiltro) return false;
             if (cargos.length && !cargos.includes(m[2].toLowerCase())) return false;
             if (tagsSel.length) {
                 const tags = [];
@@ -744,9 +756,8 @@ function editarMembro(id) {
         <button id="btn-minha-igreja" class="nav-btn" onclick="mudarSecao('minha-igreja')"><i class="fas fa-chart-bar"></i> Minha Igreja</button>
     </div>
 
-   <!-- MEMBROS -->
+    <!-- MEMBROS -->
     <div id="secao-lista">
-        <!-- Barra superior: contagem + botões -->
         <div style="background:white; padding:12px; border-radius:12px; margin-bottom:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <h4 style="margin:0;"><span id="totalMembros">0</span> Membros</h4>
@@ -756,45 +767,16 @@ function editarMembro(id) {
                     <button onclick="novoCadastro()" class="btn-card" style="background:var(--success-text); color:white; border-color:var(--success-text);"><i class="fas fa-plus"></i> Novo</button>
                 </div>
             </div>
-    
-            <!-- Filtros (linha única com quebra em mobile) -->
+
             <div class="filtros-container">
                 <div class="filtro-item" style="flex:2;">
                     <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;">
                 </div>
-    
-                <!-- Multiselect Células -->
-               <div class="filtro-item" style="flex:1;">
-                    <select id="filtroCelula" style="height:38px;">
-                        <option value="">Todas as Células</option>
-                    </select>
-                </div>
-
-                <div class="filtros-container">
-                <div class="filtro-item" style="flex:2;">
-                    <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;">
-                </div>
-            
-                <!-- Select normal de Células -->
                 <div class="filtro-item" style="flex:1;">
                     <select id="filtroCelula" style="height:38px;">
                         <option value="">Todas as Células</option>
                     </select>
                 </div>
-            
-                <!-- Multiselect Cargos (mantido) -->
-                <div class="multi-select" id="multiCargo">...</div>
-            
-                <!-- Multiselect Status (mantido) -->
-                <div class="multi-select" id="multiStatus">...</div>
-            
-                <!-- Ativo/Inativo/Todos (mantido) -->
-                <div class="filtro-item" style="max-width:100px;">
-                    <select id="filtroStatusGeral" style="height:38px;">...</select>
-                </div>
-            </div>
-    
-                <!-- Multiselect Cargos -->
                 <div class="multi-select" id="multiCargo">
                     <div class="trigger">Cargos <i class="fas fa-chevron-down"></i></div>
                     <div class="dropdown">
@@ -805,8 +787,6 @@ function editarMembro(id) {
                         <label><input type="checkbox" value="frequentador"> Frequentador</label>
                     </div>
                 </div>
-    
-                <!-- Multiselect Status (passos de fé) -->
                 <div class="multi-select" id="multiStatus">
                     <div class="trigger">Status <i class="fas fa-chevron-down"></i></div>
                     <div class="dropdown">
@@ -818,8 +798,6 @@ function editarMembro(id) {
                         <label><input type="checkbox" value="dizimista"> Dizimista</label>
                     </div>
                 </div>
-    
-                <!-- Filtro Ativo/Inativo/Todos -->
                 <div class="filtro-item" style="max-width:100px;">
                     <select id="filtroStatusGeral" style="height:38px;">
                         <option value="ativos" selected>Ativos</option>
@@ -829,8 +807,6 @@ function editarMembro(id) {
                 </div>
             </div>
         </div>
-    
-        <!-- Grid de cards dos membros -->
         <div id="gridMembros" class="member-grid"></div>
     </div>
 
@@ -1006,31 +982,5 @@ function editarMembro(id) {
         </form>
     </div>
 </div>
-
-<script>
-    // Preencher select de líderes ao carregar (usado no modal de célula)
-    function preencherSelectLideres() {
-        const sel = document.getElementById('editCelulaLider');
-        if(sel) {
-            sel.innerHTML = '<option value="">Selecione...</option>';
-            dadosMembros.filter(m => ['Líder','Pastor','Discipulador'].includes(m[2])).forEach(m => sel.innerHTML += `<option>${m[1]}</option>`);
-        }
-    }
-    const observer = new MutationObserver(() => preencherSelectLideres());
-    observer.observe(document.getElementById('modalEditarCelula'), { attributes: true, attributeFilter: ['class'] });
-
-
-
-
-
-    // Garanta que fecharModal seja usada também para clique no overlay
-    function fecharModalClique(e) {
-        if (e.target.classList.contains('modal-overlay')) {
-            e.target.classList.add('hidden');
-        }
-    }
-
-    
-</script>
 </body>
 </html>
