@@ -96,7 +96,10 @@
 
         .filtros-container { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
         .filtro-item { flex: 1 1 120px; min-width: 100px; }
-        .filtro-item input, .filtro-item select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-color); background: white; font-size: 0.8rem; margin-bottom: 0; }
+        .filtro-item input, .filtro-item select {
+            width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-color);
+            background: white; font-size: 0.8rem; margin-bottom: 0;
+        }
         .multi-select { position: relative; flex: 1 1 110px; min-width: 90px; }
         .multi-select .trigger {
             background: white; border: 1px solid var(--border-color); border-radius: 8px;
@@ -127,9 +130,17 @@
         .table-clean td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.8rem; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3100; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
-        .modal-content { background: white; width: 100%; max-width: 800px; max-height: 85vh; border-radius: 20px 20px 0 0; padding: 25px 20px; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; }
+        .modal-content {
+            background: white; width: 100%; max-width: 800px; max-height: 85vh;
+            border-radius: 20px 20px 0 0; padding: 25px 20px; overflow-y: auto;
+            position: relative; animation: slideUp 0.3s ease-out;
+        }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .btn-close-modal { position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center; }
+        .btn-close-modal {
+            position: absolute; top: 15px; right: 15px; background: #eee; border: none;
+            width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #555;
+            display: flex; align-items: center; justify-content: center;
+        }
         .hidden { display: none !important; }
         .cell-card {
             background: #fef9e8; border-radius: var(--radius); padding: 15px; margin-bottom: 12px;
@@ -508,7 +519,7 @@
                     <div style="font-weight:800;">${dataF}</div>
                     <div style="font-size:0.85rem;">${p.tema}</div>
                 </div>
-                <button class="btn-card" onclick="editarPalavra(${i})"><i class="fas fa-edit"></i></button>
+                <button class="btn-card" style="flex:0 0 auto; padding:4px 8px; font-size:0.65rem;" onclick="editarPalavra(${i})"><i class="fas fa-edit"></i></button>
             </div>`;
         });
     }
@@ -678,7 +689,6 @@
         document.getElementById('formPalavra').addEventListener('submit', salvarPalavra);
         setupMultiselects();
 
-        // Preencher líderes quando o modal abrir
         const observer = new MutationObserver(() => preencherSelectLideres());
         observer.observe(document.getElementById('modalEditarCelula'), { attributes: true, attributeFilter: ['class'] });
     }
@@ -767,7 +777,6 @@
                     <button onclick="novoCadastro()" class="btn-card" style="background:var(--success-text); color:white; border-color:var(--success-text);"><i class="fas fa-plus"></i> Novo</button>
                 </div>
             </div>
-
             <div class="filtros-container">
                 <div class="filtro-item" style="flex:2;">
                     <input type="text" id="inputBusca" placeholder="🔍 Buscar..." style="height:38px;">
@@ -829,9 +838,15 @@
     <!-- RELATÓRIOS -->
     <div id="secao-relatorios" class="hidden">
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; align-items:center;">
-            <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="flex:1;"><option value="">Todas as Células</option></select>
-            <input type="date" id="filtroRelDataInicio" onchange="filtrarRelatorios()" style="flex:1;">
-            <input type="date" id="filtroRelDataFim" onchange="filtrarRelatorios()" style="flex:1;">
+            <div class="filtro-item" style="flex:1;">
+                <select id="filtroRelCelula" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;"><option value="">Todas as Células</option></select>
+            </div>
+            <div class="filtro-item" style="flex:1;">
+                <input type="date" id="filtroRelDataInicio" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;">
+            </div>
+            <div class="filtro-item" style="flex:1;">
+                <input type="date" id="filtroRelDataFim" onchange="filtrarRelatorios()" style="height:38px; width:100%; border-radius:8px; border:1px solid var(--border-color); background:white; padding:8px 10px; font-size:0.8rem;">
+            </div>
         </div>
         <div id="listaRelatorios"></div>
     </div>
@@ -846,7 +861,9 @@
     <div id="secao-agenda" class="hidden">
         <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
             <h4>Próximos Eventos</h4>
-            <select id="filtroMesAgenda"><option value="todos">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
+            <select id="filtroMesAgenda" style="height:38px; width:auto; border-radius:8px; border:1px solid var(--border-color); padding:8px;">
+                <option value="todos">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
         </div>
         <div id="listaAgenda" class="member-grid"></div>
     </div>
@@ -855,7 +872,7 @@
     <div id="secao-palavras" class="hidden">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
             <h4>Palavras</h4>
-            <button onclick="novaPalavra()" class="btn-card" style="background:var(--success-text); color:white;"><i class="fas fa-plus"></i> Nova</button>
+            <button onclick="novaPalavra()" class="btn-card" style="background:var(--success-text); color:white; padding:6px 12px; font-size:0.7rem;"><i class="fas fa-plus"></i> Nova</button>
         </div>
         <div id="listaPalavras"></div>
     </div>
@@ -909,27 +926,30 @@
 </div>
 
 <div id="modalEditarPalavra" class="modal-overlay hidden">
-    <div class="modal-content"><button class="btn-close-modal" onclick="fecharModal('modalEditarPalavra')">&times;</button>
-        <h3>Palavra</h3>
+    <div class="modal-content" style="height:100vh; max-height:100vh; border-radius:0;">
+        <button class="btn-close-modal" onclick="fecharModal('modalEditarPalavra')" style="position:absolute; top:15px; right:15px; z-index:10;">&times;</button>
+        <h3 style="margin-top:0; margin-bottom:15px;">Palavra</h3>
         <form id="formPalavra"><input type="hidden" id="palavraId">
-            <input type="date" id="palavraData" required>
-            <input type="text" id="palavraTema" placeholder="Tema" required>
-            <input type="text" id="palavraLink" placeholder="Link YouTube (opcional)">
-            <textarea id="palavraTexto" rows="10" required></textarea>
-            <button type="submit" class="btn-card" style="background:var(--primary); color:white; width:100%;">Salvar</button>
+            <div class="form-group"><label>Data</label><input type="date" id="palavraData" required></div>
+            <div class="form-group"><label>Tema</label><input type="text" id="palavraTema" placeholder="Tema" required></div>
+            <div class="form-group"><label>Link YouTube (opcional)</label><input type="text" id="palavraLink" placeholder="Link YouTube (opcional)"></div>
+            <div class="form-group"><label>Texto / Esboço</label><textarea id="palavraTexto" rows="12" required style="min-height: 50vh;"></textarea></div>
+            <button type="submit" class="btn-card" style="background:var(--primary); color:white; width:100%; padding:12px; font-size:0.9rem;">Salvar</button>
         </form>
     </div>
 </div>
 
 <div id="modalEditarCelula" class="modal-overlay hidden">
-    <div class="modal-content"><button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
+    <div class="modal-content">
+        <button class="btn-close-modal" onclick="fecharModal('modalEditarCelula')">&times;</button>
         <h3>Célula</h3>
         <form id="formCelula"><input type="hidden" id="editCelulaId">
-            <label>Nome</label><input type="text" id="editCelulaNome" required>
-            <label>Líder</label><select id="editCelulaLider" required></select>
-            <label>Dia/Horário</label>
-            <select id="editCelulaDia"><option value="">Selecione</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option></select>
-            <label>Endereço</label><input type="text" id="editCelulaEnd">
+            <div class="form-group"><label>Nome</label><input type="text" id="editCelulaNome" required></div>
+            <div class="form-group"><label>Líder</label><select id="editCelulaLider" required></select></div>
+            <div class="form-group"><label>Dia/Horário</label>
+                <select id="editCelulaDia"><option value="">Selecione</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option></select>
+            </div>
+            <div class="form-group"><label>Endereço</label><input type="text" id="editCelulaEnd"></div>
             <button type="submit" class="btn-card" style="background:var(--primary); color:white; width:100%;">Salvar</button>
         </form>
     </div>
@@ -956,18 +976,13 @@
         <h3 id="tituloFormMembro">Cadastro de Membro</h3>
         <form id="formMembro">
             <input type="hidden" id="idMembro">
-            <label>Nome Completo</label>
-            <input type="text" id="campoNome" required>
+            <div class="form-group"><label>Nome Completo</label><input type="text" id="campoNome" required></div>
             <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>Nascimento</label><input type="date" id="campoNasc"></div>
-                <div style="flex:1;"><label>WhatsApp</label><input type="tel" id="campoTel" placeholder="(00) 00000-0000"></div>
+                <div class="form-group" style="flex:1;"><label>Nascimento</label><input type="date" id="campoNasc"></div>
+                <div class="form-group" style="flex:1;"><label>WhatsApp</label><input type="tel" id="campoTel" placeholder="(00) 00000-0000"></div>
             </div>
-            <label>Célula</label>
-            <select id="selectCelulas"><option value="">Selecione uma célula</option></select>
-            <label>Categoria</label>
-            <select id="campoCategoria">
-                <option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option>
-            </select>
+            <div class="form-group"><label>Célula</label><select id="selectCelulas"><option value="">Selecione uma célula</option></select></div>
+            <div class="form-group"><label>Categoria</label><select id="campoCategoria"><option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option></select></div>
             <h4 style="margin-top:15px;">Passos de Fé</h4>
             <div class="switch-container"><span>Batismo</span><label class="switch"><input type="checkbox" id="checkBat"><span class="slider"></span></label></div>
             <div class="switch-container"><span>Cursão</span><label class="switch"><input type="checkbox" id="checkCur"><span class="slider"></span></label></div>
