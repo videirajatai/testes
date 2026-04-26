@@ -988,7 +988,7 @@
                     return mes === parseInt(mesFiltro);
                 });
             }
-            filtrada.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+            filtrada.sort((a, b) => new Date(b[0]) - new Date(a[0]));
             filtrada.forEach(a => {
                 let dataF = a[0]?.split('-').reverse().join('/') || '';
                 div.innerHTML += `<div class="member-card">
