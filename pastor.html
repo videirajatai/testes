@@ -766,7 +766,7 @@
             }
             const filtroCelula = document.getElementById('filtroCelula');
             if (filtroCelula) {
-                filtroCelula.innerHTML = '<option value="">Todas as Células</option>';
+                filtroCelula.innerHTML = '<option value="">Todas</option>';
                 dadosCelulas.forEach(c => filtroCelula.innerHTML += `<option value="${c[0]}">${c[1]}</option>`);
             }
         }
